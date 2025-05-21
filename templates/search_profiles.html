@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Search Profiles - Jewish Dating App</title>
+    <style>
+        /* ... (Existing styles, copy .profile-card-image from browse_profiles.html styles) ... */
+        .profile-card {
+            /* ... (Existing styles) ... */
+            align-items: flex-start; /* Align items to top to prevent image from pushing content down */
+        }
+        .profile-card-image { /* New style for image container */
+            flex-shrink: 0;
+            margin-right: 20px;
+            width: 100px;
+            height: 100px;
+            overflow: hidden;
+            border-radius: 50%;
+            border: 1px solid #ddd;
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+        .profile-card-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Search Profiles</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}<ul class="flash-messages">{% for category, message in messages %}<li class="flash-message {{ category }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
+        {% endwith %}
+
+        <form action="{{ url_for('search_profiles') }}" method="GET">
+            </form>
+
+        <h2 class="search-results-heading">Search Results</h2>
+        {% if profiles %}
+            {% for profile in profiles %}
+                <div class="profile-card">
+                    <div class="profile-card-image"> {% if profile.profile_picture %}
+                            <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_picture) }}" alt="{{ profile.username }}">
+                        {% else %}
+                            <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
+                        {% endif %}
+                    </div>
+                    <div class="profile-info">
+                        <h2>{{ profile.username }}</h2>
+                        <p><strong>Age:</strong> {{ profile.age }}</p>
+                        <p><strong>Observance:</strong> {{ profile.observance_level if profile.observance_level else 'N/A' }}</p>
+                        <p><strong>Kosher:</strong> {{ profile.kosher_level if profile.kosher_level else 'N/A' }}</p>
+                        <p><strong>Shabbat:</strong> {{ profile.shabbat_observance if profile.shabbat_observance else 'N/A' }}</p>
+                        <p><strong>Synagogue:</strong> {{ profile.synagogue_affiliation if profile.synagogue_affiliation else 'N/A' }}</p>
+                        <p><strong>About Me:</strong> {{ profile.bio }}</p>
+                    </div>
+                    <div class="profile-actions">
+                        <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}">View Profile</a>
+                        <a href="{{ url_for('conversation', user_id=profile.user_id) }}" class="message-btn">Message</a>
+                        <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="POST" style="display:inline;">
+                            {% if profile.is_liked_by_me %}
+                                <button type="submit" class="unlike-btn">Unlike</button>
+                            {% else %}
+                                <button type="submit" class="like-btn">Like</button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div class="no-profiles"><p>No profiles match your search criteria. Try a different search!</p></div>
+        {% endif %}
+        <div class="back-link"><a href="{{ url_for('index') }}">Back to Home</a></div>
+    </div>
+</body>
+</html>

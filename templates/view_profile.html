@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ target_user.username }}'s Profile - Jewish Dating App</title>
+    <style>
+        /* ... (Existing styles) ... */
+        .profile-pic-large { /* New style for large image */
+            text-align: center;
+            margin-bottom: 25px;
+        }
+        .profile-pic-large img {
+            max-width: 200px;
+            max-height: 200px;
+            border-radius: 50%;
+            border: 3px solid #007bff;
+            object-fit: cover;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>{{ target_user.username }}'s Profile</h1>
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}<ul class="flash-messages">{% for category, message in messages %}<li class="flash-message {{ category }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
+        {% endwith %}
+
+        {% if target_profile %}
+            <div class="profile-pic-large"> {% if target_profile.profile_picture %}
+                    <img src="{{ url_for('static', filename='profile_pics/' + target_profile.profile_picture) }}" alt="{{ target_user.username }}">
+                {% else %}
+                    <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
+                {% endif %}
+            </div>
+
+            <div class="profile-detail">
+                <strong>Username:</strong> <span>{{ target_user.username }}</span>
+            </div>
+            <div class="profile-detail">
+                <strong>About Me:</strong>
+                <div class="profile-bio">{{ target_profile.bio }}</div>
+            </div>
+
+            <div class="profile-actions">
+                <a href="{{ url_for('conversation', user_id=target_user.id) }}">Send Message</a>
+                <form action="{{ url_for('like_profile', user_id=target_user.id) }}" method="POST" style="display:inline;">
+                    {% if is_liked_by_me %}
+                        <button type="submit" class="unlike-btn">Unlike</button>
+                    {% else %}
+                        <button type="submit" class="like-btn">Like</button>
+                    {% endif %}
+                </form>
+            </div>
+        {% else %}
+            <p style="text-align: center; color: #666;">This user has not set up a profile yet.</p>
+        {% endif %}
+        <div class="back-link"><a href="{{ url_for('browse_profiles') }}">Back to Browse</a></div>
+    </div>
+</body>
+</html>

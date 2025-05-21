@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Jewish Dating App</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+        .container { background-color: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); max-width: 600px; margin: 50px auto; }
+        h1 { text-align: center; color: #333; margin-bottom: 30px; }
+        label { display: block; margin-bottom: 8px; font-weight: bold; }
+        input[type="text"],
+        input[type="number"],
+        textarea,
+        select {
+            width: calc(100% - 20px);
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        input[type="file"] { /* Style for file input */
+            margin-bottom: 20px;
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+        }
+        input[type="submit"] {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            width: 100%;
+            font-size: 16px;
+        }
+        input[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+        .flash-message {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        .flash-message.error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+        .flash-message.warning {
+            background-color: #fff3cd;
+            color: #856404;
+            border: 1px solid #ffeeba;
+        }
+        .flash-message.info {
+            background-color: #e2e3e5;
+            color: #383d41;
+            border: 1px solid #d6d8db;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .current-profile-pic { /* Style for displaying current picture */
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .current-profile-pic img {
+            max-width: 150px;
+            max-height: 150px;
+            border-radius: 50%; /* Make it circular */
+            border: 2px solid #ddd;
+            object-fit: cover; /* Ensure image covers the area */
+        }
+        .current-profile-pic p {
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #666;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>My Profile</h1>
+
+        {% with messages = get_flashed_messages(with_categories=true) %}
+            {% if messages %}
+                <ul class="flash-messages">
+                    {% for category, message in messages %}
+                        <li class="flash-message {{ category }}">{{ message }}</li>
+                    {% endfor %}
+                </ul>
+            {% endif %}
+        {% endwith %}
+
+        <form method="POST" enctype="multipart/form-data"> {% if profile and profile.profile_picture %}
+            <div class="current-profile-pic">
+                <p>Current Profile Picture:</p>
+                <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_picture) }}" alt="Profile Picture">
+            </div>
+            {% endif %}
+
+            <label for="profile_picture">Upload Profile Picture:</label>
+            <input type="file" id="profile_picture" name="profile_picture" accept="image/png, image/jpeg, image/gif">
+            <p style="font-size: 0.8em; color: #777; margin-top: -15px; margin-bottom: 15px;">Max file size: 16MB. Allowed: PNG, JPG, JPEG, GIF.</p>
+
+
+            <label for="age">Age:</label>
+            <input type="number" id="age" name="age" min="18" max="120" value="{{ profile.age if profile else '' }}" required>
+
+            <label for="bio">About Me:</label>
+            <textarea id="bio" name="bio" rows="5" required>{{ profile.bio if profile else '' }}</textarea>
+
+            <label for="observance_level">Level of Observance:</label>
+            <select id="observance_level" name="observance_level">
+                <option value="">Select one</option>
+                <option value="Orthodox" {% if profile and profile.observance_level == 'Orthodox' %}selected{% endif %}>Orthodox</option>
+                <option value="Conservative" {% if profile and profile.observance_level == 'Conservative' %}selected{% endif %}>Conservative</option>
+                <option value="Reform" {% if profile and profile.observance_level == 'Reform' %}selected{% endif %}>Reform</option>
+                <option value="Traditional" {% if profile and profile.observance_level == 'Traditional' %}selected{% endif %}>Traditional</option>
+                <option value="Just Jewish" {% if profile and profile.observance_level == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
+                <option value="Seeking" {% if profile and profile.observance_level == 'Seeking' %}selected{% endif %}>Seeking/Exploring</option>
+            </select>
+
+            <label for="kosher_level">Kosher Level:</label>
+            <select id="kosher_level" name="kosher_level">
+                <option value="">Select one</option>
+                <option value="Glatt Kosher" {% if profile and profile.kosher_level == 'Glatt Kosher' %}selected{% endif %}>Glatt Kosher</option>
+                <option value="Kosher" {% if profile and profile.kosher_level == 'Kosher' %}selected{% endif %}>Kosher</option>
+                <option value="Kosher Style" {% if profile and profile.kosher_level == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
+                <option value="Not Kosher" {% if profile and profile.kosher_level == 'Not Kosher' %}selected{% endif %}>Not Kosher</option>
+            </select>
+
+            <label for="shabbat_observance">Shabbat Observance:</label>
+            <select id="shabbat_observance" name="shabbat_observance">
+                <option value="">Select one</option>
+                <option value="Observant" {% if profile and profile.shabbat_observance == 'Observant' %}selected{% endif %}>Observant</option>
+                <option value="Partially Observant" {% if profile and profile.shabbat_observance == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
+                <option value="Not Observant" {% if profile and profile.shabbat_observance == 'Not Observant' %}selected{% endif %}>Not Observant</option>
+            </select>
+
+            <label for="synagogue_affiliation">Synagogue Affiliation:</label>
+            <input type="text" id="synagogue_affiliation" name="synagogue_affiliation" value="{{ profile.synagogue_affiliation if profile else '' }}">
+
+            <input type="submit" value="Save Profile">
+        </form>
+
+        <div class="back-link">
+            <a href="{{ url_for('index') }}">Back to Home</a>
+        </div>
+    </div>
+</body>
+</html>
