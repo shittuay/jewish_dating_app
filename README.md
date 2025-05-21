@@ -1,7 +1,3 @@
-Certainly! Here’s your README.md converted to a properly formatted, easy-to-read Markdown document with improved section formatting, bullet points, and code blocks for clarity.
-
----
-
 # Jewish Dating App
 
 Welcome to the **Jewish Dating App**! This application provides a platform for Jewish individuals to connect, create profiles, browse other users, send messages, and express interest through a "liking" system.
