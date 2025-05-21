@@ -1,77 +1,46 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Browse Profiles - Jewish Dating App</title>
-    <style>
-        /* ... (Existing styles) ... */
-        .profile-card {
-            /* ... (Existing styles) ... */
-            align-items: flex-start; /* Align items to top to prevent image from pushing content down */
-        }
-        .profile-card-image { /* New style for image container */
-            flex-shrink: 0; /* Prevent image from shrinking */
-            margin-right: 20px; /* Space between image and info */
-            width: 100px; /* Fixed width for image */
-            height: 100px; /* Fixed height for image */
-            overflow: hidden; /* Hide overflow for rounded corners */
-            border-radius: 50%; /* Circular image */
-            border: 1px solid #ddd;
-            background-color: #f0f0f0; /* Background for placeholder */
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .profile-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover; /* Cover the area, cropping if necessary */
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Browse Other Profiles</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}<ul class="flash-messages">{% for category, message in messages %}<li class="flash-message {{ category }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
-        {% endwith %}
+{% extends "base.html" %}
 
-        {% if profiles %}
-            {% for profile in profiles %}
-                <div class="profile-card">
-                    <div class="profile-card-image"> {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_picture) }}" alt="{{ profile.username }}">
-                        {% else %}
-                            <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
-                        {% endif %}
+{% block title %}Browse Profiles - Jewish Dating App{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Browse Profiles</h1>
+    <div class="grid">
+        {% for profile in profiles %}
+        <div class="card">
+            <div class="profile-picture-container" style="width: 150px; height: 150px; margin: 0 auto 1rem;">
+                {% if profile.profile_picture %}
+                    <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                {% else %}
+                    <div class="profile-picture-placeholder">
+                        <i class="fas fa-user"></i>
                     </div>
-                    <div class="profile-info">
-                        <h2>{{ profile.username }}</h2>
-                        <p><strong>Age:</strong> {{ profile.age }}</p>
-                        <p><strong>Observance:</strong> {{ profile.observance_level if profile.observance_level else 'N/A' }}</p>
-                        <p><strong>Kosher:</strong> {{ profile.kosher_level if profile.kosher_level else 'N/A' }}</p>
-                        <p><strong>Shabbat:</strong> {{ profile.shabbat_observance if profile.shabbat_observance else 'N/A' }}</p>
-                        <p><strong>Synagogue:</strong> {{ profile.synagogue_affiliation if profile.synagogue_affiliation else 'N/A' }}</p>
-                        <p><strong>About Me:</strong> {{ profile.bio }}</p>
-                    </div>
-                    <div class="profile-actions">
-                        <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}">View Profile</a>
-                        <a href="{{ url_for('conversation', user_id=profile.user_id) }}" class="message-btn">Message</a>
-                        <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="POST" style="display:inline;">
-                            {% if profile.is_liked_by_me %}
-                                <button type="submit" class="unlike-btn">Unlike</button>
-                            {% else %}
-                                <button type="submit" class="like-btn">Like</button>
-                            {% endif %}
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-profiles"><p>No other profiles found yet. Be the first to create yours!</p></div>
-        {% endif %}
-        <div class="back-link"><a href="{{ url_for('index') }}">Back to Home</a></div>
+                {% endif %}
+            </div>
+            <h3>{{ profile.username }}</h3>
+            <p><strong>Age:</strong> {{ profile.age }}</p>
+            <p><strong>About:</strong> {{ profile.bio }}</p>
+            <p><strong>Observance Level:</strong> {{ profile.observance_level }}</p>
+            <p><strong>Kosher Level:</strong> {{ profile.kosher_level }}</p>
+            <p><strong>Shabbat Observance:</strong> {{ profile.shabbat_observance }}</p>
+            {% if profile.synagogue_affiliation %}
+                <p><strong>Synagogue:</strong> {{ profile.synagogue_affiliation }}</p>
+            {% endif %}
+            
+            <div class="actions">
+                <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" class="btn btn-primary">View Profile</a>
+                {% if profile.is_liked_by_me %}
+                    <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Unlike</button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">Like</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

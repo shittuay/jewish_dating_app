@@ -1,81 +1,100 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Search Profiles - Jewish Dating App</title>
-    <style>
-        /* ... (Existing styles, copy .profile-card-image from browse_profiles.html styles) ... */
-        .profile-card {
-            /* ... (Existing styles) ... */
-            align-items: flex-start; /* Align items to top to prevent image from pushing content down */
-        }
-        .profile-card-image { /* New style for image container */
-            flex-shrink: 0;
-            margin-right: 20px;
-            width: 100px;
-            height: 100px;
-            overflow: hidden;
-            border-radius: 50%;
-            border: 1px solid #ddd;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .profile-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Search Profiles</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}<ul class="flash-messages">{% for category, message in messages %}<li class="flash-message {{ category }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
-        {% endwith %}
+{% extends "base.html" %}
 
-        <form action="{{ url_for('search_profiles') }}" method="GET">
-            </form>
+{% block title %}Search Profiles - Jewish Dating App{% endblock %}
 
-        <h2 class="search-results-heading">Search Results</h2>
-        {% if profiles %}
-            {% for profile in profiles %}
-                <div class="profile-card">
-                    <div class="profile-card-image"> {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_picture) }}" alt="{{ profile.username }}">
-                        {% else %}
-                            <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
-                        {% endif %}
+{% block content %}
+<div class="container">
+    <h1>Search Profiles</h1>
+    
+    <form method="get" class="search-form">
+        <div class="form-group">
+            <label for="min_age">Minimum Age</label>
+            <input type="number" name="min_age" id="min_age" min="18" max="120" value="{{ request.args.get('min_age', '') }}" class="form-control">
+        </div>
+        
+        <div class="form-group">
+            <label for="max_age">Maximum Age</label>
+            <input type="number" name="max_age" id="max_age" min="18" max="120" value="{{ request.args.get('max_age', '') }}" class="form-control">
+        </div>
+        
+        <div class="form-group">
+            <label for="observance_level">Level of Religious Observance</label>
+            <select name="observance_level" id="observance_level" class="form-control">
+                <option value="">Any</option>
+                <option value="Orthodox" {% if request.args.get('observance_level') == 'Orthodox' %}selected{% endif %}>Orthodox</option>
+                <option value="Modern Orthodox" {% if request.args.get('observance_level') == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
+                <option value="Conservative" {% if request.args.get('observance_level') == 'Conservative' %}selected{% endif %}>Conservative</option>
+                <option value="Reform" {% if request.args.get('observance_level') == 'Reform' %}selected{% endif %}>Reform</option>
+                <option value="Reconstructionist" {% if request.args.get('observance_level') == 'Reconstructionist' %}selected{% endif %}>Reconstructionist</option>
+                <option value="Just Jewish" {% if request.args.get('observance_level') == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="kosher_level">Kosher Observance</label>
+            <select name="kosher_level" id="kosher_level" class="form-control">
+                <option value="">Any</option>
+                <option value="Strictly Kosher" {% if request.args.get('kosher_level') == 'Strictly Kosher' %}selected{% endif %}>Strictly Kosher</option>
+                <option value="Mostly Kosher" {% if request.args.get('kosher_level') == 'Mostly Kosher' %}selected{% endif %}>Mostly Kosher</option>
+                <option value="Kosher Style" {% if request.args.get('kosher_level') == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
+                <option value="Not Kosher" {% if request.args.get('kosher_level') == 'Not Kosher' %}selected{% endif %}>Not Kosher</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="shabbat_observance">Shabbat Observance</label>
+            <select name="shabbat_observance" id="shabbat_observance" class="form-control">
+                <option value="">Any</option>
+                <option value="Fully Observant" {% if request.args.get('shabbat_observance') == 'Fully Observant' %}selected{% endif %}>Fully Observant</option>
+                <option value="Partially Observant" {% if request.args.get('shabbat_observance') == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
+                <option value="Not Observant" {% if request.args.get('shabbat_observance') == 'Not Observant' %}selected{% endif %}>Not Observant</option>
+            </select>
+        </div>
+        
+        <div class="form-group">
+            <label for="keyword_search">Keyword Search</label>
+            <input type="text" name="keyword_search" id="keyword_search" value="{{ request.args.get('keyword_search', '') }}" class="form-control" placeholder="Search in bio or synagogue...">
+        </div>
+        
+        <button type="submit" class="btn btn-primary">Search</button>
+    </form>
+
+    <div class="grid">
+        {% for profile in profiles %}
+        <div class="card">
+            <div class="profile-picture-container" style="width: 150px; height: 150px; margin: 0 auto 1rem;">
+                {% if profile.profile_picture %}
+                    <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="Profile Picture" class="profile-picture">
+                {% else %}
+                    <div class="profile-picture-placeholder">
+                        <i class="fas fa-user"></i>
                     </div>
-                    <div class="profile-info">
-                        <h2>{{ profile.username }}</h2>
-                        <p><strong>Age:</strong> {{ profile.age }}</p>
-                        <p><strong>Observance:</strong> {{ profile.observance_level if profile.observance_level else 'N/A' }}</p>
-                        <p><strong>Kosher:</strong> {{ profile.kosher_level if profile.kosher_level else 'N/A' }}</p>
-                        <p><strong>Shabbat:</strong> {{ profile.shabbat_observance if profile.shabbat_observance else 'N/A' }}</p>
-                        <p><strong>Synagogue:</strong> {{ profile.synagogue_affiliation if profile.synagogue_affiliation else 'N/A' }}</p>
-                        <p><strong>About Me:</strong> {{ profile.bio }}</p>
-                    </div>
-                    <div class="profile-actions">
-                        <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}">View Profile</a>
-                        <a href="{{ url_for('conversation', user_id=profile.user_id) }}" class="message-btn">Message</a>
-                        <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="POST" style="display:inline;">
-                            {% if profile.is_liked_by_me %}
-                                <button type="submit" class="unlike-btn">Unlike</button>
-                            {% else %}
-                                <button type="submit" class="like-btn">Like</button>
-                            {% endif %}
-                        </form>
-                    </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-profiles"><p>No profiles match your search criteria. Try a different search!</p></div>
-        {% endif %}
-        <div class="back-link"><a href="{{ url_for('index') }}">Back to Home</a></div>
+                {% endif %}
+            </div>
+            <h3>{{ profile.username }}</h3>
+            <p><strong>Age:</strong> {{ profile.age }}</p>
+            <p><strong>About:</strong> {{ profile.bio }}</p>
+            <p><strong>Observance Level:</strong> {{ profile.observance_level }}</p>
+            <p><strong>Kosher Level:</strong> {{ profile.kosher_level }}</p>
+            <p><strong>Shabbat Observance:</strong> {{ profile.shabbat_observance }}</p>
+            {% if profile.synagogue_affiliation %}
+                <p><strong>Synagogue:</strong> {{ profile.synagogue_affiliation }}</p>
+            {% endif %}
+            
+            <div class="actions">
+                <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" class="btn btn-primary">View Profile</a>
+                {% if profile.is_liked_by_me %}
+                    <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-danger">Unlike</button>
+                    </form>
+                {% else %}
+                    <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
+                        <button type="submit" class="btn btn-primary">Like</button>
+                    </form>
+                {% endif %}
+            </div>
+        </div>
+        {% endfor %}
     </div>
-</body>
-</html>
+</div>
+{% endblock %}

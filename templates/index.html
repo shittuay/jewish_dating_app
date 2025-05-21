@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+
+{% block title %}Welcome - Jewish Dating App{% endblock %}
+
+{% block content %}
+{% if g.user %}
+<div class="container">
+    <div class="card">
+        <h1 style="text-align: center; margin-bottom: 1rem;">Welcome, {{ g.user.username }}!</h1>
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <p style="font-size: 1.2rem; color: var(--dark-gray);">Find your perfect match in the Jewish community</p>
+        </div>
+        <div class="grid" style="margin-top: 2rem;">
+            <div class="card">
+                <h2 class="card-title">My Profile</h2>
+                <p>Update your profile and preferences</p>
+                <a href="{{ url_for('profile') }}" class="btn btn-primary" style="margin-top: 1rem;">View Profile</a>
+            </div>
+            <div class="card">
+                <h2 class="card-title">Browse Profiles</h2>
+                <p>Discover potential matches</p>
+                <a href="{{ url_for('browse_profiles') }}" class="btn btn-primary" style="margin-top: 1rem;">Start Browsing</a>
+            </div>
+            <div class="card">
+                <h2 class="card-title">My Likes</h2>
+                <p>View your likes and matches</p>
+                <a href="{{ url_for('my_likes') }}" class="btn btn-primary" style="margin-top: 1rem;">View Likes</a>
+            </div>
+            <div class="card">
+                <h2 class="card-title">Messages</h2>
+                <p>Chat with your matches</p>
+                <a href="{{ url_for('messages') }}" class="btn btn-primary" style="margin-top: 1rem;">View Messages</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% else %}
+<div class="home-hero">
+    <div class="home-overlay">
+        <h1 class="home-title">Jewish Dating<br>Is Back In Style</h1>
+        <a href="{{ url_for('register') }}" class="home-btn">Get Started <i class="fas fa-arrow-right"></i></a>
+    </div>
+</div>
+{% endif %}
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.home-hero {
+    position: relative;
+    width: 100vw;
+    min-height: 90vh;
+    background: url('{{ url_for('static', filename='home_bg.jpg') }}') center center/cover no-repeat;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+.home-overlay {
+    background: rgba(0,0,0,0.35);
+    width: 100vw;
+    min-height: 90vh;
+    position: absolute;
+    top: 0; left: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+.home-title {
+    color: #fff;
+    font-size: 3rem;
+    font-weight: 700;
+    text-align: center;
+    margin-bottom: 2rem;
+    text-shadow: 0 2px 8px rgba(0,0,0,0.3);
+}
+.home-btn {
+    background: #c0392b;
+    color: #fff;
+    padding: 1rem 2.5rem;
+    border-radius: 2rem;
+    font-size: 1.5rem;
+    font-weight: 500;
+    text-decoration: none;
+    transition: background 0.2s;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+}
+.home-btn:hover {
+    background: #a93226;
+}
+</style>
+{% endblock %} 

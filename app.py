@@ -5,30 +5,36 @@ import sqlite3
 import hashlib
 from functools import wraps
 import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
 
-app = Flask(__name__)
-app.config['SECRET_KEY'] = 'your_super_long_and_random_secret_key_for_production_never_share' # Change this!
+# Create the Flask application
+app = Flask(__name__, instance_relative_config=True)
 
-DATABASE = 'database.db'
+# Ensure the instance folder exists
+try:
+    os.makedirs(app.instance_path)
+except OSError:
+    pass
 
-# --- NEW: File Upload Configuration ---
-UPLOAD_FOLDER = 'static/profile_pics' # Where to save uploaded images
-ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'} # Allowed image extensions
+app.config.from_mapping(
+    SECRET_KEY='dev',
+    DATABASE=os.path.join(app.instance_path, 'jewish_dating.sqlite'),
+    UPLOAD_FOLDER=os.path.join('static', 'uploads'),
+    MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 16MB max file size
+)
 
-app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
-app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024 # 16 MB max upload size
+# Ensure the upload folder exists
+os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
-# Create the upload folder if it doesn't exist
-if not os.path.exists(UPLOAD_FOLDER):
-    os.makedirs(UPLOAD_FOLDER)
+# Allowed file extensions for profile pictures
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
 def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE)
+    conn = sqlite3.connect(app.config['DATABASE'])
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -84,8 +90,6 @@ def init_db():
 with app.app_context():
     init_db()
 
-
-
 # --- Before each request, load the logged-in user if any ---
 @app.before_request
 def load_logged_in_user():
@@ -113,12 +117,7 @@ def login_required(view):
 
 @app.route('/')
 def index():
-    if g.user:
-        # UPDATED: Added link to 'My Likes'
-        return f"Hello, {g.user['username']}! Welcome to the Jewish Dating App. " \
-               f"<br><a href='/profile'>My Profile</a> | <a href='/browse'>Browse Profiles</a> | <a href='/search'>Search Profiles</a> | <a href='/my_likes'>My Likes</a> | <a href='/messages'>Messages</a> | <a href='/logout'>Logout</a>"
-    return "Welcome to the Jewish Dating App! <br><a href='/register'>Register Here</a> | <a href='/login'>Login Here</a>"
-
+    return render_template('index.html')
 
 @app.route('/register', methods=('GET', 'POST'))
 def register():
@@ -130,6 +129,10 @@ def register():
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+        age = request.form['age']
+        observance_level = request.form['observance_level']
+        kosher_level = request.form['kosher_level']
+        shabbat_observance = request.form['shabbat_observance']
 
         conn = get_db_connection()
         error = None
@@ -140,13 +143,30 @@ def register():
             error = 'Password is required.'
         elif password != confirm_password:
             error = 'Passwords do not match.'
+        elif not age or not age.isdigit() or int(age) < 18 or int(age) > 120:
+            error = 'Age must be a number between 18 and 120.'
+        elif not observance_level:
+            error = 'Level of observance is required.'
+        elif not kosher_level:
+            error = 'Kosher observance level is required.'
+        elif not shabbat_observance:
+            error = 'Shabbat observance level is required.'
         elif conn.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone() is not None:
             error = f"User {username} is already registered."
 
         if error is None:
             hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
-            conn.execute('INSERT INTO users (username, password) VALUES (?, ?)',
+            # First create the user
+            cursor = conn.execute('INSERT INTO users (username, password) VALUES (?, ?)',
                          (username, hashed_password))
+            user_id = cursor.lastrowid
+            
+            # Then create their profile
+            conn.execute('''INSERT INTO profiles 
+                (user_id, age, observance_level, kosher_level, shabbat_observance)
+                VALUES (?, ?, ?, ?, ?)''',
+                (user_id, age, observance_level, kosher_level, shabbat_observance))
+            
             conn.commit()
             conn.close()
             flash('Registration successful! Please log in.', 'success')
@@ -156,7 +176,6 @@ def register():
         conn.close()
 
     return render_template('register.html')
-
 
 @app.route('/login', methods=('GET', 'POST'))
 def login():
@@ -210,6 +229,16 @@ def profile():
         kosher_level = request.form.get('kosher_level')
         shabbat_observance = request.form.get('shabbat_observance')
         synagogue_affiliation = request.form.get('synagogue_affiliation')
+        
+        # Handle profile picture upload
+        profile_picture = None
+        if 'profile_picture' in request.files:
+            file = request.files['profile_picture']
+            if file and file.filename and allowed_file(file.filename):
+                # Generate a unique filename
+                filename = secure_filename(f"{user_id}_{int(datetime.datetime.now().timestamp())}_{file.filename}")
+                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+                profile_picture = filename
 
         error = None
         if not age or not bio:
@@ -223,28 +252,51 @@ def profile():
             ).fetchone()
 
             if existing_profile:
-                conn.execute(
-                    '''UPDATE profiles SET
-                        age = ?, bio = ?,
-                        observance_level = ?, kosher_level = ?,
-                        shabbat_observance = ?, synagogue_affiliation = ?
-                    WHERE user_id = ?''',
-                    (age, bio,
-                     observance_level, kosher_level,
-                     shabbat_observance, synagogue_affiliation,
-                     user_id)
-                )
+                # If there's a new profile picture, delete the old one
+                if profile_picture and existing_profile['profile_picture']:
+                    old_file = os.path.join(app.config['UPLOAD_FOLDER'], existing_profile['profile_picture'])
+                    if os.path.exists(old_file):
+                        os.remove(old_file)
+
+                # Update profile with or without new picture
+                if profile_picture:
+                    conn.execute(
+                        '''UPDATE profiles SET
+                            age = ?, bio = ?,
+                            observance_level = ?, kosher_level = ?,
+                            shabbat_observance = ?, synagogue_affiliation = ?,
+                            profile_picture = ?
+                        WHERE user_id = ?''',
+                        (age, bio,
+                         observance_level, kosher_level,
+                         shabbat_observance, synagogue_affiliation,
+                         profile_picture, user_id)
+                    )
+                else:
+                    conn.execute(
+                        '''UPDATE profiles SET
+                            age = ?, bio = ?,
+                            observance_level = ?, kosher_level = ?,
+                            shabbat_observance = ?, synagogue_affiliation = ?
+                        WHERE user_id = ?''',
+                        (age, bio,
+                         observance_level, kosher_level,
+                         shabbat_observance, synagogue_affiliation,
+                         user_id)
+                    )
                 flash('Profile updated successfully!', 'success')
             else:
                 conn.execute(
                     '''INSERT INTO profiles
                         (user_id, age, bio,
                          observance_level, kosher_level,
-                         shabbat_observance, synagogue_affiliation)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)''',
+                         shabbat_observance, synagogue_affiliation,
+                         profile_picture)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
                     (user_id, age, bio,
                      observance_level, kosher_level,
-                     shabbat_observance, synagogue_affiliation)
+                     shabbat_observance, synagogue_affiliation,
+                     profile_picture)
                 )
                 flash('Profile created successfully!', 'success')
             conn.commit()
@@ -255,12 +307,11 @@ def profile():
         conn.close()
 
     profile_data = conn.execute(
-        'SELECT age, bio, observance_level, kosher_level, shabbat_observance, synagogue_affiliation FROM profiles WHERE user_id = ?', (user_id,)
+        'SELECT age, bio, observance_level, kosher_level, shabbat_observance, synagogue_affiliation, profile_picture FROM profiles WHERE user_id = ?', (user_id,)
     ).fetchone()
     conn.close()
 
     return render_template('profile.html', profile=profile_data)
-
 
 # --- BROWSE PROFILES ROUTE (MODIFIED for likes) ---
 @app.route('/browse')
@@ -271,7 +322,7 @@ def browse_profiles():
 
     profiles_data = conn.execute(
         '''SELECT p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation,
-                  u.username, u.id as user_id,
+                  p.profile_picture, u.username, u.id as user_id,
                   EXISTS(SELECT 1 FROM likes WHERE liker_id = ? AND liked_id = u.id) AS is_liked_by_me
            FROM profiles p JOIN users u ON p.user_id = u.id
            WHERE u.id != ?
@@ -319,7 +370,6 @@ def view_user_profile(user_id):
                            target_profile=target_profile,
                            is_liked_by_me=is_liked_by_me)
 
-
 # --- SEARCH PROFILES ROUTE (ENHANCED) ---
 @app.route('/search')
 @login_required
@@ -336,12 +386,12 @@ def search_profiles():
 
     query_parts = [
         'SELECT p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation, ',
-        'u.username, u.id as user_id, ',
-        'EXISTS(SELECT 1 FROM likes WHERE liker_id = ? AND liked_id = u.id) AS is_liked_by_me ', # Add is_liked_by_me here too
-        'FROM profiles p JOIN users u ON p.user_id = u.id '
+        'p.profile_picture, u.username, u.id as user_id, ',
+        'EXISTS(SELECT 1 FROM likes WHERE liker_id = ? AND liked_id = u.id) AS is_liked_by_me ',
+        'FROM profiles p JOIN users u ON p.user_id = u.id ',
         'WHERE u.id != ? '
     ]
-    params = [current_user_id, current_user_id] # current_user_id repeated for the new EXISTS subquery
+    params = [current_user_id, current_user_id]
 
     if min_age is not None:
         query_parts.append('AND p.age >= ? ')
@@ -353,7 +403,7 @@ def search_profiles():
     if min_age is not None and max_age is not None and min_age > max_age:
         flash('Minimum age cannot be greater than maximum age.', 'error')
 
-    if observance_level and observance_level != '': # Changed 'Any' to '' for the search form
+    if observance_level and observance_level != '':
         query_parts.append('AND p.observance_level = ? ')
         params.append(observance_level)
     if kosher_level and kosher_level != '':
@@ -408,7 +458,6 @@ def like_profile(user_id):
         conn.close()
     return redirect(request.referrer or url_for('browse_profiles'))
 
-
 @app.route('/unlike/<int:user_id>', methods=['POST'])
 @login_required
 def unlike_profile(user_id):
@@ -433,7 +482,6 @@ def unlike_profile(user_id):
     flash(f'You unliked {target_user["username"]}.', 'info')
     conn.close()
     return redirect(request.referrer or url_for('browse_profiles'))
-
 
 # --- NEW: My Likes / Who Liked Me Route ---
 @app.route('/my_likes')
@@ -485,7 +533,6 @@ def my_likes():
                            liked_by_me=liked_by_me,
                            liked_me=liked_me,
                            mutual_likes=mutual_likes)
-
 
 # --- MESSAGES OVERVIEW ROUTE ---
 @app.route('/messages')
@@ -572,7 +619,6 @@ def conversation(user_id):
     conn.close()
 
     return render_template('conversation.html', messages=messages, other_user=other_user)
-
 
 if __name__ == '__main__':
     app.run(debug=True)
