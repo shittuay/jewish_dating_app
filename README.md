@@ -1,180 +1,227 @@
-##Jewish Dating App
-Welcome to the Jewish Dating App! This application provides a platform for Jewish individuals to connect, create profiles, browse other users, send messages, and express interest through a "liking" system.
+Certainly! Here’s your README.md converted to a properly formatted, easy-to-read Markdown document with improved section formatting, bullet points, and code blocks for clarity.
 
-Table of Contents
+---
 
-Features
-Technologies Used
-Setup Instructions
-Prerequisites
-Installation
-Running the Application
-Database Schema
-File Structure
-Usage
-Contributing
-License
-Features
-This application includes the following key features:
+# Jewish Dating App
 
-User Registration & Authentication: Secure user registration with hashed passwords and a robust login/logout system.
-User Profiles: Users can create and update detailed profiles including:
-Age
-Bio ("About Me")
-Observance Level (e.g., Orthodox, Conservative, Reform, etc.)
-Kosher Level (e.g., Glatt Kosher, Kosher, Vegetarian, etc.)
-Shabbat Observance (e.g., Observant, Partially Observant, Not Observant)
-Synagogue Affiliation
-Profile Picture Upload: Users can upload a profile picture.
-Browse Profiles: View other users' profiles, excluding your own.
-Search Profiles: Filter and search for profiles based on age range, observance level, kosher level, Shabbat observance, and keywords in bio or synagogue affiliation.
-Liking System:
-"Like" other users' profiles.
-"Unlike" profiles you've previously liked.
-"My Likes" Dashboard: See who you've liked, who has liked you, and crucially, your mutual matches!
-Direct Messaging: Engage in private conversations with other users.
-Flash Messages: Provides user feedback for actions (e.g., "Registration successful!", "Profile updated!").
-Login Required Decorator: Ensures that certain routes are only accessible to logged-in users.
-Technologies Used
-Flask: A micro web framework for Python.
-SQLite3: A C-language library that implements a small, fast, self-contained, high-reliability, full-featured, SQL database engine. Used for the application's database.
-HTML/CSS: For structuring and styling the web pages.
-Python: The primary programming language.
-Werkzeug: A WSGI utility library for Python (used for secure_filename).
-Hashlib: For secure password hashing.
-Os: For interacting with the operating system (e.g., creating directories for uploads).
-Setup Instructions
-Follow these steps to get the Jewish Dating App up and running on your local machine.
+Welcome to the **Jewish Dating App**! This application provides a platform for Jewish individuals to connect, create profiles, browse other users, send messages, and express interest through a "liking" system.
 
-Prerequisites
-Python 3.x: Ensure you have Python 3 installed. You can download it from python.org.
-Pip: Python's package installer, usually comes with Python.
-Installation
-Clone the Repository:
-If this project is in a Git repository, clone it to your local machine:
+---
 
-Bash
+## Table of Contents
 
-git clone <repository_url>
-cd jewish_dating_app
-If not, simply navigate to the directory where you've saved the project files.
+- [Features](#features)
+- [Technologies Used](#technologies-used)
+- [Setup Instructions](#setup-instructions)
+  - [Prerequisites](#prerequisites)
+  - [Installation](#installation)
+  - [Running the Application](#running-the-application)
+- [Database Schema](#database-schema)
+- [File Structure](#file-structure)
+- [Usage](#usage)
+- [Contributing](#contributing)
+- [License](#license)
 
-Create a Virtual Environment:
-It's highly recommended to use a virtual environment to manage dependencies.
+---
 
-Bash
+## Features
 
-python -m venv venv
-Activate the Virtual Environment:
+- **User Registration & Authentication:** Secure user registration with hashed passwords and login/logout.
+- **User Profiles:** Users can create and update profiles with:
+  - Age
+  - Bio ("About Me")
+  - Observance Level (e.g., Orthodox, Conservative, Reform, etc.)
+  - Kosher Level (e.g., Glatt Kosher, Kosher, Vegetarian, etc.)
+  - Shabbat Observance (e.g., Observant, Partially Observant, Not Observant)
+  - Synagogue Affiliation
+- **Profile Picture Upload:** Users can upload a profile picture.
+- **Browse & Search Profiles:** View and filter other users’ profiles based on multiple criteria.
+- **Liking System:**
+  - "Like" or "Unlike" other users’ profiles.
+  - "My Likes" dashboard to see who you’ve liked, who liked you, and mutual matches.
+- **Direct Messaging:** Private conversations between users.
+- **Flash Messages:** User feedback for actions (e.g., registration success, profile updated).
+- **Login Required Decorator:** Ensures certain routes are only accessible to logged-in users.
 
-On Windows:
-Bash
+---
 
-.\venv\Scripts\activate
-On macOS/Linux:
-Bash
+## Technologies Used
 
-source venv/bin/activate
-Install Dependencies:
-With your virtual environment activated, install the required Python packages:
+- **Flask:** Python web framework
+- **SQLite3:** Lightweight SQL database
+- **HTML/CSS:** Web page structure and styling
+- **Python:** Main programming language
+- **Werkzeug:** WSGI utility library (for secure_filename)
+- **Hashlib:** Secure password hashing
+- **os:** For file and directory operations
 
-Bash
+---
 
-pip install Flask Werkzeug
-(Note: sqlite3, hashlib, functools, datetime, and os are standard Python libraries and don't need separate installation via pip.)
+## Setup Instructions
 
-Running the Application
-Set the Flask App Environment Variable:
-Tell Flask where your application file is.
+### Prerequisites
 
-On Windows:
-Bash
+- **Python 3.x:** [Download here](https://www.python.org/downloads/)
+- **pip:** Usually comes with Python
 
-set FLASK_APP=app.py
-On macOS/Linux:
-Bash
+### Installation
 
-export FLASK_APP=app.py
-Run the Flask Application:
+1. **Clone the Repository**
+   ```bash
+   git clone <repository_url>
+   cd jewish_dating_app
+   ```
+   If you don’t use git, simply navigate to the directory where you’ve saved the project files.
 
-Bash
+2. **Create a Virtual Environment**
+   ```bash
+   python -m venv venv
+   ```
 
-flask run
-You should see output similar to this:
+3. **Activate the Virtual Environment**
 
- * Serving Flask app 'app.py'
- * Debug mode: on
-INFO:werkzeug:WARNING: This is a development server. Do not use it in a production deployment. Use a production WSGI server instead.
- * Running on http://127.0.0.1:5000
-Press CTRL+C to quit
-Access the Application:
-Open your web browser and navigate to http://127.0.0.1:5000 (or the address shown in your terminal).
+   - On Windows:
+     ```bash
+     .\venv\Scripts\activate
+     ```
+   - On macOS/Linux:
+     ```bash
+     source venv/bin/activate
+     ```
 
-Database Schema
-The application uses an SQLite database with the following tables:
+4. **Install Dependencies**
+   ```bash
+   pip install Flask Werkzeug
+   ```
+   > Note: `sqlite3`, `hashlib`, `functools`, `datetime`, and `os` are standard Python libraries and don’t need separate installation.
 
-users: Stores user authentication details.
+---
 
-id (INTEGER PRIMARY KEY AUTOINCREMENT)
-username (TEXT UNIQUE NOT NULL)
-password (TEXT NOT NULL - stores SHA256 hash)
-profiles: Stores detailed user profile information.
+### Running the Application
 
-id (INTEGER PRIMARY KEY AUTOINCREMENT)
-user_id (INTEGER UNIQUE NOT NULL, FOREIGN KEY to users.id)
-age (INTEGER)
-bio (TEXT)
-observance_level (TEXT)
-kosher_level (TEXT)
-shabbat_observance (TEXT)
-synagogue_affiliation (TEXT)
-profile_picture (TEXT - stores filename of the uploaded picture)
-messages: Stores direct messages between users.
+1. **Set the Flask App Environment Variable**
 
-id (INTEGER PRIMARY KEY AUTOINCREMENT)
-sender_id (INTEGER NOT NULL, FOREIGN KEY to users.id)
-receiver_id (INTEGER NOT NULL, FOREIGN KEY to users.id)
-content (TEXT NOT NULL)
-timestamp (DATETIME DEFAULT CURRENT_TIMESTAMP)
-likes: Records "likes" between users.
+   - On Windows:
+     ```bash
+     set FLASK_APP=app.py
+     ```
+   - On macOS/Linux:
+     ```bash
+     export FLASK_APP=app.py
+     ```
 
-id (INTEGER PRIMARY KEY AUTOINCREMENT)
-liker_id (INTEGER NOT NULL, FOREIGN KEY to users.id)
-liked_id (INTEGER NOT NULL, FOREIGN KEY to users.id)
-timestamp (DATETIME DEFAULT CURRENT_TIMESTAMP)
-UNIQUE(liker_id, liked_id) (Ensures a user can only like another user once)
-File Structure
+2. **Run the Flask Application**
+   ```bash
+   flask run
+   ```
+
+   You should see output similar to:
+   ```
+    * Serving Flask app 'app.py'
+    * Debug mode: on
+    * Running on http://127.0.0.1:5000
+   ```
+
+3. **Access the Application**
+
+   Open your browser and go to [http://127.0.0.1:5000](http://127.0.0.1:5000).
+
+---
+
+## Database Schema
+
+The app uses an SQLite database with these tables:
+
+### users
+| Column    | Type    | Description                        |
+|-----------|---------|------------------------------------|
+| id        | INTEGER | PRIMARY KEY AUTOINCREMENT          |
+| username  | TEXT    | UNIQUE, NOT NULL                   |
+| password  | TEXT    | NOT NULL (SHA256 hash)             |
+
+### profiles
+| Column                | Type    | Description                                  |
+|-----------------------|---------|----------------------------------------------|
+| id                    | INTEGER | PRIMARY KEY AUTOINCREMENT                    |
+| user_id               | INTEGER | UNIQUE, NOT NULL, FOREIGN KEY to users.id    |
+| age                   | INTEGER |                                              |
+| bio                   | TEXT    |                                              |
+| observance_level      | TEXT    |                                              |
+| kosher_level          | TEXT    |                                              |
+| shabbat_observance    | TEXT    |                                              |
+| synagogue_affiliation | TEXT    |                                              |
+| profile_picture       | TEXT    | Filename of uploaded picture                 |
+
+### messages
+| Column     | Type    | Description                                  |
+|------------|---------|----------------------------------------------|
+| id         | INTEGER | PRIMARY KEY AUTOINCREMENT                    |
+| sender_id  | INTEGER | NOT NULL, FOREIGN KEY to users.id            |
+| receiver_id| INTEGER | NOT NULL, FOREIGN KEY to users.id            |
+| content    | TEXT    | NOT NULL                                     |
+| timestamp  | DATETIME| DEFAULT CURRENT_TIMESTAMP                    |
+
+### likes
+| Column    | Type    | Description                                  |
+|-----------|---------|----------------------------------------------|
+| id        | INTEGER | PRIMARY KEY AUTOINCREMENT                    |
+| liker_id  | INTEGER | NOT NULL, FOREIGN KEY to users.id            |
+| liked_id  | INTEGER | NOT NULL, FOREIGN KEY to users.id            |
+| timestamp | DATETIME| DEFAULT CURRENT_TIMESTAMP                    |
+| UNIQUE(liker_id, liked_id) |        | Ensures user can only like another once  |
+
+---
+
+## File Structure
+
+```
 jewish_dating_app/
 ├── venv/                       # Python virtual environment
 ├── static/                     # Static files (CSS, JS, images)
-│   └── profile_pics/           # Uploaded user profile pictures will be stored here
-│       └── <user_id>_<timestamp>.<ext> # Example: 1_20240521183000.jpg
-├── templates/                  # HTML Jinja2 templates
-│   ├── base.html               # Base template for consistent layout
+│   └── profile_pics/           # Uploaded user profile pictures
+│       └── <user_id>_<timestamp>.<ext>
+├── templates/                  # Jinja2 HTML templates
+│   ├── base.html
 │   ├── register.html
 │   ├── login.html
-│   ├── profile.html            # For logged-in user's own profile management
-│   ├── view_profile.html       # For viewing other users' profiles
-│   ├── browse_profiles.html    # Displaying profiles for Browse
-│   ├── search_profiles.html    # Displaying search results
-│   ├── messages_overview.html  # List of conversations
-│   ├── conversation.html       # Individual message thread
-│   └── my_likes.html           # My Likes, Liked Me, Mutual Matches
-├── app.py                      # Main Flask application file
-├── database.db                 # SQLite database file (created on first run)
+│   ├── profile.html
+│   ├── view_profile.html
+│   ├── browse_profiles.html
+│   ├── search_profiles.html
+│   ├── messages_overview.html
+│   ├── conversation.html
+│   └── my_likes.html
+├── app.py                      # Main Flask app
+├── database.db                 # SQLite database (created on first run)
 ├── README.md                   # This file
-└── .flaskenv                   # (Optional) For setting FLASK_APP and FLASK_DEBUG
-Usage
-Register: Create a new account with a unique username and password.
-Login: Access your account using your credentials.
-My Profile: After logging in, navigate to /profile to create or update your dating profile. Fill in your age, bio, observance levels, and upload a profile picture.
-Browse Profiles: Visit /browse to see other users' profiles.
-Search Profiles: Use /search to find specific profiles based on criteria.
-Like/Unlike: On a user's profile or in browse/search results, you can like or unlike them.
-My Likes: Go to /my_likes to manage your likes and see your matches.
-Messages: Start a conversation from a user's profile, or view existing chats on /messages.
-Contributing
-Contributions are welcome! If you have suggestions for improvements or new features, feel free to fork the repository and submit a pull request, or open an issue.
+└── .flaskenv                   # (Optional) Flask env variables
+```
 
-License
-This project is open-source and available under the MIT License.
+---
+
+## Usage
+
+- **Register:** Create a new account with a unique username and password.
+- **Login:** Access your account.
+- **My Profile:** Go to `/profile` to create or update your dating profile.
+- **Browse Profiles:** Visit `/browse` to see other users’ profiles.
+- **Search Profiles:** Use `/search` to find profiles based on criteria.
+- **Like/Unlike:** Like or unlike users from their profile or in browse/search results.
+- **My Likes:** Visit `/my_likes` to manage likes and see your matches.
+- **Messages:** Start a conversation from a user’s profile or view chats at `/messages`.
+
+---
+
+## Contributing
+
+Contributions are welcome! If you have suggestions or new features, feel free to fork the repository and submit a pull request, or open an issue.
+
+---
+
+## License
+
+This project is open-source and available under the [MIT License](LICENSE).
+
+---
+
+Let me know if you want further customizations!
