@@ -1,0 +1,107 @@
+{% extends "base.html" %}
+
+{% block title %}Admin - Review Adverts{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="admin-adverts-header text-center mb-5">
+        <h1 class="display-4 mb-3">Advert Review</h1>
+        <p class="lead text-muted">Approve or reject adverts submitted by users. Only approved adverts will be shown to the community.</p>
+    </div>
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            {% for category, message in messages %}
+                <div class="alert alert-{{ category if category != 'error' else 'danger' }}">{{ message }}</div>
+            {% endfor %}
+        {% endif %}
+    {% endwith %}
+    <div class="table-responsive">
+        <table class="table table-striped align-middle advert-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Link</th>
+                    <th>User</th>
+                    <th>Status</th>
+                    <th>Created</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ad in adverts %}
+                <tr>
+                    <td style="width:90px;">
+                        {% if ad['image'] %}
+                        <img src="{{ url_for('static', filename=ad['image']) }}" alt="Ad Image" class="admin-ad-img">
+                        {% else %}
+                        <span class="text-muted">No image</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ ad['title'] }}</td>
+                    <td style="max-width:220px;">{{ ad['description'] }}</td>
+                    <td><a href="{{ ad['link'] }}" target="_blank">Visit</a></td>
+                    <td>{{ ad['username'] }}</td>
+                    <td>
+                        {% if ad['status'] == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif ad['status'] == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ ad['created_at'][:19] }}</td>
+                    <td>
+                        {% if ad['status'] == 'pending' %}
+                        <form action="{{ url_for('approve_advert', advert_id=ad['id']) }}" method="post" style="display:inline-block;">
+                            <button type="submit" class="btn btn-success btn-sm">Approve</button>
+                        </form>
+                        <form action="{{ url_for('reject_advert', advert_id=ad['id']) }}" method="post" style="display:inline-block;">
+                            <button type="submit" class="btn btn-danger btn-sm">Reject</button>
+                        </form>
+                        {% else %}
+                        <span class="text-muted">—</span>
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.admin-adverts-header {
+    margin-bottom: 3rem;
+}
+.advert-table th, .advert-table td {
+    vertical-align: middle;
+    text-align: center;
+}
+.admin-ad-img {
+    width: 70px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.badge.bg-warning {
+    background: #ffe082 !important;
+    color: #856404 !important;
+}
+.badge.bg-success {
+    background: #2ecc71 !important;
+}
+.badge.bg-danger {
+    background: #e74c3c !important;
+}
+.btn-sm {
+    padding: 0.3rem 0.8rem;
+    font-size: 0.95rem;
+    border-radius: 18px;
+    margin: 0 2px;
+}
+</style>
+{% endblock %} 

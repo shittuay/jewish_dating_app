@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Buy Credits - Jewish Dating App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="buy-credits-header text-center mb-5">
+        <h1 class="display-4 mb-3">Buy Ad Credits</h1>
+        <p class="lead text-muted">Purchase credits to run your adverts. 1 credit = 1 click or 1 view (customize as needed).</p>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="buy-credits-card p-4">
+                <form id="credit-form">
+                    <div class="form-group mb-4">
+                        <label for="credit-amount" class="form-label">Select Credit Amount</label>
+                        <select id="credit-amount" class="form-select" required>
+                            <option value="100">100 credits ($10)</option>
+                            <option value="500">500 credits ($45)</option>
+                            <option value="1000">1000 credits ($80)</option>
+                        </select>
+                    </div>
+                </form>
+                <div id="paypal-button-container" class="mt-4"></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.buy-credits-header {
+    margin-bottom: 3rem;
+}
+.buy-credits-card {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+}
+.form-label {
+    color: #2c3e50;
+    font-weight: 500;
+}
+.form-select {
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    padding: 0.9rem 1.1rem;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+}
+</style>
+
+<!-- PayPal Smart Buttons -->
+<script src="https://www.paypal.com/sdk/js?client-id=YOUR_PAYPAL_CLIENT_ID&currency=USD"></script>
+<script>
+function getPrice(credits) {
+    if (credits == 100) return 10;
+    if (credits == 500) return 45;
+    if (credits == 1000) return 80;
+    return 10;
+}
+
+let selectedCredits = 100;
+let selectedPrice = getPrice(selectedCredits);
+
+document.addEventListener('DOMContentLoaded', function() {
+    const creditSelect = document.getElementById('credit-amount');
+    creditSelect.addEventListener('change', function() {
+        selectedCredits = parseInt(this.value);
+        selectedPrice = getPrice(selectedCredits);
+        // Re-render PayPal button with new price
+        renderPayPalButton();
+    });
+    renderPayPalButton();
+});
+
+function renderPayPalButton() {
+    // Remove any existing buttons
+    const container = document.getElementById('paypal-button-container');
+    container.innerHTML = '';
+    paypal.Buttons({
+        createOrder: function(data, actions) {
+            return actions.order.create({
+                purchase_units: [{
+                    amount: {
+                        value: selectedPrice.toFixed(2)
+                    },
+                    description: selectedCredits + ' Ad Credits'
+                }]
+            });
+        },
+        onApprove: function(data, actions) {
+            return actions.order.capture().then(function(details) {
+                // Send payment info to backend to update balance
+                fetch('/paypal_webhook', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        orderID: data.orderID,
+                        credits: selectedCredits,
+                        amount: selectedPrice
+                    })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Payment successful! Your credits have been added.');
+                        window.location.href = '/my_adverts';
+                    } else {
+                        alert('Payment processed, but there was an error updating your credits. Please contact support.');
+                    }
+                })
+                .catch(() => {
+                    alert('Payment processed, but there was an error updating your credits. Please contact support.');
+                });
+            });
+        }
+    }).render('#paypal-button-container');
+}
+</script>
+{% endblock %} 

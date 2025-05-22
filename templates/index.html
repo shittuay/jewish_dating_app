@@ -4,39 +4,59 @@
 
 {% block content %}
 {% if g.user %}
-<div class="dashboard-hero">
-    <div class="dashboard-card">
-        <div class="dashboard-header">
-            <img src="{{ url_for('static', filename='uploads/' + (profile.profile_picture if profile and profile.profile_picture else 'default_avatar.png')) }}" class="dashboard-avatar" alt="Profile Picture">
-            <h1>Welcome, <span class="username">{{ g.user['username']|capitalize }}</span>!</h1>
-            <p class="dashboard-subtitle">Find your perfect match in the Jewish community</p>
+<div class="dashboard-layout-with-adverts">
+    <div class="side-advert left-advert d-none d-lg-flex">
+        {% if left_ad %}
+        <a href="{{ url_for('ad_click', ad_id=left_ad['id']) }}" target="_blank">
+            <img src="{{ url_for('static', filename=left_ad['image']) }}" alt="Advert" class="side-advert-img">
+        </a>
+        {% else %}
+        <img src="{{ url_for('static', filename='adverts/premium_membership.jpg') }}" alt="Advert" class="side-advert-img">
+        {% endif %}
+    </div>
+    <div class="dashboard-hero">
+        <div class="dashboard-card">
+            <div class="dashboard-header">
+                <img src="{{ url_for('static', filename='uploads/' + (profile.profile_picture if profile and profile.profile_picture else 'default_avatar.png')) }}" class="dashboard-avatar" alt="Profile Picture">
+                <h1>Welcome, <span class="username">{{ g.user['username']|capitalize }}</span>!</h1>
+                <p class="dashboard-subtitle">Find your perfect match in the Jewish community</p>
+            </div>
+            <div class="dashboard-actions">
+                <div class="dashboard-action-card">
+                    <i class="fas fa-user-circle"></i>
+                    <h3>My Profile</h3>
+                    <p>Update your profile and preferences</p>
+                    <a href="{{ url_for('profile') }}" class="btn btn-primary">View Profile</a>
+                </div>
+                <div class="dashboard-action-card">
+                    <i class="fas fa-search"></i>
+                    <h3>Browse Profiles</h3>
+                    <p>Discover potential matches</p>
+                    <a href="{{ url_for('browse_profiles') }}" class="btn btn-primary">Start Browsing</a>
+                </div>
+                <div class="dashboard-action-card">
+                    <i class="fas fa-heart"></i>
+                    <h3>My Likes</h3>
+                    <p>View your likes and matches</p>
+                    <a href="{{ url_for('my_likes') }}" class="btn btn-primary">View Likes</a>
+                </div>
+                <div class="dashboard-action-card">
+                    <i class="fas fa-comments"></i>
+                    <h3>Messages</h3>
+                    <p>Chat with your matches</p>
+                    <a href="{{ url_for('messages') }}" class="btn btn-primary">View Messages</a>
+                </div>
+            </div>
         </div>
-        <div class="dashboard-actions">
-            <div class="dashboard-action-card">
-                <i class="fas fa-user-circle"></i>
-                <h3>My Profile</h3>
-                <p>Update your profile and preferences</p>
-                <a href="{{ url_for('profile') }}" class="btn btn-primary">View Profile</a>
-            </div>
-            <div class="dashboard-action-card">
-                <i class="fas fa-search"></i>
-                <h3>Browse Profiles</h3>
-                <p>Discover potential matches</p>
-                <a href="{{ url_for('browse_profiles') }}" class="btn btn-primary">Start Browsing</a>
-            </div>
-            <div class="dashboard-action-card">
-                <i class="fas fa-heart"></i>
-                <h3>My Likes</h3>
-                <p>View your likes and matches</p>
-                <a href="{{ url_for('my_likes') }}" class="btn btn-primary">View Likes</a>
-            </div>
-            <div class="dashboard-action-card">
-                <i class="fas fa-comments"></i>
-                <h3>Messages</h3>
-                <p>Chat with your matches</p>
-                <a href="{{ url_for('messages') }}" class="btn btn-primary">View Messages</a>
-            </div>
-        </div>
+    </div>
+    <div class="side-advert right-advert d-none d-lg-flex">
+        {% if right_ad %}
+        <a href="{{ url_for('ad_click', ad_id=right_ad['id']) }}" target="_blank">
+            <img src="{{ url_for('static', filename=right_ad['image']) }}" alt="Advert" class="side-advert-img">
+        </a>
+        {% else %}
+        <img src="{{ url_for('static', filename='adverts/jewish_event.jpg') }}" alt="Advert" class="side-advert-img">
+        {% endif %}
     </div>
 </div>
 {% else %}
@@ -110,6 +130,58 @@
 
 {% block extra_css %}
 <style>
+.dashboard-layout-with-adverts {
+    display: flex;
+    flex-direction: row;
+    justify-content: center;
+    align-items: flex-start;
+    gap: 2rem;
+}
+.side-advert {
+    width: 140px;
+    min-width: 120px;
+    max-width: 160px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    position: sticky;
+    top: 100px;
+    z-index: 10;
+}
+.side-advert-img {
+    width: 100%;
+    height: 420px;
+    object-fit: cover;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    margin-bottom: 1rem;
+    transition: transform 0.18s, box-shadow 0.18s;
+}
+.side-advert-img:hover {
+    transform: scale(1.04) translateY(-4px);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.13);
+}
+@media (max-width: 1200px) {
+    .dashboard-layout-with-adverts {
+        gap: 1rem;
+    }
+    .side-advert {
+        width: 90px;
+        min-width: 80px;
+    }
+    .side-advert-img {
+        height: 260px;
+    }
+}
+@media (max-width: 991px) {
+    .side-advert {
+        display: none !important;
+    }
+    .dashboard-layout-with-adverts {
+        flex-direction: column;
+        align-items: stretch;
+    }
+}
 .dashboard-hero {
     min-height: 100vh;
     background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%);

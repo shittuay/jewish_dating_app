@@ -1,0 +1,74 @@
+{% extends "base.html" %}
+
+{% block title %}Submit an Advert - Jewish Dating App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="submit-advert-header text-center mb-5">
+        <h1 class="display-4 mb-3">Create Your Advert</h1>
+        <p class="lead text-muted">Promote your product, service, or event to our community. Your advert will be reviewed before going live.</p>
+    </div>
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-6">
+            <form action="{{ url_for('submit_advert') }}" method="post" enctype="multipart/form-data" class="advert-form">
+                <div class="form-group mb-4">
+                    <label for="title" class="form-label">Advert Title</label>
+                    <input type="text" name="title" id="title" class="form-control" required maxlength="80" placeholder="e.g. Jewish Singles Event">
+                </div>
+                <div class="form-group mb-4">
+                    <label for="description" class="form-label">Description</label>
+                    <textarea name="description" id="description" class="form-control" rows="4" required maxlength="300" placeholder="Describe your product, service, or event..."></textarea>
+                </div>
+                <div class="form-group mb-4">
+                    <label for="link" class="form-label">Link (where users go when they click your ad)</label>
+                    <input type="url" name="link" id="link" class="form-control" required placeholder="https://yourwebsite.com">
+                </div>
+                <div class="form-group mb-4">
+                    <label for="image" class="form-label">Image (recommended size: 600x800px or vertical)</label>
+                    <input type="file" name="image" id="image" class="form-control" accept="image/*" required>
+                </div>
+                <button type="submit" class="btn btn-primary w-100">Submit Advert</button>
+            </form>
+        </div>
+    </div>
+</div>
+
+<style>
+.submit-advert-header {
+    margin-bottom: 3rem;
+}
+.advert-form {
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.10);
+    padding: 2.5rem 2rem 2rem 2rem;
+}
+.form-label {
+    color: #2c3e50;
+    font-weight: 500;
+}
+.form-control {
+    border-radius: 10px;
+    border: 1px solid #e9ecef;
+    padding: 0.9rem 1.1rem;
+    font-size: 1.05rem;
+    margin-bottom: 0.5rem;
+}
+.form-control:focus {
+    border-color: #4a90e2;
+    box-shadow: 0 0 0 0.15rem rgba(74,144,226,0.12);
+}
+.btn-primary {
+    border-radius: 25px;
+    font-weight: 500;
+    padding: 0.7rem 1.5rem;
+    font-size: 1.1rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: background 0.2s, transform 0.2s;
+}
+.btn-primary:hover {
+    background: #357abd;
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,102 @@
+{% extends "base.html" %}
+
+{% block title %}My Adverts - Jewish Dating App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="my-adverts-header text-center mb-5">
+        <h1 class="display-4 mb-3">My Adverts</h1>
+        <p class="lead text-muted">Track your adverts, see their status, and monitor performance.</p>
+        <div class="mb-3">
+            <span class="badge bg-info text-dark" style="font-size:1.1rem;">Balance: {{ g.user['balance'] }} credits</span>
+        </div>
+        <a href="{{ url_for('buy_credits') }}" class="btn btn-success mt-2 me-2">Buy Credits</a>
+        <a href="{{ url_for('submit_advert') }}" class="btn btn-primary mt-2">+ Create New Advert</a>
+    </div>
+    <div class="table-responsive">
+        <table class="table table-striped align-middle my-advert-table">
+            <thead>
+                <tr>
+                    <th>Image</th>
+                    <th>Title</th>
+                    <th>Description</th>
+                    <th>Link</th>
+                    <th>Status</th>
+                    <th>Views</th>
+                    <th>Clicks</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for ad in adverts %}
+                <tr>
+                    <td style="width:90px;">
+                        {% if ad['image'] %}
+                        <img src="{{ url_for('static', filename=ad['image']) }}" alt="Ad Image" class="my-ad-img">
+                        {% else %}
+                        <span class="text-muted">No image</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ ad['title'] }}</td>
+                    <td style="max-width:220px;">{{ ad['description'] }}</td>
+                    <td><a href="{{ ad['link'] }}" target="_blank">Visit</a></td>
+                    <td>
+                        {% if ad['status'] == 'pending' %}
+                            <span class="badge bg-warning text-dark">Pending</span>
+                        {% elif ad['status'] == 'approved' %}
+                            <span class="badge bg-success">Approved</span>
+                        {% else %}
+                            <span class="badge bg-danger">Rejected</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ ad['views'] }}</td>
+                    <td>{{ ad['clicks'] }}</td>
+                    <td>{{ ad['created_at'][:19] }}</td>
+                </tr>
+                {% else %}
+                <tr><td colspan="8" class="text-center text-muted">You have not submitted any adverts yet.</td></tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<style>
+.my-adverts-header {
+    margin-bottom: 3rem;
+}
+.my-advert-table th, .my-advert-table td {
+    vertical-align: middle;
+    text-align: center;
+}
+.my-ad-img {
+    width: 70px;
+    height: 90px;
+    object-fit: cover;
+    border-radius: 10px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.badge.bg-warning {
+    background: #ffe082 !important;
+    color: #856404 !important;
+}
+.badge.bg-success {
+    background: #2ecc71 !important;
+}
+.badge.bg-danger {
+    background: #e74c3c !important;
+}
+.btn-primary {
+    border-radius: 25px;
+    font-weight: 500;
+    padding: 0.7rem 1.5rem;
+    font-size: 1.05rem;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.08);
+    transition: background 0.2s, transform 0.2s;
+}
+.btn-primary:hover {
+    background: #357abd;
+    transform: translateY(-2px);
+}
+</style>
+{% endblock %} 

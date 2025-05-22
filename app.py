@@ -7,6 +7,7 @@ from functools import wraps
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import shutil
+import random
 
 # Create the Flask application
 app = Flask(__name__, instance_relative_config=True)
@@ -45,7 +46,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL
+            password TEXT NOT NULL,
+            balance INTEGER NOT NULL DEFAULT 0
         );
     ''')
     conn.execute('''
@@ -104,6 +106,32 @@ def init_db():
             FOREIGN KEY (user_id) REFERENCES users(id)
         );
     ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS adverts (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            title TEXT NOT NULL,
+            description TEXT NOT NULL,
+            image TEXT,
+            link TEXT NOT NULL,
+            status TEXT NOT NULL DEFAULT 'pending',
+            views INTEGER NOT NULL DEFAULT 0,
+            clicks INTEGER NOT NULL DEFAULT 0,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            approved_at DATETIME
+        );
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS payments (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            amount INTEGER NOT NULL,
+            payment_id TEXT,
+            status TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+    ''')
     conn.commit()
     conn.close()
 
@@ -134,6 +162,15 @@ def login_required(view):
         return view(*args, **kwargs)
     return wrapped_view
 
+# --- Admin check decorator ---
+def admin_required(view):
+    @wraps(view)
+    def wrapped_view(*args, **kwargs):
+        if not g.user or g.user['id'] != 1:
+            abort(403)
+        return view(*args, **kwargs)
+    return wrapped_view
+
 # --- ROUTES ---
 
 @app.route('/')
@@ -144,8 +181,21 @@ def index():
             'SELECT * FROM profiles WHERE user_id = ?', (g.user['id'],)
         ).fetchone()
         reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
+
+        # Get two random approved adverts for side banners - Rolled back to previous logic
+        adverts = conn.execute('SELECT * FROM adverts WHERE status = "approved"').fetchall()
+        left_ad = right_ad = None
+        if adverts:
+            ads = random.sample(adverts, min(2, len(adverts)))
+            left_ad = ads[0]
+            if len(ads) > 1:
+                right_ad = ads[1]
+            else:
+                right_ad = ads[0] # Use the same ad for both if only one exists
+            # Note: View/Click tracking is removed in this rollback
+
         conn.close()
-        return render_template('index.html', profile=profile, reviews=reviews)
+        return render_template('index.html', profile=profile, reviews=reviews, left_ad=left_ad, right_ad=right_ad)
     else:
         conn = get_db_connection()
         reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
@@ -749,6 +799,133 @@ def chatbot():
     else:
         reply = "Thank you for your message! Our team will get back to you soon, or you can email support@jewishdating.com."
     return jsonify({'reply': reply})
+
+@app.route('/adverts')
+def adverts():
+    adverts = [
+        {
+            'image': url_for('static', filename='adverts/jewish_event.jpg'),
+            'title': 'Jewish Singles Event',
+            'description': 'Join our upcoming singles mixer in NYC! Meet new people and enjoy a fun evening.',
+            'link': '#'
+        },
+        {
+            'image': url_for('static', filename='adverts/premium_membership.jpg'),
+            'title': 'Upgrade to Premium',
+            'description': 'Unlock unlimited likes, see who viewed your profile, and more with Premium Membership.',
+            'link': '#'
+        },
+        {
+            'image': url_for('static', filename='adverts/app_promo.jpg'),
+            'title': 'Download Our App',
+            'description': 'Get the Jewish Dating App on your phone for the best experience, anytime, anywhere.',
+            'link': '#'
+        },
+        {
+            'image': url_for('static', filename='adverts/success_story.jpg'),
+            'title': 'Success Stories',
+            'description': 'Read how real couples found love on our platform. Your story could be next!',
+            'link': '#'
+        }
+    ]
+    return render_template('adverts.html', adverts=adverts)
+
+@app.route('/submit_advert', methods=['GET', 'POST'])
+@login_required
+def submit_advert():
+    if request.method == 'POST':
+        title = request.form['title']
+        description = request.form['description']
+        link = request.form['link']
+        image = None
+        if 'image' in request.files:
+            file = request.files['image']
+            if file and file.filename and allowed_file(file.filename):
+                filename = secure_filename(f"ad_{g.user['id']}_{int(datetime.datetime.now().timestamp())}_{file.filename}")
+                image_folder = os.path.join(app.config['UPLOAD_FOLDER'], 'adverts')
+                os.makedirs(image_folder, exist_ok=True)
+                file.save(os.path.join(image_folder, filename))
+                image = f"adverts/{filename}"
+        if not title or not description or not link:
+            flash('All fields are required.', 'error')
+            return redirect(url_for('submit_advert'))
+        conn = get_db_connection()
+        conn.execute('''INSERT INTO adverts (user_id, title, description, image, link, status) VALUES (?, ?, ?, ?, ?, ?)''',
+                     (g.user['id'], title, description, image, link, 'pending'))
+        conn.commit()
+        conn.close()
+        flash('Your advert has been submitted for review!', 'success')
+        return redirect(url_for('adverts'))
+    return render_template('submit_advert.html')
+
+@app.route('/admin/adverts')
+@admin_required
+def admin_adverts():
+    conn = get_db_connection()
+    adverts = conn.execute('''
+        SELECT a.*, u.username FROM adverts a
+        JOIN users u ON a.user_id = u.id
+        ORDER BY a.created_at DESC
+    ''').fetchall()
+    conn.close()
+    return render_template('admin_adverts.html', adverts=adverts)
+
+@app.route('/admin/adverts/approve/<int:advert_id>', methods=['POST'])
+@admin_required
+def approve_advert(advert_id):
+    conn = get_db_connection()
+    conn.execute('''UPDATE adverts SET status = 'approved', approved_at = CURRENT_TIMESTAMP WHERE id = ?''', (advert_id,))
+    conn.commit()
+    conn.close()
+    flash('Advert approved!', 'success')
+    return redirect(url_for('admin_adverts'))
+
+@app.route('/admin/adverts/reject/<int:advert_id>', methods=['POST'])
+@admin_required
+def reject_advert(advert_id):
+    conn = get_db_connection()
+    conn.execute('''UPDATE adverts SET status = 'rejected' WHERE id = ?''', (advert_id,))
+    conn.commit()
+    conn.close()
+    flash('Advert rejected.', 'info')
+    return redirect(url_for('admin_adverts'))
+
+@app.route('/my_adverts')
+@login_required
+def my_adverts():
+    conn = get_db_connection()
+    adverts = conn.execute('''
+        SELECT * FROM adverts WHERE user_id = ? ORDER BY created_at DESC
+    ''', (g.user['id'],)).fetchall()
+    conn.close()
+    return render_template('my_adverts.html', adverts=adverts)
+
+@app.route('/buy_credits')
+@login_required
+def buy_credits():
+    return render_template('buy_credits.html')
+
+@app.route('/paypal_webhook', methods=['POST'])
+@login_required
+def paypal_webhook():
+    data = request.get_json()
+    order_id = data.get('orderID')
+    credits = int(data.get('credits', 0))
+    amount = int(data.get('amount', 0))
+    if not order_id or not credits or not amount:
+        return jsonify({'success': False, 'error': 'Missing data'}), 400
+    # Add credits to user balance and log payment
+    conn = get_db_connection()
+    try:
+        conn.execute('UPDATE users SET balance = balance + ? WHERE id = ?', (credits, g.user['id']))
+        conn.execute('INSERT INTO payments (user_id, amount, payment_id, status) VALUES (?, ?, ?, ?)',
+                     (g.user['id'], amount, order_id, 'completed'))
+        conn.commit()
+        conn.close()
+        return jsonify({'success': True})
+    except Exception as e:
+        conn.close()
+        return jsonify({'success': False, 'error': str(e)}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
