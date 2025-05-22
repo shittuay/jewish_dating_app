@@ -41,10 +41,11 @@
         {% if mutual_likes %}
             {% for profile in mutual_likes %}
                 <div class="profile-card">
-                    <div class="profile-card-image"> {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_picture) }}" alt="{{ profile.username }}">
+                    <div class="profile-card-image">
+                        {% if profile.profile_picture %}
+                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="{{ profile.username }}">
                         {% else %}
-                            <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
+                            <div class="profile-picture-placeholder">No profile picture</div>
                         {% endif %}
                     </div>
                     <div class="profile-info">
@@ -62,10 +63,11 @@
         {% if liked_by_me %}
             {% for profile in liked_by_me %}
                 <div class="profile-card">
-                    <div class="profile-card-image"> {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_picture) }}" alt="{{ profile.username }}">
+                    <div class="profile-card-image">
+                        {% if profile.profile_picture %}
+                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="{{ profile.username }}">
                         {% else %}
-                            <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
+                            <div class="profile-picture-placeholder">No profile picture</div>
                         {% endif %}
                     </div>
                     <div class="profile-info">
@@ -83,10 +85,11 @@
         {% if liked_me %}
             {% for profile in liked_me %}
                 <div class="profile-card">
-                    <div class="profile-card-image"> {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='profile_pics/' + profile.profile_picture) }}" alt="{{ profile.username }}">
+                    <div class="profile-card-image">
+                        {% if profile.profile_picture %}
+                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="{{ profile.username }}">
                         {% else %}
-                            <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
+                            <div class="profile-picture-placeholder">No profile picture</div>
                         {% endif %}
                     </div>
                     <div class="profile-info">

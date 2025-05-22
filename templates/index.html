@@ -65,6 +65,39 @@
                 </div>
             </div>
         </div>
+        <!-- Reviews Section -->
+        <div class="reviews-section">
+            <h2>What Our Members Say</h2>
+            <div class="reviews-grid">
+                {% for review in reviews %}
+                <div class="review-card">
+                    <p class="review-text">“{{ review['review_text'] }}”</p>
+                    <div class="review-user">
+                        {% if review['photo'] %}
+                        <img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="{{ review['name'] }}">
+                        {% else %}
+                        <img src="https://ui-avatars.com/api/?name={{ review['name']|urlencode }}&background=4a90e2&color=fff&rounded=true" alt="{{ review['name'] }}">
+                        {% endif %}
+                        <span>{{ review['name'] }}{% if review['location'] %}, {{ review['location'] }}{% endif %}</span>
+                    </div>
+                </div>
+                {% else %}
+                <p style="color:#888;">No reviews yet. Be the first to share your experience!</p>
+                {% endfor %}
+            </div>
+        </div>
+        <!-- Review Submission Form -->
+        <div class="review-form-section">
+            <h3>Share Your Experience</h3>
+            <form action="{{ url_for('submit_review') }}" method="post" enctype="multipart/form-data" class="review-form">
+                <input type="text" name="name" placeholder="Your Name" required class="form-control">
+                <input type="text" name="location" placeholder="Your Location" class="form-control">
+                <textarea name="review_text" placeholder="Your Review" required class="form-control"></textarea>
+                <input type="file" name="photo" accept="image/*" class="form-control">
+                <button type="submit" class="btn btn-primary">Submit Review</button>
+            </form>
+            <p style="font-size:0.95em; color:#888; margin-top:0.5rem;">Your review will be visible after admin approval.</p>
+        </div>
     </div>
 </div>
 {% endif %}
@@ -171,6 +204,78 @@
 @media (max-width: 900px) {
     .home-info-box { padding: 1.2rem 0.5rem; }
     .home-features { flex-direction: column; gap: 0.5rem; }
+}
+.reviews-section {
+    margin: 3rem auto 0 auto;
+    max-width: 900px;
+    background: rgba(255,255,255,0.92);
+    border-radius: 1.5rem;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    text-align: center;
+}
+.reviews-section h2 {
+    color: #2c3e50;
+    font-size: 2rem;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+.reviews-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 2rem;
+    justify-content: center;
+}
+.review-card {
+    background: #f8f9fa;
+    border-radius: 1rem;
+    padding: 1.5rem 1rem 1rem 1rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    max-width: 260px;
+    min-width: 200px;
+    text-align: center;
+    flex: 1 1 220px;
+}
+.review-text {
+    font-style: italic;
+    color: #333;
+    margin-bottom: 1rem;
+}
+.review-user {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.7rem;
+}
+.review-user img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+    border: 2px solid #4a90e2;
+}
+.review-user span {
+    color: #2c3e50;
+    font-weight: 500;
+}
+.review-form-section {
+    margin: 3rem auto 0 auto;
+    max-width: 500px;
+    background: rgba(255,255,255,0.97);
+    border-radius: 1.5rem;
+    padding: 2rem 2.5rem;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.10);
+    text-align: center;
+}
+.review-form-section h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+}
+.review-form input,
+.review-form textarea {
+    margin-bottom: 1rem;
 }
 </style>
 {% endblock %} 

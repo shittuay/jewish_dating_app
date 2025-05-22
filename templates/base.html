@@ -8,6 +8,17 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
     <style>
+        html, body {
+            height: 100%;
+        }
+        body {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .main-content {
+            flex: 1 0 auto;
+        }
         :root {
             --primary-color: #4a90e2;
             --secondary-color: #2c3e50;
@@ -204,6 +215,60 @@
                 margin-top: 120px;
             }
         }
+
+        .site-footer {
+            background: #2c3e50;
+            color: #fff;
+            padding: 2.5rem 0 1.2rem 0;
+            font-size: 1rem;
+            margin-top: 0;
+        }
+        .footer-top-text {
+            max-width: 900px;
+            margin: 0 auto 1.5rem auto;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #f8f9fa;
+        }
+        .footer-links {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 2.5rem;
+            margin-bottom: 1.5rem;
+        }
+        .footer-links-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            min-width: 180px;
+        }
+        .footer-links a {
+            color: #b0c4de;
+            text-decoration: none;
+            transition: color 0.2s;
+            font-size: 1rem;
+        }
+        .footer-links a:hover {
+            color: #fff;
+            text-decoration: underline;
+        }
+        .footer-bottom {
+            text-align: center;
+            color: #b0c4de;
+            font-size: 0.95rem;
+            margin-top: 1.5rem;
+        }
+        @media (max-width: 700px) {
+            .footer-links {
+                flex-direction: column;
+                gap: 1.2rem;
+            }
+            .footer-links-group {
+                min-width: 0;
+                align-items: center;
+            }
+        }
     </style>
     {% block extra_css %}{% endblock %}
 </head>
@@ -239,9 +304,38 @@
                 {% endfor %}
             {% endif %}
         {% endwith %}
-
         {% block content %}{% endblock %}
     </main>
+
+    <footer class="site-footer">
+        <div class="footer-top-text">
+            If you're serious about finding the relationship you want, The Jewish Dating is for you. With one of the largest networks of singles in the U.S., finding a match has never been easier. Our team of passionate, experienced, and qualified staff is dedicated to our client's success. Your love life is our business.
+        </div>
+        <div class="footer-links">
+            <div class="footer-links-group">
+                <a href="/">Home</a>
+                <a href="#">About Us</a>
+                <a href="#">Our Proven Process</a>
+                <a href="#">Client Stories</a>
+                <a href="#">FAQ</a>
+                <a href="/privacy">Privacy Policy</a>
+                <a href="/terms">Terms of Use</a>
+            </div>
+            <div class="footer-links-group">
+                <a href="#">Christian Singles</a>
+                <a href="#">Mature Singles</a>
+                <a href="#">Divorced</a>
+                <a href="#">Singles Over 50</a>
+                <a href="#">Single Professionals</a>
+                <a href="#">Single Men</a>
+                <a href="#">Single Women</a>
+                <a href="#">Widowed Singles</a>
+            </div>
+        </div>
+        <div class="footer-bottom">
+            &copy; 2025 Jewish Dating App. All rights reserved.
+        </div>
+    </footer>
 
     {% block extra_js %}{% endblock %}
 </body>

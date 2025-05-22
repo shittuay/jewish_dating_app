@@ -6,6 +6,7 @@ import hashlib
 from functools import wraps
 import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
+import shutil
 
 # Create the Flask application
 app = Flask(__name__, instance_relative_config=True)
@@ -83,6 +84,26 @@ def init_db():
             FOREIGN KEY (liked_id) REFERENCES users(id)
         );
     ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS reviews (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            name TEXT NOT NULL,
+            location TEXT,
+            review_text TEXT NOT NULL,
+            photo TEXT,
+            status TEXT NOT NULL,
+            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        );
+    ''')
+    conn.execute('''
+        CREATE TABLE IF NOT EXISTS user_photos (
+            id INTEGER PRIMARY KEY AUTOINCREMENT,
+            user_id INTEGER NOT NULL,
+            filename TEXT NOT NULL,
+            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+            FOREIGN KEY (user_id) REFERENCES users(id)
+        );
+    ''')
     conn.commit()
     conn.close()
 
@@ -117,7 +138,10 @@ def login_required(view):
 
 @app.route('/')
 def index():
-    return render_template('index.html')
+    conn = get_db_connection()
+    reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
+    conn.close()
+    return render_template('index.html', reviews=reviews)
 
 @app.route('/register', methods=('GET', 'POST'))
 def register():
@@ -309,9 +333,10 @@ def profile():
     profile_data = conn.execute(
         'SELECT age, bio, observance_level, kosher_level, shabbat_observance, synagogue_affiliation, profile_picture FROM profiles WHERE user_id = ?', (user_id,)
     ).fetchone()
+    photos = conn.execute('SELECT id, filename FROM user_photos WHERE user_id = ? ORDER BY uploaded_at DESC', (user_id,)).fetchall()
     conn.close()
 
-    return render_template('profile.html', profile=profile_data)
+    return render_template('profile.html', profile=profile_data, gallery_photos=photos)
 
 # --- BROWSE PROFILES ROUTE (MODIFIED for likes) ---
 @app.route('/browse')
@@ -492,7 +517,7 @@ def my_likes():
 
     # Profiles I (current_user) have liked
     liked_by_me = conn.execute(
-        '''SELECT u.id AS user_id, u.username, p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation
+        '''SELECT u.id AS user_id, u.username, p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation, p.profile_picture
            FROM likes l
            JOIN users u ON l.liked_id = u.id
            JOIN profiles p ON u.id = p.user_id
@@ -503,7 +528,7 @@ def my_likes():
 
     # Profiles that have liked me (current_user)
     liked_me = conn.execute(
-        '''SELECT u.id AS user_id, u.username, p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation
+        '''SELECT u.id AS user_id, u.username, p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation, p.profile_picture
            FROM likes l
            JOIN users u ON l.liker_id = u.id
            JOIN profiles p ON u.id = p.user_id
@@ -513,11 +538,8 @@ def my_likes():
     ).fetchall()
     
     # Check for mutual likes (matches!)
-    # A mutual like occurs when liker_id (A) liked liked_id (B), AND liker_id (B) liked liked_id (A)
-    # We can get this by finding common users between liked_by_me and liked_me lists.
-    # Or, with a more direct SQL query:
     mutual_likes = conn.execute(
-        '''SELECT u.id AS user_id, u.username, p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation
+        '''SELECT u.id AS user_id, u.username, p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation, p.profile_picture
            FROM likes l1
            JOIN likes l2 ON l1.liker_id = l2.liked_id AND l1.liked_id = l2.liker_id
            JOIN users u ON l1.liked_id = u.id
@@ -619,6 +641,76 @@ def conversation(user_id):
     conn.close()
 
     return render_template('conversation.html', messages=messages, other_user=other_user)
+
+# Review submission route
+@app.route('/submit_review', methods=['POST'])
+def submit_review():
+    name = request.form['name']
+    location = request.form.get('location', '')
+    review_text = request.form['review_text']
+    photo = None
+    if 'photo' in request.files:
+        file = request.files['photo']
+        if file and file.filename and allowed_file(file.filename):
+            filename = secure_filename(f"review_{int(datetime.datetime.now().timestamp())}_{file.filename}")
+            file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
+            photo = filename
+    conn = get_db_connection()
+    conn.execute(
+        'INSERT INTO reviews (name, location, review_text, photo, status) VALUES (?, ?, ?, ?, ?)',
+        (name, location, review_text, photo, 'pending')
+    )
+    conn.commit()
+    conn.close()
+    flash('Thank you for your review! It will appear after admin approval.', 'success')
+    return redirect(url_for('index'))
+
+# Helper: Ensure user-specific upload folder exists
+def get_user_upload_folder(user_id):
+    folder = os.path.join(app.config['UPLOAD_FOLDER'], f'user_{user_id}')
+    os.makedirs(folder, exist_ok=True)
+    return folder
+
+# Upload gallery photo
+@app.route('/upload_photo', methods=['POST'])
+@login_required
+def upload_photo():
+    user_id = g.user['id']
+    if 'photo' not in request.files:
+        flash('No file part', 'error')
+        return redirect(url_for('profile'))
+    file = request.files['photo']
+    if file and file.filename and allowed_file(file.filename):
+        folder = get_user_upload_folder(user_id)
+        filename = secure_filename(f"{user_id}_{int(datetime.datetime.now().timestamp())}_{file.filename}")
+        file.save(os.path.join(folder, filename))
+        conn = get_db_connection()
+        conn.execute('INSERT INTO user_photos (user_id, filename) VALUES (?, ?)', (user_id, f'user_{user_id}/{filename}'))
+        conn.commit()
+        conn.close()
+        flash('Photo uploaded!', 'success')
+    else:
+        flash('Invalid file type.', 'error')
+    return redirect(url_for('profile'))
+
+# Delete gallery photo
+@app.route('/delete_photo/<int:photo_id>', methods=['POST'])
+@login_required
+def delete_photo(photo_id):
+    user_id = g.user['id']
+    conn = get_db_connection()
+    photo = conn.execute('SELECT filename FROM user_photos WHERE id = ? AND user_id = ?', (photo_id, user_id)).fetchone()
+    if photo:
+        file_path = os.path.join(app.config['UPLOAD_FOLDER'], photo['filename'])
+        if os.path.exists(file_path):
+            os.remove(file_path)
+        conn.execute('DELETE FROM user_photos WHERE id = ?', (photo_id,))
+        conn.commit()
+        flash('Photo deleted.', 'success')
+    else:
+        flash('Photo not found.', 'error')
+    conn.close()
+    return redirect(url_for('profile'))
 
 if __name__ == '__main__':
     app.run(debug=True)

@@ -75,5 +75,77 @@
 
         <button type="submit" class="btn btn-primary">Save Profile</button>
     </form>
+
+    <!-- Gallery Section -->
+    <div class="gallery-section">
+        <h3>My Photo Gallery</h3>
+        <form action="{{ url_for('upload_photo') }}" method="post" enctype="multipart/form-data" class="gallery-upload-form">
+            <input type="file" name="photo" accept="image/*" class="form-control" required>
+            <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">Add Photo</button>
+        </form>
+        <div class="gallery-grid">
+            {% for photo in gallery_photos %}
+            <div class="gallery-photo-card">
+                <img src="{{ url_for('static', filename='uploads/' + photo['filename']) }}" alt="Gallery Photo">
+                <form action="{{ url_for('delete_photo', photo_id=photo['id']) }}" method="post" style="margin-top:0.5rem;">
+                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                </form>
+            </div>
+            {% else %}
+            <p style="color:#888;">No gallery photos yet. Add some beautiful moments!</p>
+            {% endfor %}
+        </div>
+    </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.gallery-section {
+    margin-top: 2.5rem;
+    background: #f8f9fa;
+    border-radius: 1rem;
+    padding: 1.5rem 1rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+}
+.gallery-section h3 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    font-weight: 700;
+    text-align: center;
+}
+.gallery-upload-form {
+    display: flex;
+    gap: 1rem;
+    justify-content: center;
+    margin-bottom: 1.5rem;
+}
+.gallery-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1.5rem;
+    justify-content: center;
+}
+.gallery-photo-card {
+    background: #fff;
+    border-radius: 0.7rem;
+    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+    padding: 0.5rem;
+    text-align: center;
+    max-width: 180px;
+}
+.gallery-photo-card img {
+    width: 160px;
+    height: 160px;
+    object-fit: cover;
+    border-radius: 0.5rem;
+    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+}
+.btn-sm {
+    font-size: 0.95rem;
+    padding: 0.3rem 0.8rem;
+    border-radius: 0.5rem;
+}
+</style>
 {% endblock %}
