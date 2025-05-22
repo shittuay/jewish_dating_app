@@ -1,61 +1,235 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ target_user.username }}'s Profile - Jewish Dating App</title>
-    <style>
-        /* ... (Existing styles) ... */
-        .profile-pic-large { /* New style for large image */
-            text-align: center;
-            margin-bottom: 25px;
-        }
-        .profile-pic-large img {
-            max-width: 200px;
-            max-height: 200px;
-            border-radius: 50%;
-            border: 3px solid #007bff;
-            object-fit: cover;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>{{ target_user.username }}'s Profile</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}<ul class="flash-messages">{% for category, message in messages %}<li class="flash-message {{ category }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
-        {% endwith %}
+{% extends "base.html" %}
 
-        {% if target_profile %}
-            <div class="profile-pic-large"> {% if target_profile.profile_picture %}
-                    <img src="{{ url_for('static', filename='profile_pics/' + target_profile.profile_picture) }}" alt="{{ target_user.username }}">
+{% block title %}{{ target_user.username }}'s Profile - Jewish Dating App{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="profile-view-container">
+        <div class="profile-header text-center mb-5">
+            <div class="profile-image-large">
+                {% if target_profile.profile_picture %}
+                    <img src="{{ url_for('static', filename='uploads/' + target_profile.profile_picture) }}" 
+                         alt="{{ target_user.username }}" 
+                         class="profile-image">
                 {% else %}
-                    <img src="{{ url_for('static', filename='profile_pics/default_avatar.png') }}" alt="No profile picture">
+                    <div class="profile-image-placeholder">
+                        <i class="fas fa-user"></i>
+                    </div>
                 {% endif %}
             </div>
+            <h1 class="display-4 mt-4">{{ target_user.username }}</h1>
+        </div>
 
-            <div class="profile-detail">
-                <strong>Username:</strong> <span>{{ target_user.username }}</span>
-            </div>
-            <div class="profile-detail">
-                <strong>About Me:</strong>
-                <div class="profile-bio">{{ target_profile.bio }}</div>
-            </div>
+        {% if target_profile %}
+            <div class="profile-content">
+                <div class="row">
+                    <div class="col-md-8 mx-auto">
+                        <div class="card profile-details-card">
+                            <div class="card-body">
+                                <div class="profile-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-user-circle"></i> About Me
+                                    </h3>
+                                    <p class="bio-text">{{ target_profile.bio }}</p>
+                                </div>
 
-            <div class="profile-actions">
-                <a href="{{ url_for('conversation', user_id=target_user.id) }}">Send Message</a>
-                <form action="{{ url_for('like_profile', user_id=target_user.id) }}" method="POST" style="display:inline;">
-                    {% if is_liked_by_me %}
-                        <button type="submit" class="unlike-btn">Unlike</button>
-                    {% else %}
-                        <button type="submit" class="like-btn">Like</button>
-                    {% endif %}
-                </form>
+                                <div class="profile-section">
+                                    <h3 class="section-title">
+                                        <i class="fas fa-info-circle"></i> Details
+                                    </h3>
+                                    <div class="details-grid">
+                                        <div class="detail-item">
+                                            <i class="fas fa-birthday-cake"></i>
+                                            <span>{{ target_profile.age }} years old</span>
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <i class="fas fa-star-of-david"></i>
+                                            <span>{{ target_profile.observance_level }}</span>
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <i class="fas fa-utensils"></i>
+                                            <span>{{ target_profile.kosher_level }}</span>
+                                        </div>
+                                        
+                                        <div class="detail-item">
+                                            <i class="fas fa-moon"></i>
+                                            <span>{{ target_profile.shabbat_observance }}</span>
+                                        </div>
+                                        
+                                        {% if target_profile.synagogue_affiliation %}
+                                        <div class="detail-item">
+                                            <i class="fas fa-synagogue"></i>
+                                            <span>{{ target_profile.synagogue_affiliation }}</span>
+                                        </div>
+                                        {% endif %}
+                                    </div>
+                                </div>
+
+                                <div class="profile-actions mt-4">
+                                    <div class="d-flex justify-content-center gap-3">
+                                        <a href="{{ url_for('conversation', user_id=target_user.id) }}" 
+                                           class="btn btn-primary">
+                                            <i class="fas fa-comments"></i> Send Message
+                                        </a>
+                                        
+                                        <form action="{{ url_for('like_profile', user_id=target_user.id) }}" 
+                                              method="POST" 
+                                              class="d-inline">
+                                            {% if is_liked_by_me %}
+                                                <button type="submit" class="btn btn-danger">
+                                                    <i class="fas fa-heart-broken"></i> Unlike
+                                                </button>
+                                            {% else %}
+                                                <button type="submit" class="btn btn-primary">
+                                                    <i class="fas fa-heart"></i> Like
+                                                </button>
+                                            {% endif %}
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         {% else %}
-            <p style="text-align: center; color: #666;">This user has not set up a profile yet.</p>
+            <div class="text-center">
+                <p class="lead text-muted">This user has not set up a profile yet.</p>
+            </div>
         {% endif %}
-        <div class="back-link"><a href="{{ url_for('browse_profiles') }}">Back to Browse</a></div>
+
+        <div class="text-center mt-4">
+            <a href="{{ url_for('browse_profiles') }}" class="btn btn-outline-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Browse
+            </a>
+        </div>
     </div>
-</body>
-</html>
+</div>
+
+<style>
+.profile-view-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.profile-image-large {
+    width: 200px;
+    height: 200px;
+    margin: 0 auto;
+    border-radius: 50%;
+    overflow: hidden;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    border: 4px solid #fff;
+}
+
+.profile-image {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-image-placeholder {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    color: #6c757d;
+    font-size: 4rem;
+}
+
+.profile-details-card {
+    border: none;
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    background: #fff;
+}
+
+.section-title {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.section-title i {
+    color: #007bff;
+    margin-right: 0.5rem;
+}
+
+.bio-text {
+    color: #495057;
+    line-height: 1.6;
+    font-size: 1.1rem;
+}
+
+.details-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    padding: 0.75rem;
+    background: #f8f9fa;
+    border-radius: 8px;
+    transition: transform 0.2s ease;
+}
+
+.detail-item:hover {
+    transform: translateY(-2px);
+    background: #e9ecef;
+}
+
+.detail-item i {
+    width: 24px;
+    margin-right: 0.75rem;
+    color: #007bff;
+    font-size: 1.1rem;
+}
+
+.profile-actions {
+    margin-top: 2rem;
+}
+
+.btn {
+    padding: 0.75rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+.btn-primary, .btn-danger {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover, .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.btn-outline-secondary {
+    border-width: 2px;
+}
+
+.btn-outline-secondary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.gap-3 {
+    gap: 1rem;
+}
+</style>
+{% endblock %}

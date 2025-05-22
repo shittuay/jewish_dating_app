@@ -3,98 +3,346 @@
 {% block title %}Search Profiles - Jewish Dating App{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Search Profiles</h1>
-    
-    <form method="get" class="search-form">
-        <div class="form-group">
-            <label for="min_age">Minimum Age</label>
-            <input type="number" name="min_age" id="min_age" min="18" max="120" value="{{ request.args.get('min_age', '') }}" class="form-control">
-        </div>
-        
-        <div class="form-group">
-            <label for="max_age">Maximum Age</label>
-            <input type="number" name="max_age" id="max_age" min="18" max="120" value="{{ request.args.get('max_age', '') }}" class="form-control">
-        </div>
-        
-        <div class="form-group">
-            <label for="observance_level">Level of Religious Observance</label>
-            <select name="observance_level" id="observance_level" class="form-control">
-                <option value="">Any</option>
-                <option value="Orthodox" {% if request.args.get('observance_level') == 'Orthodox' %}selected{% endif %}>Orthodox</option>
-                <option value="Modern Orthodox" {% if request.args.get('observance_level') == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
-                <option value="Conservative" {% if request.args.get('observance_level') == 'Conservative' %}selected{% endif %}>Conservative</option>
-                <option value="Reform" {% if request.args.get('observance_level') == 'Reform' %}selected{% endif %}>Reform</option>
-                <option value="Reconstructionist" {% if request.args.get('observance_level') == 'Reconstructionist' %}selected{% endif %}>Reconstructionist</option>
-                <option value="Just Jewish" {% if request.args.get('observance_level') == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="kosher_level">Kosher Observance</label>
-            <select name="kosher_level" id="kosher_level" class="form-control">
-                <option value="">Any</option>
-                <option value="Strictly Kosher" {% if request.args.get('kosher_level') == 'Strictly Kosher' %}selected{% endif %}>Strictly Kosher</option>
-                <option value="Mostly Kosher" {% if request.args.get('kosher_level') == 'Mostly Kosher' %}selected{% endif %}>Mostly Kosher</option>
-                <option value="Kosher Style" {% if request.args.get('kosher_level') == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
-                <option value="Not Kosher" {% if request.args.get('kosher_level') == 'Not Kosher' %}selected{% endif %}>Not Kosher</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="shabbat_observance">Shabbat Observance</label>
-            <select name="shabbat_observance" id="shabbat_observance" class="form-control">
-                <option value="">Any</option>
-                <option value="Fully Observant" {% if request.args.get('shabbat_observance') == 'Fully Observant' %}selected{% endif %}>Fully Observant</option>
-                <option value="Partially Observant" {% if request.args.get('shabbat_observance') == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
-                <option value="Not Observant" {% if request.args.get('shabbat_observance') == 'Not Observant' %}selected{% endif %}>Not Observant</option>
-            </select>
-        </div>
-        
-        <div class="form-group">
-            <label for="keyword_search">Keyword Search</label>
-            <input type="text" name="keyword_search" id="keyword_search" value="{{ request.args.get('keyword_search', '') }}" class="form-control" placeholder="Search in bio or synagogue...">
-        </div>
-        
-        <button type="submit" class="btn btn-primary">Search</button>
-    </form>
+<div class="container py-5">
+    <div class="search-header text-center mb-5">
+        <h1 class="display-4 mb-3">Find Your Perfect Match</h1>
+        <p class="lead text-muted">Use our advanced search to find compatible Jewish singles</p>
+    </div>
 
-    <div class="grid">
-        {% for profile in profiles %}
-        <div class="card">
-            <div class="profile-picture-container" style="width: 150px; height: 150px; margin: 0 auto 1rem;">
-                {% if profile.profile_picture %}
-                    <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="Profile Picture" class="profile-picture">
+    <div class="row">
+        <div class="col-md-4">
+            <div class="search-filters-card">
+                <h3 class="filters-title">
+                    <i class="fas fa-filter"></i> Search Filters
+                </h3>
+                <form method="get" class="search-form">
+                    <div class="form-group mb-4">
+                        <label for="min_age" class="form-label">Age Range</label>
+                        <div class="row g-2">
+                            <div class="col">
+                                <input type="number" 
+                                       name="min_age" 
+                                       id="min_age" 
+                                       min="18" 
+                                       max="120" 
+                                       value="{{ request.args.get('min_age', '') }}" 
+                                       class="form-control" 
+                                       placeholder="Min">
+                            </div>
+                            <div class="col">
+                                <input type="number" 
+                                       name="max_age" 
+                                       id="max_age" 
+                                       min="18" 
+                                       max="120" 
+                                       value="{{ request.args.get('max_age', '') }}" 
+                                       class="form-control" 
+                                       placeholder="Max">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="observance_level" class="form-label">Level of Religious Observance</label>
+                        <select name="observance_level" id="observance_level" class="form-select">
+                            <option value="">Any</option>
+                            <option value="Orthodox" {% if request.args.get('observance_level') == 'Orthodox' %}selected{% endif %}>Orthodox</option>
+                            <option value="Modern Orthodox" {% if request.args.get('observance_level') == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
+                            <option value="Conservative" {% if request.args.get('observance_level') == 'Conservative' %}selected{% endif %}>Conservative</option>
+                            <option value="Reform" {% if request.args.get('observance_level') == 'Reform' %}selected{% endif %}>Reform</option>
+                            <option value="Reconstructionist" {% if request.args.get('observance_level') == 'Reconstructionist' %}selected{% endif %}>Reconstructionist</option>
+                            <option value="Just Jewish" {% if request.args.get('observance_level') == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="kosher_level" class="form-label">Kosher Observance</label>
+                        <select name="kosher_level" id="kosher_level" class="form-select">
+                            <option value="">Any</option>
+                            <option value="Strictly Kosher" {% if request.args.get('kosher_level') == 'Strictly Kosher' %}selected{% endif %}>Strictly Kosher</option>
+                            <option value="Mostly Kosher" {% if request.args.get('kosher_level') == 'Mostly Kosher' %}selected{% endif %}>Mostly Kosher</option>
+                            <option value="Kosher Style" {% if request.args.get('kosher_level') == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
+                            <option value="Not Kosher" {% if request.args.get('kosher_level') == 'Not Kosher' %}selected{% endif %}>Not Kosher</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="shabbat_observance" class="form-label">Shabbat Observance</label>
+                        <select name="shabbat_observance" id="shabbat_observance" class="form-select">
+                            <option value="">Any</option>
+                            <option value="Fully Observant" {% if request.args.get('shabbat_observance') == 'Fully Observant' %}selected{% endif %}>Fully Observant</option>
+                            <option value="Partially Observant" {% if request.args.get('shabbat_observance') == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
+                            <option value="Not Observant" {% if request.args.get('shabbat_observance') == 'Not Observant' %}selected{% endif %}>Not Observant</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group mb-4">
+                        <label for="keyword_search" class="form-label">Keyword Search</label>
+                        <input type="text" 
+                               name="keyword_search" 
+                               id="keyword_search" 
+                               value="{{ request.args.get('keyword_search', '') }}" 
+                               class="form-control" 
+                               placeholder="Search in bio, synagogue...">
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100">
+                        <i class="fas fa-search"></i> Search
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <div class="col-md-8">
+            <div class="search-results">
+                {% if profiles %}
+                    <div class="row row-cols-1 row-cols-md-2 g-4">
+                        {% for profile in profiles %}
+                            <div class="col">
+                                <div class="card h-100 profile-card">
+                                    <div class="profile-image-container">
+                                        {% if profile.profile_picture %}
+                                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" 
+                                                 alt="{{ profile.username }}" 
+                                                 class="profile-image">
+                                        {% else %}
+                                            <div class="profile-image-placeholder">
+                                                <i class="fas fa-user"></i>
+                                            </div>
+                                        {% endif %}
+                                    </div>
+                                    
+                                    <div class="card-body">
+                                        <h3 class="card-title h4 mb-3">{{ profile.username }}</h3>
+                                        
+                                        <div class="profile-details">
+                                            <div class="detail-item">
+                                                <i class="fas fa-birthday-cake"></i>
+                                                <span>{{ profile.age }} years old</span>
+                                            </div>
+                                            
+                                            <div class="detail-item">
+                                                <i class="fas fa-star-of-david"></i>
+                                                <span>{{ profile.observance_level }}</span>
+                                            </div>
+                                            
+                                            <div class="detail-item">
+                                                <i class="fas fa-utensils"></i>
+                                                <span>{{ profile.kosher_level }}</span>
+                                            </div>
+                                            
+                                            <div class="detail-item">
+                                                <i class="fas fa-moon"></i>
+                                                <span>{{ profile.shabbat_observance }}</span>
+                                            </div>
+                                            
+                                            {% if profile.synagogue_affiliation %}
+                                            <div class="detail-item">
+                                                <i class="fas fa-synagogue"></i>
+                                                <span>{{ profile.synagogue_affiliation }}</span>
+                                            </div>
+                                            {% endif %}
+                                        </div>
+
+                                        <div class="bio-section mt-3">
+                                            <p class="card-text">{{ profile.bio }}</p>
+                                        </div>
+                                    </div>
+
+                                    <div class="card-footer bg-transparent border-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
+                                               class="btn btn-outline-primary">
+                                                <i class="fas fa-user-circle"></i> View Profile
+                                            </a>
+                                            
+                                            {% if profile.is_liked_by_me %}
+                                                <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-danger">
+                                                        <i class="fas fa-heart-broken"></i> Unlike
+                                                    </button>
+                                                </form>
+                                            {% else %}
+                                                <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
+                                                    <button type="submit" class="btn btn-primary">
+                                                        <i class="fas fa-heart"></i> Like
+                                                    </button>
+                                                </form>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
                 {% else %}
-                    <div class="profile-picture-placeholder">
-                        <i class="fas fa-user"></i>
+                    <div class="no-results text-center">
+                        <div class="empty-state">
+                            <i class="fas fa-search empty-icon"></i>
+                            <h3>No Profiles Found</h3>
+                            <p class="text-muted">Try adjusting your search filters</p>
+                        </div>
                     </div>
                 {% endif %}
             </div>
-            <h3>{{ profile.username }}</h3>
-            <p><strong>Age:</strong> {{ profile.age }}</p>
-            <p><strong>About:</strong> {{ profile.bio }}</p>
-            <p><strong>Observance Level:</strong> {{ profile.observance_level }}</p>
-            <p><strong>Kosher Level:</strong> {{ profile.kosher_level }}</p>
-            <p><strong>Shabbat Observance:</strong> {{ profile.shabbat_observance }}</p>
-            {% if profile.synagogue_affiliation %}
-                <p><strong>Synagogue:</strong> {{ profile.synagogue_affiliation }}</p>
-            {% endif %}
-            
-            <div class="actions">
-                <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" class="btn btn-primary">View Profile</a>
-                {% if profile.is_liked_by_me %}
-                    <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-danger">Unlike</button>
-                    </form>
-                {% else %}
-                    <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-primary">Like</button>
-                    </form>
-                {% endif %}
-            </div>
         </div>
-        {% endfor %}
     </div>
 </div>
+
+<style>
+.search-header {
+    margin-bottom: 3rem;
+}
+
+.search-filters-card {
+    background: #fff;
+    border-radius: 15px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    position: sticky;
+    top: 2rem;
+}
+
+.filters-title {
+    color: #2c3e50;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.filters-title i {
+    color: #007bff;
+    margin-right: 0.5rem;
+}
+
+.form-label {
+    color: #495057;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #007bff;
+    box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.15);
+}
+
+.profile-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.profile-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    color: #6c757d;
+    font-size: 3rem;
+}
+
+.profile-details {
+    margin-top: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.detail-item i {
+    width: 20px;
+    margin-right: 0.5rem;
+    color: #007bff;
+}
+
+.bio-section {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.card-footer {
+    padding: 1rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary, .btn-danger {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover, .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+.empty-state {
+    padding: 3rem 1rem;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 4rem;
+    color: #dee2e6;
+    margin-bottom: 1.5rem;
+}
+
+.empty-state h3 {
+    color: #2c3e50;
+    margin-bottom: 0.5rem;
+}
+</style>
 {% endblock %}

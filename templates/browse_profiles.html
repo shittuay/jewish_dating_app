@@ -3,44 +3,191 @@
 {% block title %}Browse Profiles - Jewish Dating App{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1>Browse Profiles</h1>
-    <div class="grid">
+<div class="container py-5">
+    <div class="browse-header text-center mb-5">
+        <h1 class="display-4 mb-3">Find Your Perfect Match</h1>
+        <p class="lead text-muted">Browse through our community of Jewish singles</p>
+    </div>
+
+    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
         {% for profile in profiles %}
-        <div class="card">
-            <div class="profile-picture-container" style="width: 150px; height: 150px; margin: 0 auto 1rem;">
-                {% if profile.profile_picture %}
-                    <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="Profile Picture" class="profile-picture">
-                {% else %}
-                    <div class="profile-picture-placeholder">
-                        <i class="fas fa-user"></i>
+        <div class="col">
+            <div class="card h-100 profile-card">
+                <div class="profile-image-container">
+                    {% if profile.profile_picture %}
+                        <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" 
+                             alt="{{ profile.username }}" 
+                             class="profile-image">
+                    {% else %}
+                        <div class="profile-image-placeholder">
+                            <i class="fas fa-user"></i>
+                        </div>
+                    {% endif %}
+                </div>
+                
+                <div class="card-body">
+                    <h3 class="card-title h4 mb-3">{{ profile.username }}</h3>
+                    
+                    <div class="profile-details">
+                        <div class="detail-item">
+                            <i class="fas fa-birthday-cake"></i>
+                            <span>{{ profile.age }} years old</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <i class="fas fa-star-of-david"></i>
+                            <span>{{ profile.observance_level }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <i class="fas fa-utensils"></i>
+                            <span>{{ profile.kosher_level }}</span>
+                        </div>
+                        
+                        <div class="detail-item">
+                            <i class="fas fa-moon"></i>
+                            <span>{{ profile.shabbat_observance }}</span>
+                        </div>
+                        
+                        {% if profile.synagogue_affiliation %}
+                        <div class="detail-item">
+                            <i class="fas fa-synagogue"></i>
+                            <span>{{ profile.synagogue_affiliation }}</span>
+                        </div>
+                        {% endif %}
                     </div>
-                {% endif %}
-            </div>
-            <h3>{{ profile.username }}</h3>
-            <p><strong>Age:</strong> {{ profile.age }}</p>
-            <p><strong>About:</strong> {{ profile.bio }}</p>
-            <p><strong>Observance Level:</strong> {{ profile.observance_level }}</p>
-            <p><strong>Kosher Level:</strong> {{ profile.kosher_level }}</p>
-            <p><strong>Shabbat Observance:</strong> {{ profile.shabbat_observance }}</p>
-            {% if profile.synagogue_affiliation %}
-                <p><strong>Synagogue:</strong> {{ profile.synagogue_affiliation }}</p>
-            {% endif %}
-            
-            <div class="actions">
-                <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" class="btn btn-primary">View Profile</a>
-                {% if profile.is_liked_by_me %}
-                    <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-danger">Unlike</button>
-                    </form>
-                {% else %}
-                    <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" style="display: inline;">
-                        <button type="submit" class="btn btn-primary">Like</button>
-                    </form>
-                {% endif %}
+
+                    <div class="bio-section mt-3">
+                        <p class="card-text">{{ profile.bio }}</p>
+                    </div>
+                </div>
+
+                <div class="card-footer bg-transparent border-0">
+                    <div class="d-flex justify-content-between align-items-center">
+                        <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
+                           class="btn btn-outline-primary">
+                            <i class="fas fa-user-circle"></i> View Profile
+                        </a>
+                        
+                        {% if profile.is_liked_by_me %}
+                            <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-heart-broken"></i> Unlike
+                                </button>
+                            </form>
+                        {% else %}
+                            <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-heart"></i> Like
+                                </button>
+                            </form>
+                        {% endif %}
+                    </div>
+                </div>
             </div>
         </div>
         {% endfor %}
     </div>
 </div>
+
+<style>
+.browse-header {
+    margin-bottom: 3rem;
+}
+
+.profile-card {
+    transition: transform 0.2s ease-in-out, box-shadow 0.2s ease-in-out;
+    border: none;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.profile-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 15px rgba(0, 0, 0, 0.1);
+}
+
+.profile-image-container {
+    position: relative;
+    width: 100%;
+    padding-top: 100%;
+    overflow: hidden;
+    background-color: #f8f9fa;
+}
+
+.profile-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.profile-image-placeholder {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #e9ecef;
+    color: #6c757d;
+    font-size: 3rem;
+}
+
+.profile-details {
+    margin-top: 1rem;
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    color: #495057;
+}
+
+.detail-item i {
+    width: 20px;
+    margin-right: 0.5rem;
+    color: #007bff;
+}
+
+.bio-section {
+    color: #6c757d;
+    font-size: 0.9rem;
+    line-height: 1.5;
+}
+
+.card-footer {
+    padding: 1rem;
+}
+
+.btn {
+    padding: 0.5rem 1rem;
+    border-radius: 25px;
+    font-weight: 500;
+    transition: all 0.2s ease-in-out;
+}
+
+.btn i {
+    margin-right: 0.5rem;
+}
+
+.btn-outline-primary:hover {
+    transform: translateY(-2px);
+}
+
+.btn-primary, .btn-danger {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.btn-primary:hover, .btn-danger:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+</style>
 {% endblock %}

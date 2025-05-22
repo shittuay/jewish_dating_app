@@ -1,6 +1,6 @@
 import os # Import os module
 from werkzeug.utils import secure_filename # Import secure_filename
-from flask import Flask, render_template, request, redirect, url_for, flash, session, g, abort
+from flask import Flask, render_template, request, redirect, url_for, flash, session, g, abort, jsonify
 import sqlite3
 import hashlib
 from functools import wraps
@@ -138,10 +138,19 @@ def login_required(view):
 
 @app.route('/')
 def index():
-    conn = get_db_connection()
-    reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
-    conn.close()
-    return render_template('index.html', reviews=reviews)
+    if g.user:
+        conn = get_db_connection()
+        profile = conn.execute(
+            'SELECT * FROM profiles WHERE user_id = ?', (g.user['id'],)
+        ).fetchone()
+        reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
+        conn.close()
+        return render_template('index.html', profile=profile, reviews=reviews)
+    else:
+        conn = get_db_connection()
+        reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
+        conn.close()
+        return render_template('index.html', reviews=reviews)
 
 @app.route('/register', methods=('GET', 'POST'))
 def register():
@@ -711,6 +720,35 @@ def delete_photo(photo_id):
         flash('Photo not found.', 'error')
     conn.close()
     return redirect(url_for('profile'))
+
+@app.route('/chatbot', methods=['POST'])
+def chatbot():
+    data = request.get_json()
+    user_message = data.get('message', '').strip().lower()
+    # Simple FAQ/rule-based responses
+    if not user_message:
+        reply = "Please type a message."
+    elif 'hello' in user_message or 'hi' in user_message:
+        reply = "Hello! How can I help you today?"
+    elif 'reset password' in user_message or 'forgot password' in user_message:
+        reply = "To reset your password, please use the 'Forgot Password' link on the login page. If you need further help, contact support@jewishdating.com."
+    elif 'delete account' in user_message:
+        reply = "To delete your account, please go to your profile settings and click 'Delete Account'. If you need assistance, let us know."
+    elif 'contact' in user_message or 'support' in user_message:
+        reply = "You can reach our support team at support@jewishdating.com. We're here to help!"
+    elif 'how do i' in user_message or 'how to' in user_message:
+        reply = "Can you please provide more details about what you need help with?"
+    elif 'profile picture' in user_message:
+        reply = "To change your profile picture, go to your profile page and upload a new photo."
+    elif 'like' in user_message or 'match' in user_message:
+        reply = "You can like other profiles by clicking the heart button. If you both like each other, it's a match!"
+    elif 'message' in user_message or 'chat' in user_message:
+        reply = "To message someone, visit their profile and click 'Send Message'."
+    elif 'review' in user_message:
+        reply = "You can leave a review from the home page. Reviews are shown after admin approval."
+    else:
+        reply = "Thank you for your message! Our team will get back to you soon, or you can email support@jewishdating.com."
+    return jsonify({'reply': reply})
 
 if __name__ == '__main__':
     app.run(debug=True)
