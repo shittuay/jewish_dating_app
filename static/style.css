@@ -114,4 +114,141 @@
         width: 150px;
         height: 150px;
     }
+}
+
+/* Home Page Styles for Logged Out View */
+.home-hero {
+    position: relative; /* Needed for the overlay */
+    width: 100%;
+    /* Add padding to the bottom to ensure content is not hidden by the footer */
+    padding-bottom: 80px; /* Adjust as needed based on footer height */
+}
+
+.home-overlay {
+    /* Remove absolute positioning if it exists and causing overlap */
+    position: static; /* Or relative */
+    width: 100%;
+    /* Add padding to the top to avoid content being hidden by the fixed navbar */
+    padding-top: 80px; /* Adjust as needed based on navbar height */
+    display: flex; /* Use flexbox for vertical stacking */
+    flex-direction: column; /* Stack children vertically */
+    align-items: center; /* Center align the sections */
+}
+
+.home-overlay > * {
+    width: 100%; /* Ensure sections take full width */
+    max-width: 1000px; /* Optional: Limit max width for better readability */
+    margin-bottom: 2rem; /* Add space between sections */
+    padding: 0 15px; /* Add horizontal padding */
+}
+
+.home-overlay .home-title {
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.home-overlay .home-btn {
+     margin-bottom: 2rem; /* Add space below the button */
+}
+
+.home-info-box,
+.reviews-section,
+.review-form-section {
+    background-color: #fff; /* Add background to sections for clarity */
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    padding: 2rem; /* Add internal padding */
+    margin-bottom: 2rem; /* Space between these sections */
+}
+
+.home-info-box .home-features {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.home-info-box .feature {
+    text-align: center;
+}
+
+.home-info-box .feature-icon {
+    font-size: 3rem;
+    color: var(--primary-color);
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.reviews-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 1.5rem;
+}
+
+.review-card {
+    background-color: var(--light-gray);
+    border-radius: var(--border-radius);
+    padding: 1.5rem;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+}
+
+.review-card .review-text {
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+
+.review-card .review-user {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+}
+
+.review-card .review-user img {
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.review-form .form-control {
+    margin-bottom: 0; /* Remove default form-group margin */
+}
+
+.dashboard-hero {
+    min-height: 100vh;
+    /* Removed background gradient */
+    /* background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); */
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Styles for sections outside home-overlay */
+.reviews-section,
+.review-form-section {
+    max-width: 1000px; /* Match max-width of content in home-overlay */
+    margin: 2rem auto; /* Center the sections and add vertical space */
+    padding: 2rem; /* Add internal padding */
+    /* Removed background-color: #fff; */
+    /* Removed border-radius: var(--border-radius); */
+    /* Removed box-shadow: var(--box-shadow); */
+}
+
+/* Add padding to review-form-section content if needed after removing background padding */
+.review-form-section h3 {
+    margin-bottom: 1rem;
+}
+
+.review-form input,
+.review-form textarea {
+    margin-bottom: 1rem;
 } 

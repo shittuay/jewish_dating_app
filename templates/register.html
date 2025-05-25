@@ -3,12 +3,12 @@
 {% block title %}Register - Jewish Dating App{% endblock %}
 
 {% block content %}
-<div class="container">
-    <h1 style="text-align: center; margin-bottom: 2rem;">Create Your Account</h1>
+<div class="register-container">
+    <h1>Create Your Account</h1>
     
-    <form action="{{ url_for('register') }}" method="POST">
-        <div class="card">
-            <h2 class="card-title">Account Information</h2>
+    <form action="{{ url_for('register') }}" method="POST" class="register-form">
+        <div class="form-section">
+            <h2>Account Information</h2>
             <div class="form-group">
                 <label for="username" class="form-label">Username</label>
                 <input type="text" id="username" name="username" class="form-control" required>
@@ -25,8 +25,8 @@
             </div>
         </div>
 
-        <div class="card">
-            <h2 class="card-title">Basic Information</h2>
+        <div class="form-section">
+            <h2>Basic Information</h2>
             <div class="form-group">
                 <label for="age" class="form-label">Age</label>
                 <input type="number" id="age" name="age" class="form-control" min="18" max="120" required>
@@ -67,13 +67,121 @@
             </div>
         </div>
 
-        <div style="text-align: center; margin-top: 2rem;">
-            <button type="submit" class="btn btn-primary" style="min-width: 200px;">Create Account</button>
+        <div class="form-actions">
+            <button type="submit" class="btn btn-primary">Create Account</button>
         </div>
     </form>
 
-    <div style="text-align: center; margin-top: 2rem;">
-        Already have an account? <a href="{{ url_for('login') }}" class="btn btn-primary" style="margin-left: 1rem;">Log in</a>
+    <div class="login-link">
+        Already have an account? <a href="{{ url_for('login') }}">Log in</a>
     </div>
 </div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+.register-container {
+    max-width: 600px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.register-container h1 {
+    text-align: center;
+    color: #2c3e50;
+    margin-bottom: 2rem;
+    font-size: 2rem;
+}
+
+.register-form {
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+}
+
+.form-section {
+    margin-bottom: 1rem;
+}
+
+.form-section h2 {
+    color: #2c3e50;
+    font-size: 1.3rem;
+    margin-bottom: 1.5rem;
+    font-weight: 600;
+}
+
+.form-group {
+    margin-bottom: 1.2rem;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    color: #2c3e50;
+    font-weight: 500;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.8rem;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: border-color 0.2s;
+}
+
+.form-control:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 0 2px rgba(74, 144, 226, 0.2);
+}
+
+.form-actions {
+    text-align: center;
+    margin-top: 1rem;
+}
+
+.btn-primary {
+    background: #4a90e2;
+    color: white;
+    padding: 0.8rem 2rem;
+    border: none;
+    border-radius: 4px;
+    font-size: 1rem;
+    font-weight: 500;
+    cursor: pointer;
+    transition: background-color 0.2s;
+}
+
+.btn-primary:hover {
+    background: #357abd;
+}
+
+.login-link {
+    text-align: center;
+    margin-top: 2rem;
+    color: #666;
+}
+
+.login-link a {
+    color: #4a90e2;
+    text-decoration: none;
+    font-weight: 500;
+    margin-left: 0.5rem;
+}
+
+.login-link a:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .register-container {
+        margin: 1rem auto;
+    }
+    
+    .form-section h2 {
+        font-size: 1.2rem;
+    }
+}
+</style>
 {% endblock %}
