@@ -60,86 +60,99 @@
     </div>
 </div>
 {% else %}
-<div class="home-hero">
-    <div class="home-overlay">
-        <h1 class="home-title">Jewish Dating<br>Is Back In Style</h1>
-        <a href="{{ url_for('register') }}" class="home-btn">Get Started <i class="fas fa-arrow-right"></i></a>
-        <div class="home-info-box">
-            <h2>JewishMatch Connect: Connecting Hearts, Building Jewish Futures</h2>
-            <p>JewishMatch Connect is the smart dating choice for Jewish singles seeking meaningful relationships. If you're serious about finding a partner who shares your faith and values, JewishMatch Connect is for you. Our dedicated platform and personalized approach make finding your Jewish match easier than ever. Our team of passionate, experienced individuals is committed to your success. Your Jewish love story is our mission.</p>
-            <div class="home-features">
-                <div class="feature">
-                    <span class="feature-icon animated-icon"><i class="fas fa-ribbon"></i></span>
-                    <strong>Certified Jewish Match Connectors</strong><br>
-                    <span class="feature-desc">Our team understands the nuances of Jewish traditions and values, guiding you with expertise and cultural sensitivity.</span>
-                </div>
-                <div class="feature">
-                    <span class="feature-icon animated-icon"><i class="fas fa-scroll"></i></span>
-                    <strong>Dedicated Relationship Coaches</strong><br>
-                    <span class="feature-desc">Our experienced coaches offer insights and support to help you build healthy, lasting Jewish relationships.</span>
-                </div>
-                <div class="feature">
-                    <span class="feature-icon animated-icon"><i class="fas fa-shield-alt"></i></span>
-                    <strong>Secure Community</strong><br>
-                    <span class="feature-desc">Your safety and privacy are paramount. We provide a secure platform to connect with peace of mind.</span>
-                </div>
-                <div class="feature">
-                    <span class="feature-icon animated-icon"><i class="fas fa-ring"></i></span>
-                    <strong>Personalized Jewish Introductions</strong><br>
-                    <span class="feature-desc">We go beyond just matching; our personalized approach helps you create and nurture a strong Jewish partnership.</span>
-                </div>
-            </div>
-
-            <!-- Reviews Section - Swiper Slider -->
-            <div class="reviews-section">
-                <h2>What Our Members Say</h2>
-                <div class="swiper">
-                    <div class="swiper-wrapper">
-                        {% for review in reviews %}
-                        <div class="swiper-slide">
-                            <div class="review-card">
-                                <p class="review-text">"{{ review['review_text'] }}"</p>
-                                <div class="review-user">
-                                    {% if review['photo'] %}
-                                    <img src="{{ url_for('static', filename='uploads/' + review['photo']) }}" alt="{{ review['name'] }}">
-                                    {% else %}
-                                    <img src="https://ui-avatars.com/api/?name={{ review['name']|urlencode }}&background=4a90e2&color=fff&rounded=true" alt="{{ review['name'] }}">
-                                    {% endif %}
-                                    <span>{{ review['name'] }}{% if review['location'] %}, {{ review['location'] }}{% endif %}</span>
-                                </div>
-                            </div>
-                        </div>
-                        {% else %}
-                        <div class="swiper-slide">
-                            <p style="color:#888;">No reviews yet. Be the first to share your experience!</p>
-                        </div>
-                        {% endfor %}
-                    </div>
-                    <div class="swiper-pagination"></div>
-                </div>
-            </div>
-
-            <!-- Review Submission Form - Moved inside home-info-box -->
-            <div class="review-form-section" style="margin-top: 2rem; background: transparent; box-shadow: none; padding: 0;">
-                <h3>Share Your Experience</h3>
-                <form action="{{ url_for('submit_review') }}" method="post" enctype="multipart/form-data" class="review-form">
-                    <input type="text" name="name" placeholder="Your Name" required class="form-control">
-                    <input type="text" name="location" placeholder="Your Location" class="form-control">
-                    <textarea name="review_text" placeholder="Your Review" required class="form-control"></textarea>
-                    <input type="file" name="photo" accept="image/*" class="form-control">
-                    <button type="submit" class="btn btn-primary">Submit Review</button>
-                </form>
-                <p style="font-size:0.95em; color:#888; margin-top:0.5rem;">Your review will be visible after admin approval.</p>
-            </div>
-        </div>
+<div class="hero-section">
+    <div class="hero-overlay">
+        <h1 class="hero-title">Find Your Bashert in Our Jewish Community</h1>
+        <p class="hero-tagline">Where Jewish values meet authentic connections. Join a trusted, welcoming space to find your match and build a meaningful future.</p>
+        <a href="{{ url_for('register') }}" class="hero-cta-btn">Get Started</a>
     </div>
 </div>
+
+<!-- Features Section -->
+<section class="features-section">
+    <div class="features-grid">
+        <div class="feature-card">
+            <span class="feature-icon"><i class="fas fa-hamsa"></i></span>
+            <h3>Kosher Connections</h3>
+            <p>Find matches who share your level of religious observance and kosher lifestyle.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon"><i class="fas fa-candlestick-holder"></i></span>
+            <h3>Shabbat-Ready Matches</h3>
+            <p>Connect with singles who value Shabbat and Jewish traditions in daily life.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon"><i class="fas fa-users"></i></span>
+            <h3>Family-Oriented Community</h3>
+            <p>Join a platform focused on long-term relationships, family, and community values.</p>
+        </div>
+        <div class="feature-card">
+            <span class="feature-icon"><i class="fas fa-shield-alt"></i></span>
+            <h3>Safety & Privacy First</h3>
+            <p>Enjoy a secure, moderated environment with verified profiles and privacy controls.</p>
+        </div>
+    </div>
+</section>
+
+<!-- Success Stories Section -->
+<section class="success-stories-section">
+    <h2 class="section-title">Success Stories</h2>
+    <div class="swiper success-swiper">
+        <div class="swiper-wrapper">
+            {% for story in success_stories %}
+            <div class="swiper-slide">
+                <div class="testimonial-card">
+                    {% if story.photo %}
+                    <img src="{{ url_for('static', filename='uploads/' + story.photo) }}" alt="{{ story.name }}" class="testimonial-photo">
+                    {% else %}
+                    <img src="https://ui-avatars.com/api/?name={{ story.name|urlencode }}&background=2B4C7E&color=fff&rounded=true" alt="{{ story.name }}" class="testimonial-photo">
+                    {% endif %}
+                    <div class="testimonial-content">
+                        <p class="testimonial-text">“{{ story.text }}”</p>
+                        <div class="testimonial-user">{{ story.name }}<span class="testimonial-event">{{ story.event }}</span></div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <div class="swiper-slide">
+                <div class="testimonial-card">
+                    <p style="color:#888;">No success stories yet. Be the first to share your journey!</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        <div class="swiper-pagination"></div>
+    </div>
+</section>
+
+<!-- How It Works Section -->
+<section class="how-it-works-section">
+    <h2 class="section-title">How It Works</h2>
+    <div class="how-steps">
+        <div class="how-step">
+            <span class="how-step-icon"><i class="fas fa-user-plus"></i></span>
+            <h3>Create Your Profile</h3>
+            <p>Sign up and tell us about your values, lifestyle, and what you're looking for in a match.</p>
+        </div>
+        <div class="how-step">
+            <span class="how-step-icon"><i class="fas fa-heart"></i></span>
+            <h3>Get Matched</h3>
+            <p>Our smart matching connects you with singles who share your Jewish values and goals.</p>
+        </div>
+        <div class="how-step">
+            <span class="how-step-icon"><i class="fas fa-comments"></i></span>
+            <h3>Connect & Meet</h3>
+            <p>Start meaningful conversations and take the next step toward your Jewish future together.</p>
+        </div>
+    </div>
+</section>
 {% endif %}
 {% endblock %}
 
 {% block extra_css %}
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
 <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;800&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&family=Inter:wght@400;600&display=swap" rel="stylesheet">
 <style>
 body {
     background: #f7fafd;
@@ -402,6 +415,245 @@ body {
     background: #ffb6b9;
     opacity: 1;
 }
+.hero-section {
+    width: 100vw;
+    min-height: 60vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    background: linear-gradient(120deg, rgba(212,175,55,0.12) 0%, rgba(43,76,126,0.18) 100%), url('data:image/svg+xml;utf8,<svg width="60" height="60" viewBox="0 0 60 60" fill="none" xmlns="http://www.w3.org/2000/svg"><polygon points="30,5 39,25 59,25 42,39 48,59 30,47 12,59 18,39 1,25 21,25" fill="%23D4AF37" fill-opacity="0.07"/></svg>');
+    background-size: auto, 120px 120px;
+    background-repeat: repeat;
+    background-position: center;
+    box-shadow: 0 4px 24px rgba(44,76,126,0.08);
+}
+.hero-overlay {
+    width: 100%;
+    max-width: 700px;
+    margin: 0 auto;
+    text-align: center;
+    padding: 4rem 2rem 3rem 2rem;
+    background: rgba(255,255,255,0.92);
+    border-radius: 2rem;
+    box-shadow: 0 2px 12px rgba(44,76,126,0.10);
+}
+.hero-title {
+    font-family: 'Playfair Display', serif;
+    color: #2B4C7E;
+    font-size: 2.8rem;
+    font-weight: 700;
+    margin-bottom: 1.2rem;
+    letter-spacing: -1px;
+}
+.hero-tagline {
+    font-family: 'Inter', sans-serif;
+    color: #555;
+    font-size: 1.25rem;
+    margin-bottom: 2.2rem;
+}
+.hero-cta-btn {
+    background: linear-gradient(90deg, #2B4C7E 60%, #D4AF37 100%);
+    color: #fff;
+    padding: 1rem 2.5rem;
+    border-radius: 2.5rem;
+    font-size: 1.3rem;
+    font-weight: 700;
+    text-decoration: none;
+    box-shadow: 0 4px 16px rgba(44,76,126,0.10);
+    border: none;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    display: inline-block;
+}
+.hero-cta-btn:hover {
+    background: linear-gradient(90deg, #1d3357 60%, #B8860B 100%);
+    transform: translateY(-2px) scale(1.04);
+    box-shadow: 0 8px 32px rgba(44,76,126,0.13);
+}
+@media (max-width: 700px) {
+    .hero-title { font-size: 2rem; }
+    .hero-overlay { padding: 2.2rem 0.5rem; }
+}
+.features-section {
+    width: 100vw;
+    background: #f7fafd;
+    padding: 3.5rem 0 2.5rem 0;
+    display: flex;
+    justify-content: center;
+}
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 2.2rem;
+    max-width: 1100px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 2rem;
+}
+.feature-card {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 12px rgba(44,76,126,0.10);
+    padding: 2.2rem 1.5rem 1.5rem 1.5rem;
+    text-align: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+    border: 1.5px solid #eaf6fb;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.feature-card:hover {
+    box-shadow: 0 8px 32px rgba(44,76,126,0.13);
+    transform: translateY(-4px) scale(1.03);
+    border-color: #2B4C7E;
+}
+.feature-icon {
+    font-size: 2.7rem;
+    color: #2B4C7E;
+    margin-bottom: 1.1rem;
+    display: block;
+}
+.feature-card h3 {
+    color: #2B4C7E;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    font-family: 'Inter', sans-serif;
+}
+.feature-card p {
+    color: #555;
+    font-size: 1.05rem;
+    font-family: 'Inter', sans-serif;
+}
+@media (max-width: 700px) {
+    .features-section { padding: 2rem 0 1.5rem 0; }
+    .features-grid { gap: 1.2rem; padding: 0 0.5rem; }
+    .feature-card { padding: 1.2rem 0.7rem; }
+}
+.success-stories-section {
+    width: 100vw;
+    background: #fff;
+    padding: 3rem 0 2.5rem 0;
+    text-align: center;
+}
+.success-stories-section .section-title {
+    color: #2B4C7E;
+    font-size: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    margin-bottom: 2.2rem;
+}
+.success-swiper {
+    width: 100%;
+    max-width: 950px;
+    margin: 0 auto;
+    padding-bottom: 2.5rem;
+}
+.testimonial-card {
+    background: #f7fafd;
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 12px rgba(44,76,126,0.08);
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 260px;
+    max-width: 340px;
+    margin: 0 auto;
+}
+.testimonial-photo {
+    width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    object-fit: cover;
+    margin-bottom: 1.1rem;
+    border: 3px solid #D4AF37;
+}
+.testimonial-content {
+    text-align: center;
+}
+.testimonial-text {
+    color: #2B4C7E;
+    font-size: 1.08rem;
+    font-style: italic;
+    margin-bottom: 1rem;
+}
+.testimonial-user {
+    color: #222;
+    font-weight: 700;
+    font-size: 1.05rem;
+}
+.testimonial-event {
+    display: block;
+    color: #B8860B;
+    font-size: 0.98rem;
+    font-weight: 500;
+    margin-top: 0.2rem;
+}
+.swiper-pagination-bullet {
+    background: #2B4C7E;
+    opacity: 0.5;
+}
+.swiper-pagination-bullet-active {
+    background: #D4AF37;
+    opacity: 1;
+}
+.how-it-works-section {
+    width: 100vw;
+    background: #f7fafd;
+    padding: 3rem 0 2.5rem 0;
+    text-align: center;
+}
+.how-it-works-section .section-title {
+    color: #2B4C7E;
+    font-size: 2rem;
+    font-family: 'Playfair Display', serif;
+    font-weight: 700;
+    margin-bottom: 2.2rem;
+}
+.how-steps {
+    display: flex;
+    justify-content: center;
+    gap: 2.5rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    flex-wrap: wrap;
+}
+.how-step {
+    background: #fff;
+    border-radius: 1.5rem;
+    box-shadow: 0 2px 12px rgba(44,76,126,0.08);
+    padding: 2rem 1.5rem 1.5rem 1.5rem;
+    text-align: center;
+    flex: 1 1 260px;
+    max-width: 320px;
+    min-width: 220px;
+    margin-bottom: 1.5rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+.how-step-icon {
+    font-size: 2.5rem;
+    color: #2B4C7E;
+    margin-bottom: 1.1rem;
+    display: block;
+}
+.how-step h3 {
+    color: #2B4C7E;
+    font-size: 1.18rem;
+    font-weight: 700;
+    margin-bottom: 0.7rem;
+    font-family: 'Inter', sans-serif;
+}
+.how-step p {
+    color: #555;
+    font-size: 1.02rem;
+    font-family: 'Inter', sans-serif;
+}
+@media (max-width: 900px) {
+    .how-steps { flex-direction: column; gap: 1.2rem; }
+}
 </style>
 {% endblock %}
 
@@ -410,6 +662,19 @@ body {
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     new Swiper('.swiper', {
+        slidesPerView: 1,
+        spaceBetween: 30,
+        loop: true,
+        pagination: {
+            el: '.swiper-pagination',
+            clickable: true,
+        },
+        breakpoints: {
+            700: { slidesPerView: 2 },
+            1100: { slidesPerView: 3 }
+        }
+    });
+    new Swiper('.success-swiper', {
         slidesPerView: 1,
         spaceBetween: 30,
         loop: true,
