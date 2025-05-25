@@ -447,19 +447,20 @@
             z-index: 9999;
         }
         .chatbot-toggle-btn {
-            background: #007bff;
+            background: #e91e63;
             color: #fff;
             border: none;
             border-radius: 50%;
             width: 60px;
             height: 60px;
-            font-size: 2rem;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            font-size: 1.5rem;
+            box-shadow: 0 4px 12px rgba(233, 30, 99, 0.2);
             cursor: pointer;
-            transition: background 0.2s;
+            transition: all 0.3s ease;
         }
         .chatbot-toggle-btn:hover {
-            background: #0056b3;
+            background: #d81b60;
+            transform: scale(1.05);
         }
         .chatbot-window {
             position: absolute;
@@ -480,7 +481,7 @@
             to { opacity: 1; transform: translateY(0); }
         }
         .chatbot-header {
-            background: #007bff;
+            background: #e91e63;
             color: #fff;
             padding: 1rem;
             display: flex;
@@ -513,14 +514,14 @@
             word-break: break-word;
         }
         .chatbot-message-bot {
-            background: #e9ecef;
+            background: #fce4ec;
             color: #2c3e50;
-            align-self: flex-start;
+            border-radius: 15px 15px 15px 0;
         }
         .chatbot-message-user {
-            background: #007bff;
+            background: #e91e63;
             color: #fff;
-            align-self: flex-end;
+            border-radius: 15px 15px 0 15px;
         }
         .chatbot-form {
             display: flex;
@@ -537,7 +538,7 @@
             background: #fff;
         }
         .chatbot-send-btn {
-            background: #007bff;
+            background: #e91e63;
             color: #fff;
             border: none;
             border-radius: 0 0 15px 0;
@@ -547,7 +548,11 @@
             transition: background 0.2s;
         }
         .chatbot-send-btn:hover {
-            background: #0056b3;
+            background: #d81b60;
+        }
+        .chatbot-input:focus {
+            border-color: #e91e63;
+            box-shadow: 0 0 0 0.2rem rgba(233, 30, 99, 0.15);
         }
         @media (max-width: 600px) {
             #chatbot-widget {
@@ -732,21 +737,21 @@
 
     <!-- Floating Chatbot Button and Chat Window -->
     <div id="chatbot-widget">
-        <button id="chatbot-toggle" class="chatbot-toggle-btn" aria-label="Chat with us">
-            <i class="fas fa-comments"></i>
+        <button id="chatbot-toggle" class="chatbot-toggle-btn" aria-label="Chat with our love agent">
+            <i class="fas fa-heart"></i>
         </button>
         <div id="chatbot-window" class="chatbot-window" style="display: none;">
             <div class="chatbot-header">
-                <span><i class="fas fa-robot"></i> Chat Support</span>
+                <span><i class="fas fa-heart"></i> Love Agent</span>
                 <button id="chatbot-close" class="chatbot-close-btn" aria-label="Close chat">&times;</button>
             </div>
             <div id="chatbot-messages" class="chatbot-messages">
                 <div class="chatbot-message chatbot-message-bot">
-                    Hi! 👋 How can we help you today?
+                    Shalom! 👋 I'm your Jewish dating coach and love agent. I'm here to help you navigate your dating journey with wisdom and support. How can I assist you today?
                 </div>
             </div>
             <form id="chatbot-form" class="chatbot-form">
-                <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Type your message..." autocomplete="off" required />
+                <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask me anything about dating..." autocomplete="off" required />
                 <button type="submit" class="chatbot-send-btn"><i class="fas fa-paper-plane"></i></button>
             </form>
         </div>

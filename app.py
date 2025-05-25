@@ -15,6 +15,11 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from email.utils import formatdate
 import json
+import requests
+from dotenv import load_dotenv
+
+# Load environment variables from .env file
+load_dotenv()
 
 # Create the Flask application
 app = Flask(__name__, instance_relative_config=True)
@@ -26,7 +31,7 @@ except OSError:
     pass
 
 app.config.from_mapping(
-    SECRET_KEY='dev',
+    SECRET_KEY=os.getenv('SECRET_KEY', 'dev'),
     DATABASE=os.path.join(app.instance_path, 'jewish_dating.sqlite'),
     UPLOAD_FOLDER=os.path.join('static', 'uploads'),
     MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max file size
@@ -35,7 +40,9 @@ app.config.from_mapping(
     MAIL_USE_TLS=True,
     MAIL_USERNAME='your-email@gmail.com',  # Update with your email
     MAIL_PASSWORD='your-app-password',     # Update with your app password
-    MAIL_DEFAULT_SENDER='Jewish Dating App <your-email@gmail.com>'
+    MAIL_DEFAULT_SENDER='Jewish Dating App <your-email@gmail.com>',
+    DEEPSEEK_API_KEY=os.getenv('DEEPSEEK_API_KEY', ''),  # Add DeepSeek API key
+    DEEPSEEK_API_URL='https://api.deepseek.com/v1/chat/completions'  # DeepSeek API endpoint
 )
 
 # Ensure the upload folder exists
@@ -559,7 +566,7 @@ def online_users():
 
         # Query for users whose last_active timestamp is within the threshold, excluding the current user
         online_users_list = conn.execute(
-            'SELECT id, username FROM users WHERE last_active >= ? AND id != ?', 
+            'SELECT id, username FROM users WHERE last_active >= ? AND id != ?',
             (time_threshold, g.user['id'])
         ).fetchall()
 
@@ -567,6 +574,10 @@ def online_users():
         online_users_data = [{ 'id': user['id'], 'username': user['username'] } for user in online_users_list]
 
         return jsonify(online_users_data)
+    except Exception as e:
+        # Log the error or handle it as needed
+        print(f"Error fetching online users: {e}")
+        return jsonify({"error": "Could not fetch online users"}), 500
     finally:
         conn.close()
 
@@ -1043,33 +1054,99 @@ def delete_photo(photo_id):
     conn.close()
     return redirect(url_for('profile'))
 
+def get_love_agent_response(user_message, user_context=None):
+    """Get a response from the DeepSeek-powered love agent."""
+    if not app.config['DEEPSEEK_API_KEY']:
+        return "I'm currently offline. Please try again later or contact support."
+    
+    try:
+        headers = {
+            'Authorization': f'Bearer {app.config["DEEPSEEK_API_KEY"]}',
+            'Content-Type': 'application/json'
+        }
+        
+        # Construct the system message for the love agent persona
+        system_message = """You are a warm, empathetic Jewish dating coach and love agent. Your role is to:
+1. Provide thoughtful dating advice while respecting Jewish values and traditions
+2. Help users navigate the dating process with wisdom and sensitivity
+3. Offer support and encouragement in their journey to find meaningful connections
+4. Share insights about Jewish dating customs and practices when relevant
+5. Maintain a professional yet friendly tone
+6. Never provide medical, legal, or financial advice
+7. Always prioritize user safety and well-being
+
+Remember to:
+- Be supportive and non-judgmental
+- Respect different levels of religious observance
+- Encourage healthy dating practices
+- Focus on building meaningful connections
+- Maintain appropriate boundaries
+
+Crucially, respond in a natural, conversational tone and **avoid using any markdown formatting** (like bolding with *, italics with _, or code blocks with ```)."""
+        
+        # Prepare the conversation history
+        messages = [
+            {"role": "system", "content": system_message}
+        ]
+        
+        # Add user context if available
+        if user_context:
+            messages.append({
+                "role": "system",
+                "content": f"User context: {user_context}"
+            })
+        
+        # Add the user's message
+        messages.append({
+            "role": "user",
+            "content": user_message
+        })
+        
+        # Make the API request
+        response = requests.post(
+            app.config['DEEPSEEK_API_URL'],
+            headers=headers,
+            json={
+                "model": "deepseek-chat",
+                "messages": messages,
+                "temperature": 0.7,
+                "max_tokens": 500
+            }
+        )
+        
+        if response.status_code == 200:
+            return response.json()['choices'][0]['message']['content']
+        else:
+            app.logger.error(f"DeepSeek API error: {response.status_code} - {response.text}")
+            return "I'm having trouble connecting right now. Please try again later."
+            
+    except Exception as e:
+        app.logger.error(f"Error in love agent: {str(e)}")
+        return "I encountered an error. Please try again later."
+
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
     data = request.get_json()
-    user_message = data.get('message', '').strip().lower()
-    # Simple FAQ/rule-based responses
+    user_message = data.get('message', '').strip()
+    
     if not user_message:
-        reply = "Please type a message."
-    elif 'hello' in user_message or 'hi' in user_message:
-        reply = "Hello! How can I help you today?"
-    elif 'reset password' in user_message or 'forgot password' in user_message:
-        reply = "To reset your password, please use the 'Forgot Password' link on the login page. If you need further help, contact support@jewishdating.com."
-    elif 'delete account' in user_message:
-        reply = "To delete your account, please go to your profile settings and click 'Delete Account'. If you need assistance, let us know."
-    elif 'contact' in user_message or 'support' in user_message:
-        reply = "You can reach our support team at support@jewishdating.com. We're here to help!"
-    elif 'how do i' in user_message or 'how to' in user_message:
-        reply = "Can you please provide more details about what you need help with?"
-    elif 'profile picture' in user_message:
-        reply = "To change your profile picture, go to your profile page and upload a new photo."
-    elif 'like' in user_message or 'match' in user_message:
-        reply = "You can like other profiles by clicking the heart button. If you both like each other, it's a match!"
-    elif 'message' in user_message or 'chat' in user_message:
-        reply = "To message someone, visit their profile and click 'Send Message'."
-    elif 'review' in user_message:
-        reply = "You can leave a review from the home page. Reviews are shown after admin approval."
-    else:
-        reply = "Thank you for your message! Our team will get back to you soon, or you can email support@jewishdating.com."
+        return jsonify({'reply': "Please type a message."})
+    
+    # Get user context if available
+    user_context = None
+    if g.user:
+        conn = get_db_connection()
+        try:
+            profile = conn.execute(
+                'SELECT * FROM profiles WHERE user_id = ?', (g.user['id'],)
+            ).fetchone()
+            if profile:
+                user_context = f"User is {profile['age']} years old, {profile['observance_level']} observance level, {profile['kosher_level']} kosher level, {profile['shabbat_observance']} shabbat observance, affiliated with {profile['synagogue_affiliation']}."
+        finally:
+            conn.close()
+    
+    # Get AI response from love agent
+    reply = get_love_agent_response(user_message, user_context)
     return jsonify({'reply': reply})
 
 @app.route('/adverts')
