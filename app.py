@@ -1470,6 +1470,7 @@ def send_newsletter_email(recipient_email, subject, content, is_preview=False):
         </html>
         """
         
+        
         msg.attach(MIMEText(text_content, 'plain'))
         msg.attach(MIMEText(html_content, 'html'))
         
