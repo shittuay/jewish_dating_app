@@ -564,6 +564,12 @@
                 right: -1rem;
             }
         }
+
+        /* Add some basic styles for the thinking indicator */
+        .chatbot-messages .chatbot-message-bot.thinking-indicator {
+            font-style: italic;
+            color: #999;
+        }
     </style>
     {% block extra_css %}
     <style>
@@ -749,11 +755,17 @@
                 <div class="chatbot-message chatbot-message-bot">
                     Shalom! 👋 I'm your Jewish dating coach and love agent. I'm here to help you navigate your dating journey with wisdom and support. How can I assist you today?
                 </div>
+                <!-- Thinking indicator -->
+                <div id="chatbot-thinking-indicator" class="chatbot-message chatbot-message-bot" style="display: none;">
+                    Thinking...
+                </div>
             </div>
-            <form id="chatbot-form" class="chatbot-form">
-                <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask me anything about dating..." autocomplete="off" required />
-                <button type="submit" class="chatbot-send-btn"><i class="fas fa-paper-plane"></i></button>
-            </form>
+            <div class="chatbot-input-area">
+                <form id="chatbot-form" class="chatbot-form">
+                    <input type="text" id="chatbot-input" class="chatbot-input" placeholder="Ask me anything about dating..." autocomplete="off" required />
+                    <button type="submit" class="chatbot-send-btn"><i class="fas fa-paper-plane"></i></button>
+                </form>
+            </div>
         </div>
     </div>
 
@@ -766,6 +778,7 @@
         const form = document.getElementById('chatbot-form');
         const input = document.getElementById('chatbot-input');
         const messages = document.getElementById('chatbot-messages');
+        const thinkingIndicator = document.getElementById('chatbot-thinking-indicator');
 
         toggleBtn.addEventListener('click', function() {
             chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
@@ -784,6 +797,12 @@
             messages.appendChild(userDiv);
             messages.scrollTop = messages.scrollHeight;
             input.value = '';
+
+            // Show thinking indicator
+            thinkingIndicator.style.display = 'block';
+            thinkingIndicator.classList.add('thinking-indicator');
+            messages.scrollTop = messages.scrollHeight;
+
             // Send to backend
             fetch('/chatbot', {
                 method: 'POST',
@@ -792,6 +811,10 @@
             })
             .then(res => res.json())
             .then(data => {
+                // Hide thinking indicator
+                thinkingIndicator.style.display = 'none';
+                thinkingIndicator.classList.remove('thinking-indicator');
+
                 const botDiv = document.createElement('div');
                 botDiv.className = 'chatbot-message chatbot-message-bot';
                 botDiv.textContent = data.reply;
@@ -799,6 +822,10 @@
                 messages.scrollTop = messages.scrollHeight;
             })
             .catch(() => {
+                // Hide thinking indicator
+                thinkingIndicator.style.display = 'none';
+                thinkingIndicator.classList.remove('thinking-indicator');
+
                 const botDiv = document.createElement('div');
                 botDiv.className = 'chatbot-message chatbot-message-bot';
                 botDiv.textContent = 'Sorry, there was a problem. Please try again later.';
