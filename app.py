@@ -629,7 +629,7 @@ def profile():
                     conn.execute(
                         '''UPDATE profiles SET
                             age = ?, bio = ?,
-                            observance_level = ?, kosher_level,
+                            observance_level = ?, kosher_level = ?,
                             shabbat_observance = ?, synagogue_affiliation = ?,
                             profile_picture = ?
                         WHERE user_id = ?''',
