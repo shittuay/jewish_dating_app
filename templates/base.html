@@ -756,9 +756,7 @@
                     Shalom! 👋 I'm your Jewish dating coach and love agent. I'm here to help you navigate your dating journey with wisdom and support. How can I assist you today?
                 </div>
                 <!-- Thinking indicator -->
-                <div id="chatbot-thinking-indicator" class="chatbot-message chatbot-message-bot" style="display: none;">
-                    Thinking...
-                </div>
+                
             </div>
             <div class="chatbot-input-area">
                 <form id="chatbot-form" class="chatbot-form">
@@ -778,7 +776,6 @@
         const form = document.getElementById('chatbot-form');
         const input = document.getElementById('chatbot-input');
         const messages = document.getElementById('chatbot-messages');
-        const thinkingIndicator = document.getElementById('chatbot-thinking-indicator');
 
         toggleBtn.addEventListener('click', function() {
             chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
@@ -798,10 +795,12 @@
             messages.scrollTop = messages.scrollHeight;
             input.value = '';
 
-            // Show thinking indicator
-            thinkingIndicator.style.display = 'block';
-            thinkingIndicator.classList.add('thinking-indicator');
-            messages.scrollTop = messages.scrollHeight;
+            // Create and show thinking indicator dynamically
+            const thinkingIndicator = document.createElement('div');
+            thinkingIndicator.className = 'chatbot-message chatbot-message-bot thinking-indicator';
+            thinkingIndicator.textContent = 'Thinking...';
+            messages.appendChild(thinkingIndicator);
+            messages.scrollTop = messages.scrollHeight; // Scroll to show the indicator
 
             // Send to backend
             fetch('/chatbot', {
@@ -811,9 +810,8 @@
             })
             .then(res => res.json())
             .then(data => {
-                // Hide thinking indicator
-                thinkingIndicator.style.display = 'none';
-                thinkingIndicator.classList.remove('thinking-indicator');
+                // Remove thinking indicator
+                messages.removeChild(thinkingIndicator);
 
                 const botDiv = document.createElement('div');
                 botDiv.className = 'chatbot-message chatbot-message-bot';
@@ -822,9 +820,8 @@
                 messages.scrollTop = messages.scrollHeight;
             })
             .catch(() => {
-                // Hide thinking indicator
-                thinkingIndicator.style.display = 'none';
-                thinkingIndicator.classList.remove('thinking-indicator');
+                // Remove thinking indicator
+                messages.removeChild(thinkingIndicator);
 
                 const botDiv = document.createElement('div');
                 botDiv.className = 'chatbot-message chatbot-message-bot';
