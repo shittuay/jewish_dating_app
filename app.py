@@ -1455,22 +1455,27 @@ def send_newsletter_email(recipient_email, subject, content, is_preview=False):
         footer = f"\n\n---\nTo unsubscribe, click here: {unsubscribe_url}"
         
         # Create both plain text and HTML versions
-        text_content = content + footer
+        # Safely replace newlines with <br> tags
+        formatted_content = content.replace('\n', '<br>')
+
+        # Now use the result in the f-string
         html_content = f"""
-        <html>
-            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
-                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
-                    {content.replace('\n', '<br>')}
-                    <hr style="border: 1px solid #eee; margin: 20px 0;">
-                    <p style="color: #666; font-size: 12px;">
-                        To unsubscribe, <a href="{unsubscribe_url}">click here</a>
-                    </p>
-                </div>
-            </body>
-        </html>
-        """
-        
-        
+<html>
+    <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+        <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+            {formatted_content}
+            <hr style="border: 1px solid #eee; margin: 20px 0;">
+            <p style="color: #666; font-size: 12px;">
+                To unsubscribe, <a href="{unsubscribe_url}">click here</a>
+            </p>
+        </div>
+    </body>
+</html>
+"""
+
+        # Define plain text version for email clients that do not support HTML
+        text_content = f"{content}\n\nTo unsubscribe, visit: {unsubscribe_url}"
+
         msg.attach(MIMEText(text_content, 'plain'))
         msg.attach(MIMEText(html_content, 'html'))
         
