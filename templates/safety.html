@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="text-center mb-4">Safety & Privacy</h1>
+            <p class="text-center lead mb-5">
+                Your safety and privacy are our top priorities. Learn about our security measures and how we protect our community.
+            </p>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Account Security</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-shield-alt text-primary me-2"></i>Secure Authentication</h5>
+                            <p>We use industry-standard encryption and secure password hashing to protect your account credentials.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-user-shield text-primary me-2"></i>Profile Verification</h5>
+                            <p>All profiles are manually reviewed to ensure authenticity and maintain community standards.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-lock text-primary me-2"></i>Privacy Controls</h5>
+                            <p>You have full control over your profile visibility and who can contact you.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Privacy Protection</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-user-secret text-primary me-2"></i>Personal Information</h5>
+                            <p>We never share your personal information with third parties without your explicit consent.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-envelope-shield text-primary me-2"></i>Secure Communication</h5>
+                            <p>All messages are encrypted and stored securely. We monitor for inappropriate content.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-camera-slash text-primary me-2"></i>Photo Protection</h5>
+                            <p>Profile photos are protected against unauthorized downloads and screenshots.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Community Guidelines</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-heart text-primary me-2"></i>Respectful Behavior</h5>
+                            <p>We maintain a zero-tolerance policy for harassment, hate speech, or inappropriate behavior.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-flag text-primary me-2"></i>Reporting System</h5>
+                            <p>Easy-to-use reporting tools to flag inappropriate content or behavior. Our team reviews all reports promptly.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-ban text-primary me-2"></i>Account Moderation</h5>
+                            <p>Violations of our community guidelines may result in temporary or permanent account suspension.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Meeting Safely</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-map-marker-alt text-primary me-2"></i>Public Places</h5>
+                            <p>Always meet in public places for your first few dates. Choose well-lit, populated locations.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-car text-primary me-2"></i>Transportation</h5>
+                            <p>Use your own transportation or a trusted ride service. Don't rely on your date for rides.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-phone text-primary me-2"></i>Stay Connected</h5>
+                            <p>Let a friend or family member know where you're going and who you're meeting.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Need Help?</h2>
+                    <p class="card-text">
+                        If you encounter any safety concerns or need assistance:
+                        <br><br>
+                        <strong>Emergency:</strong> Call 911 or your local emergency services
+                        <br>
+                        <strong>Support:</strong> Email safety@jewishdating.com
+                        <br>
+                        <strong>Report an Issue:</strong> Use the "Report" button on any profile or message
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="mb-4">
+                    Remember: Your safety is our priority. If something doesn't feel right, trust your instincts and report it.
+                </p>
+                <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg">
+                    Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.btn-primary {
+    padding: 12px 30px;
+    font-weight: 600;
+}
+
+.h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.list-unstyled li {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.list-unstyled li:last-child {
+    margin-bottom: 0;
+}
+</style>
+{% endblock %} 

@@ -1,6 +1,6 @@
 import os # Import os module
 from werkzeug.utils import secure_filename # Import secure_filename
-from flask import Flask, render_template, request, redirect, url_for, flash, session, g, abort, jsonify
+from flask import Flask, render_template, request, redirect, url_for, flash, session, g, abort, jsonify, Response
 import sqlite3
 import hashlib
 from functools import wraps
@@ -8,6 +8,13 @@ import datetime
 from werkzeug.security import generate_password_hash, check_password_hash
 import shutil
 import random
+import csv
+from io import StringIO
+import smtplib
+from email.mime.text import MIMEText
+from email.mime.multipart import MIMEMultipart
+from email.utils import formatdate
+import json
 
 # Create the Flask application
 app = Flask(__name__, instance_relative_config=True)
@@ -22,7 +29,13 @@ app.config.from_mapping(
     SECRET_KEY='dev',
     DATABASE=os.path.join(app.instance_path, 'jewish_dating.sqlite'),
     UPLOAD_FOLDER=os.path.join('static', 'uploads'),
-    MAX_CONTENT_LENGTH=16 * 1024 * 1024  # 16MB max file size
+    MAX_CONTENT_LENGTH=16 * 1024 * 1024,  # 16MB max file size
+    MAIL_SERVER='smtp.gmail.com',
+    MAIL_PORT=587,
+    MAIL_USE_TLS=True,
+    MAIL_USERNAME='your-email@gmail.com',  # Update with your email
+    MAIL_PASSWORD='your-app-password',     # Update with your app password
+    MAIL_DEFAULT_SENDER='Jewish Dating App <your-email@gmail.com>'
 )
 
 # Ensure the upload folder exists
@@ -42,102 +55,304 @@ def get_db_connection():
 
 def init_db():
     conn = get_db_connection()
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            username TEXT UNIQUE NOT NULL,
-            password TEXT NOT NULL,
-            balance INTEGER NOT NULL DEFAULT 0
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS profiles (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER UNIQUE NOT NULL,
-            age INTEGER,
-            bio TEXT,
-            observance_level TEXT,
-            kosher_level TEXT,
-            shabbat_observance TEXT,
-            synagogue_affiliation TEXT,
-            profile_picture TEXT, -- NEW COLUMN for profile picture filename
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS messages (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            sender_id INTEGER NOT NULL,
-            receiver_id INTEGER NOT NULL,
-            content TEXT NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (sender_id) REFERENCES users(id),
-            FOREIGN KEY (receiver_id) REFERENCES users(id)
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS likes (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            liker_id INTEGER NOT NULL,
-            liked_id INTEGER NOT NULL,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
-            UNIQUE(liker_id, liked_id),
-            FOREIGN KEY (liker_id) REFERENCES users(id),
-            FOREIGN KEY (liked_id) REFERENCES users(id)
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS reviews (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            name TEXT NOT NULL,
-            location TEXT,
-            review_text TEXT NOT NULL,
-            photo TEXT,
-            status TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS user_photos (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            filename TEXT NOT NULL,
-            uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS adverts (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            title TEXT NOT NULL,
-            description TEXT NOT NULL,
-            image TEXT,
-            link TEXT NOT NULL,
-            status TEXT NOT NULL DEFAULT 'pending',
-            views INTEGER NOT NULL DEFAULT 0,
-            clicks INTEGER NOT NULL DEFAULT 0,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            approved_at DATETIME
-        );
-    ''')
-    conn.execute('''
-        CREATE TABLE IF NOT EXISTS payments (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            user_id INTEGER NOT NULL,
-            amount INTEGER NOT NULL,
-            payment_id TEXT,
-            status TEXT NOT NULL,
-            created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-            FOREIGN KEY (user_id) REFERENCES users(id)
-        );
-    ''')
-    conn.commit()
-    conn.close()
+    try:
+        # Create users table if it doesn't exist
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS users (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                username TEXT UNIQUE NOT NULL,
+                password TEXT NOT NULL,
+                balance INTEGER NOT NULL DEFAULT 0
+            );
+        ''')
+
+        # Check and add last_active column if it doesn't exist
+        cursor = conn.execute("PRAGMA table_info(users)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'last_active' not in columns:
+            print("Adding 'last_active' column to users table...")
+            # Add the last_active column without default for compatibility
+            conn.execute("ALTER TABLE users ADD COLUMN last_active DATETIME;")
+            # Update existing rows with current timestamp
+            conn.execute("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE last_active IS NULL;")
+            print("'last_active' column added and existing rows updated successfully.")
+
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS profiles (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER UNIQUE NOT NULL,
+                age INTEGER,
+                bio TEXT,
+                observance_level TEXT,
+                kosher_level TEXT,
+                shabbat_observance TEXT,
+                synagogue_affiliation TEXT,
+                profile_picture TEXT, -- NEW COLUMN for profile picture filename
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                sender_id INTEGER NOT NULL,
+                receiver_id INTEGER NOT NULL,
+                content TEXT NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (sender_id) REFERENCES users(id),
+                FOREIGN KEY (receiver_id) REFERENCES users(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS likes (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                liker_id INTEGER NOT NULL,
+                liked_id INTEGER NOT NULL,
+                timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+                UNIQUE(liker_id, liked_id),
+                FOREIGN KEY (liker_id) REFERENCES users(id),
+                FOREIGN KEY (liked_id) REFERENCES users(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS reviews (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                location TEXT,
+                review_text TEXT NOT NULL,
+                photo TEXT,
+                status TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS user_photos (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                filename TEXT NOT NULL,
+                uploaded_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS adverts (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                title TEXT NOT NULL,
+                description TEXT NOT NULL,
+                image TEXT,
+                link TEXT NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending',
+                views INTEGER NOT NULL DEFAULT 0,
+                clicks INTEGER NOT NULL DEFAULT 0,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                approved_at DATETIME
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS payments (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                amount INTEGER NOT NULL,
+                payment_id TEXT,
+                status TEXT NOT NULL,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS newsletter_subscribers (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                email TEXT UNIQUE NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active',
+                subscribed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                unsubscribed_at DATETIME,
+                last_email_sent DATETIME
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS newsletter_templates (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                content TEXT NOT NULL,
+                description TEXT,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS scheduled_newsletters (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                subject TEXT NOT NULL,
+                content TEXT NOT NULL,
+                scheduled_for DATETIME NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending',
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                sent_at DATETIME,
+                created_by INTEGER NOT NULL,
+                template_id INTEGER,
+                recurring_id INTEGER REFERENCES recurring_newsletters(id),
+                FOREIGN KEY (created_by) REFERENCES users(id),
+                FOREIGN KEY (template_id) REFERENCES newsletter_templates(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS scheduled_newsletter_recipients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                scheduled_newsletter_id INTEGER NOT NULL,
+                subscriber_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'pending',
+                sent_at DATETIME,
+                error_message TEXT,
+                FOREIGN KEY (scheduled_newsletter_id) REFERENCES scheduled_newsletters(id),
+                FOREIGN KEY (subscriber_id) REFERENCES newsletter_subscribers(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS recurring_newsletters (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                subject TEXT NOT NULL,
+                content TEXT NOT NULL,
+                frequency TEXT NOT NULL CHECK(frequency IN ('daily', 'weekly', 'monthly')),
+                start_date DATETIME NOT NULL,
+                end_date DATETIME,
+                last_sent DATETIME,
+                status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'paused', 'completed')),
+                created_by INTEGER NOT NULL,
+                template_id INTEGER,
+                created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (created_by) REFERENCES users(id),
+                FOREIGN KEY (template_id) REFERENCES newsletter_templates(id)
+            );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS recurring_newsletter_recipients (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                recurring_newsletter_id INTEGER NOT NULL,
+                subscriber_id INTEGER NOT NULL,
+                status TEXT NOT NULL DEFAULT 'active' CHECK(status IN ('active', 'excluded')),
+                added_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (recurring_newsletter_id) REFERENCES recurring_newsletters(id),
+                FOREIGN KEY (subscriber_id) REFERENCES newsletter_subscribers(id),
+                UNIQUE(recurring_newsletter_id, subscriber_id)
+            );
+        ''')
+
+        # Insert default templates if they don't exist
+        default_templates = [
+            {
+                'name': 'Welcome Email',
+                'subject': 'Welcome to Jewish Dating App!',
+                'content': '''Welcome to our community!
+
+We're excited to have you join us on your journey to find meaningful connections within the Jewish community.
+
+Here's what you can do next:
+1. Complete your profile
+2. Browse potential matches
+3. Join our upcoming events
+4. Read success stories from other members
+
+If you have any questions, our support team is here to help.
+
+Best regards,
+The Jewish Dating App Team''',
+                'description': 'Welcome email for new subscribers'
+            },
+            {
+                'name': 'Weekly Digest',
+                'subject': 'Your Weekly Jewish Dating Digest',
+                'content': '''Here's your weekly update from Jewish Dating App!
+
+📅 Upcoming Events:
+{events}
+
+💝 Success Stories:
+{success_stories}
+
+🎯 Featured Profiles:
+{featured_profiles}
+
+💡 Dating Tips:
+{dating_tips}
+
+Stay connected with our community and keep checking your matches!
+
+Best regards,
+The Jewish Dating App Team''',
+                'description': 'Weekly newsletter with updates and highlights'
+            },
+            {
+                'name': 'Event Invitation',
+                'subject': 'Join Our Upcoming Jewish Singles Event!',
+                'content': '''We're hosting a special event for our community!
+
+📅 Date: {event_date}
+📍 Location: {event_location}
+⏰ Time: {event_time}
+
+What to expect:
+- Meet other Jewish singles in a comfortable setting
+- Enjoy kosher refreshments
+- Participate in fun ice-breaker activities
+- Connect with potential matches
+
+RSVP now to secure your spot!
+
+Best regards,
+The Jewish Dating App Team''',
+                'description': 'Template for event invitations'
+            }
+        ]
+        
+        for template in default_templates:
+            conn.execute('''
+                INSERT OR IGNORE INTO newsletter_templates (name, subject, content, description)
+                VALUES (?, ?, ?, ?)
+            ''', (template['name'], template['subject'], template['content'], template['description']))
+        
+        conn.commit()
+    finally:
+        conn.close()
 
 # Initialize the database when the app starts
 with app.app_context():
     init_db()
+
+# --- Database Migration --- 
+def migrate_db():
+    conn = None  # Initialize conn to None
+    try:
+        conn = get_db_connection()
+        # Check if last_active column exists in users table
+        cursor = conn.execute("PRAGMA table_info(users)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'last_active' not in columns:
+            print("Adding 'last_active' column to users table...")
+            conn.execute("ALTER TABLE users ADD COLUMN last_active DATETIME DEFAULT CURRENT_TIMESTAMP;")
+            conn.commit()
+            print("'last_active' column added successfully.")
+        # Add other migrations here if needed
+
+    except sqlite3.Error as e:
+        print(f"Database migration failed: {e}")
+        if conn:
+            conn.rollback()
+    finally:
+        if conn:
+            conn.close()
+
+# Run migrations after initializing the db
+with app.app_context():
+    init_db()
+    migrate_db()
+
+# Add context processor for current datetime
+@app.context_processor
+def inject_now():
+    return {'now': datetime.datetime.now()}
 
 # --- Before each request, load the logged-in user if any ---
 @app.before_request
@@ -150,6 +365,11 @@ def load_logged_in_user():
         g.user = conn.execute(
             'SELECT * FROM users WHERE id = ?', (user_id,)
         ).fetchone()
+        # Update last_active timestamp for logged-in user
+        conn.execute(
+            'UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE id = ?', (user_id,)
+        )
+        conn.commit()
         conn.close()
 
 # --- Decorator to ensure a user is logged in ---
@@ -177,30 +397,61 @@ def admin_required(view):
 def index():
     if g.user:
         conn = get_db_connection()
-        profile = conn.execute(
-            'SELECT * FROM profiles WHERE user_id = ?', (g.user['id'],)
-        ).fetchone()
-        reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
+        try:
+            profile = conn.execute(
+                'SELECT * FROM profiles WHERE user_id = ?', (g.user['id'],)
+            ).fetchone()
+            reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
 
-        # Get two random approved adverts for side banners - Rolled back to previous logic
-        adverts = conn.execute('SELECT * FROM adverts WHERE status = "approved"').fetchall()
-        left_ad = right_ad = None
-        if adverts:
-            ads = random.sample(adverts, min(2, len(adverts)))
-            left_ad = ads[0]
-            if len(ads) > 1:
-                right_ad = ads[1]
-            else:
-                right_ad = ads[0] # Use the same ad for both if only one exists
-            # Note: View/Click tracking is removed in this rollback
+            # Get featured profiles (recently active users with high engagement)
+            featured_profiles = conn.execute('''
+                SELECT p.*, u.username, u.id as user_id,
+                       COUNT(DISTINCT l.id) as like_count,
+                       EXISTS(SELECT 1 FROM likes WHERE liker_id = ? AND liked_id = u.id) as is_liked_by_me
+                FROM profiles p
+                JOIN users u ON p.user_id = u.id
+                LEFT JOIN likes l ON l.liked_id = u.id
+                WHERE u.id != ?
+                GROUP BY u.id
+                ORDER BY like_count DESC, u.username ASC
+                LIMIT 6
+            ''', (g.user['id'], g.user['id'])).fetchall()
 
-        conn.close()
-        return render_template('index.html', profile=profile, reviews=reviews, left_ad=left_ad, right_ad=right_ad)
+            # Get two random approved adverts for side banners
+            adverts = conn.execute('SELECT * FROM adverts WHERE status = "approved"').fetchall()
+            left_ad = right_ad = None
+            if adverts:
+                ads = random.sample(adverts, min(2, len(adverts)))
+                left_ad = ads[0]
+                if len(ads) > 1:
+                    right_ad = ads[1]
+                else:
+                    right_ad = ads[0]
+
+            return render_template('index.html', profile=profile, reviews=reviews, 
+                                 featured_profiles=featured_profiles, left_ad=left_ad, right_ad=right_ad)
+        finally:
+            conn.close()
     else:
         conn = get_db_connection()
-        reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
-        conn.close()
-        return render_template('index.html', reviews=reviews)
+        try:
+            reviews = conn.execute('SELECT * FROM reviews WHERE status = "approve" ORDER BY created_at DESC LIMIT 6').fetchall()
+            
+            # Get featured profiles for non-logged in users
+            featured_profiles = conn.execute('''
+                SELECT p.*, u.username, u.id as user_id,
+                       COUNT(DISTINCT l.id) as like_count
+                FROM profiles p
+                JOIN users u ON p.user_id = u.id
+                LEFT JOIN likes l ON l.liked_id = u.id
+                GROUP BY u.id
+                ORDER BY like_count DESC, u.username ASC
+                LIMIT 6
+            ''').fetchall()
+            
+            return render_template('index.html', reviews=reviews, featured_profiles=featured_profiles)
+        finally:
+            conn.close()
 
 @app.route('/register', methods=('GET', 'POST'))
 def register():
@@ -294,9 +545,30 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.clear()
-    flash('You have been logged out.', 'info')
+    session.pop('user_id', None)
+    flash('You have been logged out.', 'success')
     return redirect(url_for('index'))
+
+@app.route('/online_users')
+@login_required
+def online_users():
+    conn = get_db_connection()
+    try:
+        # Define the time threshold for considering a user online (e.g., last 5 minutes)
+        time_threshold = datetime.datetime.now() - datetime.timedelta(minutes=5)
+
+        # Query for users whose last_active timestamp is within the threshold, excluding the current user
+        online_users_list = conn.execute(
+            'SELECT id, username FROM users WHERE last_active >= ? AND id != ?', 
+            (time_threshold, g.user['id'])
+        ).fetchall()
+
+        # Convert the fetched rows to a list of dictionaries
+        online_users_data = [{ 'id': user['id'], 'username': user['username'] } for user in online_users_list]
+
+        return jsonify(online_users_data)
+    finally:
+        conn.close()
 
 # --- PROFILE ROUTE (for logged-in user's own profile) ---
 @app.route('/profile', methods=('GET', 'POST'))
@@ -346,7 +618,7 @@ def profile():
                     conn.execute(
                         '''UPDATE profiles SET
                             age = ?, bio = ?,
-                            observance_level = ?, kosher_level = ?,
+                            observance_level = ?, kosher_level,
                             shabbat_observance = ?, synagogue_affiliation = ?,
                             profile_picture = ?
                         WHERE user_id = ?''',
@@ -926,6 +1198,953 @@ def paypal_webhook():
     except Exception as e:
         conn.close()
         return jsonify({'success': False, 'error': str(e)}), 500
+
+@app.route('/subscribe_newsletter', methods=['POST'])
+def subscribe_newsletter():
+    email = request.form.get('email', '').strip().lower()
+    
+    if not email or '@' not in email:
+        flash('Please enter a valid email address.', 'error')
+        return redirect(url_for('index'))
+    
+    conn = get_db_connection()
+    try:
+        # Check if email already exists
+        existing = conn.execute(
+            'SELECT id, status FROM newsletter_subscribers WHERE email = ?',
+            (email,)
+        ).fetchone()
+        
+        if existing:
+            if existing['status'] == 'active':
+                flash('You are already subscribed to our newsletter!', 'info')
+            else:
+                # Reactivate subscription
+                conn.execute(
+                    '''UPDATE newsletter_subscribers 
+                    SET status = 'active', unsubscribed_at = NULL 
+                    WHERE email = ?''',
+                    (email,)
+                )
+                flash('Welcome back! Your newsletter subscription has been reactivated.', 'success')
+        else:
+            # Add new subscriber
+            conn.execute(
+                'INSERT INTO newsletter_subscribers (email) VALUES (?)',
+                (email,)
+            )
+            flash('Thank you for subscribing to our newsletter!', 'success')
+        
+        conn.commit()
+    except sqlite3.IntegrityError:
+        flash('An error occurred. Please try again later.', 'error')
+    except Exception as e:
+        flash('An unexpected error occurred. Please try again later.', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('index'))
+
+@app.route('/unsubscribe_newsletter/<email>')
+def unsubscribe_newsletter(email):
+    conn = get_db_connection()
+    try:
+        conn.execute(
+            '''UPDATE newsletter_subscribers 
+            SET status = 'unsubscribed', unsubscribed_at = CURRENT_TIMESTAMP 
+            WHERE email = ?''',
+            (email,)
+        )
+        conn.commit()
+        flash('You have been unsubscribed from our newsletter.', 'info')
+    except Exception as e:
+        flash('An error occurred while processing your request.', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('index'))
+
+@app.route('/admin/newsletter')
+@admin_required
+def admin_newsletter():
+    conn = get_db_connection()
+    
+    # Get filter parameters
+    status = request.args.get('status', 'all')
+    search = request.args.get('search', '').strip()
+    sort_by = request.args.get('sort_by', 'subscribed_at')
+    sort_order = request.args.get('sort_order', 'desc')
+    
+    # Build query
+    query_parts = ['SELECT * FROM newsletter_subscribers WHERE 1=1']
+    params = []
+    
+    if status != 'all':
+        query_parts.append('AND status = ?')
+        params.append(status)
+    
+    if search:
+        query_parts.append('AND (email LIKE ? OR subscribed_at LIKE ? OR unsubscribed_at LIKE ?)')
+        search_term = f'%{search}%'
+        params.extend([search_term, search_term, search_term])
+    
+    # Add sorting
+    valid_sort_columns = ['email', 'status', 'subscribed_at', 'unsubscribed_at', 'last_email_sent']
+    if sort_by not in valid_sort_columns:
+        sort_by = 'subscribed_at'
+    if sort_order not in ['asc', 'desc']:
+        sort_order = 'desc'
+    
+    query_parts.append(f'ORDER BY {sort_by} {sort_order}')
+    
+    # Execute query
+    subscribers = conn.execute(' '.join(query_parts), params).fetchall()
+    
+    # Get statistics
+    stats = {
+        'total': conn.execute('SELECT COUNT(*) as count FROM newsletter_subscribers').fetchone()['count'],
+        'active': conn.execute('SELECT COUNT(*) as count FROM newsletter_subscribers WHERE status = "active"').fetchone()['count'],
+        'unsubscribed': conn.execute('SELECT COUNT(*) as count FROM newsletter_subscribers WHERE status = "unsubscribed"').fetchone()['count']
+    }
+    
+    conn.close()
+    
+    return render_template('admin_newsletter.html',
+                         subscribers=subscribers,
+                         stats=stats,
+                         current_status=status,
+                         current_search=search,
+                         current_sort=sort_by,
+                         current_order=sort_order)
+
+@app.route('/admin/newsletter/export')
+@admin_required
+def export_newsletter_subscribers():
+    conn = get_db_connection()
+    subscribers = conn.execute('''
+        SELECT email, status, subscribed_at, unsubscribed_at, last_email_sent
+        FROM newsletter_subscribers
+        ORDER BY subscribed_at DESC
+    ''').fetchall()
+    conn.close()
+    
+    # Create CSV content
+    output = StringIO()
+    writer = csv.writer(output)
+    writer.writerow(['Email', 'Status', 'Subscribed At', 'Unsubscribed At', 'Last Email Sent'])
+    
+    for sub in subscribers:
+        writer.writerow([
+            sub['email'],
+            sub['status'],
+            sub['subscribed_at'],
+            sub['unsubscribed_at'],
+            sub['last_email_sent']
+        ])
+    
+    output.seek(0)
+    return Response(
+        output,
+        mimetype='text/csv',
+        headers={
+            'Content-Disposition': 'attachment; filename=newsletter_subscribers.csv'
+        }
+    )
+
+@app.route('/admin/newsletter/delete/<int:subscriber_id>', methods=['POST'])
+@admin_required
+def delete_newsletter_subscriber(subscriber_id):
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM newsletter_subscribers WHERE id = ?', (subscriber_id,))
+        conn.commit()
+        flash('Subscriber deleted successfully.', 'success')
+    except Exception as e:
+        flash('Error deleting subscriber.', 'error')
+    finally:
+        conn.close()
+    return redirect(url_for('admin_newsletter'))
+
+def send_newsletter_email(recipient_email, subject, content, is_preview=False):
+    try:
+        msg = MIMEMultipart('alternative')
+        msg['Subject'] = subject
+        msg['From'] = app.config['MAIL_DEFAULT_SENDER']
+        msg['To'] = recipient_email
+        msg['Date'] = formatdate(localtime=True)
+        
+        # Add unsubscribe link
+        unsubscribe_url = url_for('unsubscribe_newsletter', email=recipient_email, _external=True)
+        footer = f"\n\n---\nTo unsubscribe, click here: {unsubscribe_url}"
+        
+        # Create both plain text and HTML versions
+        text_content = content + footer
+        html_content = f"""
+        <html>
+            <body style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">
+                <div style="max-width: 600px; margin: 0 auto; padding: 20px;">
+                    {content.replace('\n', '<br>')}
+                    <hr style="border: 1px solid #eee; margin: 20px 0;">
+                    <p style="color: #666; font-size: 12px;">
+                        To unsubscribe, <a href="{unsubscribe_url}">click here</a>
+                    </p>
+                </div>
+            </body>
+        </html>
+        """
+        
+        msg.attach(MIMEText(text_content, 'plain'))
+        msg.attach(MIMEText(html_content, 'html'))
+        
+        if not is_preview:
+            # Connect to SMTP server and send
+            with smtplib.SMTP(app.config['MAIL_SERVER'], app.config['MAIL_PORT']) as server:
+                server.starttls()
+                server.login(app.config['MAIL_USERNAME'], app.config['MAIL_PASSWORD'])
+                server.send_message(msg)
+            
+            # Update last_email_sent in database
+            conn = get_db_connection()
+            conn.execute(
+                'UPDATE newsletter_subscribers SET last_email_sent = CURRENT_TIMESTAMP WHERE email = ?',
+                (recipient_email,)
+            )
+            conn.commit()
+            conn.close()
+            
+            return True, "Email sent successfully"
+        else:
+            return True, "Preview generated successfully"
+            
+    except Exception as e:
+        return False, str(e)
+
+@app.route('/admin/newsletter/bulk_action', methods=['POST'])
+@admin_required
+def bulk_newsletter_action():
+    action = request.form.get('action')
+    subscriber_ids = request.form.getlist('subscriber_ids[]')
+    
+    if not subscriber_ids:
+        flash('No subscribers selected.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    conn = get_db_connection()
+    try:
+        if action == 'delete':
+            placeholders = ','.join('?' * len(subscriber_ids))
+            conn.execute(f'DELETE FROM newsletter_subscribers WHERE id IN ({placeholders})', subscriber_ids)
+            flash(f'Successfully deleted {len(subscriber_ids)} subscribers.', 'success')
+        elif action == 'unsubscribe':
+            placeholders = ','.join('?' * len(subscriber_ids))
+            conn.execute(
+                f'''UPDATE newsletter_subscribers 
+                SET status = 'unsubscribed', unsubscribed_at = CURRENT_TIMESTAMP 
+                WHERE id IN ({placeholders})''',
+                subscriber_ids
+            )
+            flash(f'Successfully unsubscribed {len(subscriber_ids)} subscribers.', 'success')
+        elif action == 'resubscribe':
+            placeholders = ','.join('?' * len(subscriber_ids))
+            conn.execute(
+                f'''UPDATE newsletter_subscribers 
+                SET status = 'active', unsubscribed_at = NULL 
+                WHERE id IN ({placeholders})''',
+                subscriber_ids
+            )
+            flash(f'Successfully reactivated {len(subscriber_ids)} subscribers.', 'success')
+        
+        conn.commit()
+    except Exception as e:
+        flash(f'Error performing bulk action: {str(e)}', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('admin_newsletter'))
+
+@app.route('/admin/newsletter/preview_email', methods=['POST'])
+@admin_required
+def preview_newsletter_email():
+    subject = request.form.get('subject', '').strip()
+    content = request.form.get('content', '').strip()
+    test_email = request.form.get('test_email', '').strip()
+    
+    if not subject or not content:
+        return jsonify({'success': False, 'error': 'Subject and content are required'})
+    
+    if not test_email or '@' not in test_email:
+        return jsonify({'success': False, 'error': 'Valid test email is required'})
+    
+    success, message = send_newsletter_email(test_email, subject, content, is_preview=True)
+    return jsonify({'success': success, 'message': message})
+
+@app.route('/admin/newsletter/send', methods=['POST'])
+@admin_required
+def send_newsletter():
+    subject = request.form.get('subject', '').strip()
+    content = request.form.get('content', '').strip()
+    subscriber_ids = request.form.getlist('subscriber_ids[]')
+    
+    if not subject or not content:
+        flash('Subject and content are required.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    if not subscriber_ids:
+        flash('No subscribers selected.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    conn = get_db_connection()
+    try:
+        # Get active subscribers
+        placeholders = ','.join('?' * len(subscriber_ids))
+        subscribers = conn.execute(
+            f'''SELECT email FROM newsletter_subscribers 
+            WHERE id IN ({placeholders}) AND status = 'active' ''',
+            subscriber_ids
+        ).fetchall()
+        
+        success_count = 0
+        error_count = 0
+        error_messages = []
+        
+        for subscriber in subscribers:
+            success, message = send_newsletter_email(subscriber['email'], subject, content)
+            if success:
+                success_count += 1
+            else:
+                error_count += 1
+                error_messages.append(f"{subscriber['email']}: {message}")
+        
+        if success_count > 0:
+            flash(f'Successfully sent newsletter to {success_count} subscribers.', 'success')
+        if error_count > 0:
+            flash(f'Failed to send to {error_count} subscribers. Check logs for details.', 'error')
+            app.logger.error(f'Newsletter sending errors: {json.dumps(error_messages)}')
+            
+    except Exception as e:
+        flash(f'Error sending newsletter: {str(e)}', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('admin_newsletter'))
+
+@app.route('/admin/newsletter/templates')
+@admin_required
+def newsletter_templates():
+    conn = get_db_connection()
+    templates = conn.execute('SELECT * FROM newsletter_templates ORDER BY name').fetchall()
+    conn.close()
+    return render_template('newsletter_templates.html', templates=templates)
+
+@app.route('/admin/newsletter/templates/add', methods=['POST'])
+@admin_required
+def add_newsletter_template():
+    name = request.form.get('name', '').strip()
+    subject = request.form.get('subject', '').strip()
+    content = request.form.get('content', '').strip()
+    description = request.form.get('description', '').strip()
+    
+    if not name or not subject or not content:
+        flash('Name, subject, and content are required.', 'error')
+        return redirect(url_for('newsletter_templates'))
+    
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            INSERT INTO newsletter_templates (name, subject, content, description)
+            VALUES (?, ?, ?, ?)
+        ''', (name, subject, content, description))
+        conn.commit()
+        flash('Template added successfully!', 'success')
+    except sqlite3.IntegrityError:
+        flash('A template with this name already exists.', 'error')
+    except Exception as e:
+        flash(f'Error adding template: {str(e)}', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('newsletter_templates'))
+
+@app.route('/admin/newsletter/templates/<int:template_id>/edit', methods=['POST'])
+@admin_required
+def edit_newsletter_template(template_id):
+    name = request.form.get('name', '').strip()
+    subject = request.form.get('subject', '').strip()
+    content = request.form.get('content', '').strip()
+    description = request.form.get('description', '').strip()
+    
+    if not name or not subject or not content:
+        flash('Name, subject, and content are required.', 'error')
+        return redirect(url_for('newsletter_templates'))
+    
+    conn = get_db_connection()
+    try:
+        conn.execute('''
+            UPDATE newsletter_templates 
+            SET name = ?, subject = ?, content = ?, description = ?, updated_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (name, subject, content, description, template_id))
+        conn.commit()
+        flash('Template updated successfully!', 'success')
+    except sqlite3.IntegrityError:
+        flash('A template with this name already exists.', 'error')
+    except Exception as e:
+        flash(f'Error updating template: {str(e)}', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('newsletter_templates'))
+
+@app.route('/admin/newsletter/templates/<int:template_id>/delete', methods=['POST'])
+@admin_required
+def delete_newsletter_template(template_id):
+    conn = get_db_connection()
+    try:
+        conn.execute('DELETE FROM newsletter_templates WHERE id = ?', (template_id,))
+        conn.commit()
+        flash('Template deleted successfully!', 'success')
+    except Exception as e:
+        flash(f'Error deleting template: {str(e)}', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('newsletter_templates'))
+
+@app.route('/admin/newsletter/import', methods=['POST'])
+@admin_required
+def import_subscribers():
+    if 'file' not in request.files:
+        flash('No file uploaded.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    file = request.files['file']
+    if not file or not file.filename:
+        flash('No file selected.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    if not file.filename.endswith('.csv'):
+        flash('Please upload a CSV file.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    try:
+        # Read CSV file
+        stream = StringIO(file.stream.read().decode("UTF8"), newline=None)
+        csv_reader = csv.DictReader(stream)
+        
+        # Validate required columns
+        required_columns = {'email'}
+        if not required_columns.issubset(csv_reader.fieldnames):
+            flash('CSV must contain an "email" column.', 'error')
+            return redirect(url_for('admin_newsletter'))
+        
+        conn = get_db_connection()
+        success_count = 0
+        error_count = 0
+        error_messages = []
+        
+        for row in csv_reader:
+            email = row['email'].strip().lower()
+            if not email or '@' not in email:
+                error_count += 1
+                error_messages.append(f"Invalid email: {email}")
+                continue
+            
+            try:
+                conn.execute('''
+                    INSERT OR IGNORE INTO newsletter_subscribers (email)
+                    VALUES (?)
+                ''', (email,))
+                success_count += 1
+            except Exception as e:
+                error_count += 1
+                error_messages.append(f"{email}: {str(e)}")
+        
+        conn.commit()
+        conn.close()
+        
+        if success_count > 0:
+            flash(f'Successfully imported {success_count} subscribers.', 'success')
+        if error_count > 0:
+            flash(f'Failed to import {error_count} subscribers. Check logs for details.', 'error')
+            app.logger.error(f'Subscriber import errors: {json.dumps(error_messages)}')
+            
+    except Exception as e:
+        flash(f'Error processing file: {str(e)}', 'error')
+    
+    return redirect(url_for('admin_newsletter'))
+
+@app.route('/admin/newsletter/templates/<int:template_id>')
+@admin_required
+def get_template(template_id):
+    conn = get_db_connection()
+    template = conn.execute('SELECT * FROM newsletter_templates WHERE id = ?', (template_id,)).fetchone()
+    conn.close()
+    
+    if template:
+        return jsonify({
+            'success': True,
+            'template': {
+                'name': template['name'],
+                'subject': template['subject'],
+                'content': template['content']
+            }
+        })
+    else:
+        return jsonify({'success': False, 'error': 'Template not found'}), 404
+
+@app.route('/admin/newsletter/schedule', methods=['POST'])
+@admin_required
+def schedule_newsletter():
+    subject = request.form.get('subject', '').strip()
+    content = request.form.get('content', '').strip()
+    scheduled_for = request.form.get('scheduled_for', '').strip()
+    template_id = request.form.get('template_id')
+    subscriber_ids = request.form.getlist('subscriber_ids[]')
+    
+    if not subject or not content or not scheduled_for or not subscriber_ids:
+        flash('All fields are required.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    try:
+        scheduled_datetime = datetime.datetime.strptime(scheduled_for, '%Y-%m-%dT%H:%M')
+        if scheduled_datetime < datetime.datetime.now():
+            flash('Scheduled time must be in the future.', 'error')
+            return redirect(url_for('admin_newsletter'))
+    except ValueError:
+        flash('Invalid date/time format.', 'error')
+        return redirect(url_for('admin_newsletter'))
+    
+    conn = get_db_connection()
+    try:
+        # Create scheduled newsletter
+        cursor = conn.execute('''
+            INSERT INTO scheduled_newsletters 
+            (subject, content, scheduled_for, created_by, template_id)
+            VALUES (?, ?, ?, ?, ?)
+        ''', (subject, content, scheduled_datetime, g.user['id'], template_id))
+        scheduled_id = cursor.lastrowid
+        
+        # Add recipients
+        for subscriber_id in subscriber_ids:
+            conn.execute('''
+                INSERT INTO scheduled_newsletter_recipients 
+                (scheduled_newsletter_id, subscriber_id)
+                VALUES (?, ?)
+            ''', (scheduled_id, subscriber_id))
+        
+        conn.commit()
+        flash('Newsletter scheduled successfully!', 'success')
+    except Exception as e:
+        conn.rollback()
+        flash(f'Error scheduling newsletter: {str(e)}', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('admin_newsletter'))
+
+@app.route('/admin/newsletter/scheduled')
+@admin_required
+def scheduled_newsletters():
+    conn = get_db_connection()
+    scheduled = conn.execute('''
+        SELECT sn.*, 
+               COUNT(snr.id) as total_recipients,
+               COUNT(CASE WHEN snr.status = 'sent' THEN 1 END) as sent_count,
+               COUNT(CASE WHEN snr.status = 'failed' THEN 1 END) as failed_count,
+               u.username as creator
+        FROM scheduled_newsletters sn
+        LEFT JOIN scheduled_newsletter_recipients snr ON sn.id = snr.scheduled_newsletter_id
+        LEFT JOIN users u ON sn.created_by = u.id
+        GROUP BY sn.id
+        ORDER BY sn.scheduled_for DESC
+    ''').fetchall()
+    conn.close()
+    return render_template('scheduled_newsletters.html', scheduled=scheduled)
+
+@app.route('/admin/newsletter/scheduled/<int:scheduled_id>/cancel', methods=['POST'])
+@admin_required
+def cancel_scheduled_newsletter(scheduled_id):
+    conn = get_db_connection()
+    try:
+        # Only allow cancellation of pending newsletters
+        conn.execute('''
+            UPDATE scheduled_newsletters 
+            SET status = 'cancelled' 
+            WHERE id = ? AND status = 'pending' AND scheduled_for > CURRENT_TIMESTAMP
+        ''', (scheduled_id,))
+        conn.commit()
+        flash('Newsletter cancelled successfully.', 'success')
+    except Exception as e:
+        flash(f'Error cancelling newsletter: {str(e)}', 'error')
+    finally:
+        conn.close()
+    return redirect(url_for('scheduled_newsletters'))
+
+@app.route('/admin/newsletter/scheduled/<int:scheduled_id>')
+@admin_required
+def view_scheduled_newsletter(scheduled_id):
+    conn = get_db_connection()
+    newsletter = conn.execute('''
+        SELECT sn.*, u.username as creator,
+               t.name as template_name
+        FROM scheduled_newsletters sn
+        LEFT JOIN users u ON sn.created_by = u.id
+        LEFT JOIN newsletter_templates t ON sn.template_id = t.id
+        WHERE sn.id = ?
+    ''', (scheduled_id,)).fetchone()
+    
+    if not newsletter:
+        conn.close()
+        flash('Scheduled newsletter not found.', 'error')
+        return redirect(url_for('scheduled_newsletters'))
+    
+    recipients = conn.execute('''
+        SELECT snr.*, ns.email
+        FROM scheduled_newsletter_recipients snr
+        JOIN newsletter_subscribers ns ON snr.subscriber_id = ns.id
+        WHERE snr.scheduled_newsletter_id = ?
+        ORDER BY snr.status, ns.email
+    ''', (scheduled_id,)).fetchall()
+    
+    conn.close()
+    return render_template('view_scheduled_newsletter.html', 
+                         newsletter=newsletter, 
+                         recipients=recipients)
+
+def send_scheduled_newsletters():
+    """Background task to send scheduled newsletters"""
+    conn = get_db_connection()
+    try:
+        # Get pending newsletters that are due
+        newsletters = conn.execute('''
+            SELECT id, subject, content
+            FROM scheduled_newsletters
+            WHERE status = 'pending' 
+            AND scheduled_for <= CURRENT_TIMESTAMP
+        ''').fetchall()
+        
+        for newsletter in newsletters:
+            # Get recipients
+            recipients = conn.execute('''
+                SELECT snr.id, ns.email
+                FROM scheduled_newsletter_recipients snr
+                JOIN newsletter_subscribers ns ON snr.subscriber_id = ns.id
+                WHERE snr.scheduled_newsletter_id = ?
+                AND snr.status = 'pending'
+            ''', (newsletter['id'],)).fetchall()
+            
+            success_count = 0
+            error_count = 0
+            
+            for recipient in recipients:
+                try:
+                    success, message = send_newsletter_email(
+                        recipient['email'],
+                        newsletter['subject'],
+                        newsletter['content']
+                    )
+                    
+                    if success:
+                        conn.execute('''
+                            UPDATE scheduled_newsletter_recipients
+                            SET status = 'sent', sent_at = CURRENT_TIMESTAMP
+                            WHERE id = ?
+                        ''', (recipient['id'],))
+                        success_count += 1
+                    else:
+                        conn.execute('''
+                            UPDATE scheduled_newsletter_recipients
+                            SET status = 'failed', error_message = ?
+                            WHERE id = ?
+                        ''', (message, recipient['id']))
+                        error_count += 1
+                        
+                except Exception as e:
+                    conn.execute('''
+                        UPDATE scheduled_newsletter_recipients
+                        SET status = 'failed', error_message = ?
+                        WHERE id = ?
+                    ''', (str(e), recipient['id']))
+                    error_count += 1
+            
+            # Update newsletter status
+            if error_count == 0:
+                status = 'completed'
+            elif success_count == 0:
+                status = 'failed'
+            else:
+                status = 'partial'
+                
+            conn.execute('''
+                UPDATE scheduled_newsletters
+                SET status = ?, sent_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (status, newsletter['id']))
+            
+            conn.commit()
+            
+    except Exception as e:
+        app.logger.error(f'Error in send_scheduled_newsletters: {str(e)}')
+    finally:
+        conn.close()
+
+# Add a scheduled task to run every minute
+from apscheduler.schedulers.background import BackgroundScheduler
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=send_scheduled_newsletters, trigger="interval", minutes=1)
+scheduler.start()
+
+# Ensure scheduler shuts down with the app
+import atexit
+atexit.register(lambda: scheduler.shutdown())
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+@app.route('/success_stories')
+def success_stories():
+    conn = get_db_connection()
+    try:
+        # Get approved success stories from reviews
+        stories = conn.execute('''
+            SELECT name, location, review_text, photo, created_at 
+            FROM reviews 
+            WHERE status = 'approve' 
+            ORDER BY created_at DESC
+        ''').fetchall()
+        return render_template('success_stories.html', stories=stories)
+    finally:
+        conn.close()
+
+@app.route('/safety')
+def safety():
+    return render_template('safety.html')
+
+@app.route('/contact', methods=['GET', 'POST'])
+def contact():
+    if request.method == 'POST':
+        name = request.form.get('name', '').strip()
+        email = request.form.get('email', '').strip()
+        subject = request.form.get('subject', '').strip()
+        message = request.form.get('message', '').strip()
+        
+        # Basic validation
+        if not all([name, email, subject, message]):
+            flash('All fields are required.', 'error')
+            return redirect(url_for('contact'))
+        
+        if '@' not in email:
+            flash('Please enter a valid email address.', 'error')
+            return redirect(url_for('contact'))
+        
+        try:
+            # Here you would typically:
+            # 1. Send an email to your support team
+            # 2. Store the message in a database
+            # 3. Send an auto-reply to the user
+            
+            # For now, we'll just flash a success message
+            flash('Thank you for your message! We will get back to you soon.', 'success')
+            return redirect(url_for('contact'))
+            
+        except Exception as e:
+            flash('An error occurred while sending your message. Please try again later.', 'error')
+            return redirect(url_for('contact'))
+    
+    return render_template('contact.html')
+
+@app.route('/dating-tips')
+def dating_tips():
+    return render_template('dating_tips.html')
+
+@app.route('/community-events')
+def community_events():
+    conn = get_db_connection()
+    try:
+        # Get upcoming events from the database
+        # For now, we'll use placeholder data since we haven't created the events table yet
+        events = [
+            {
+                'title': 'Jewish Singles Mixer',
+                'date': '2024-04-15',
+                'time': '7:00 PM',
+                'location': 'Kosher Restaurant, NYC',
+                'description': 'Join us for an evening of meaningful connections in a comfortable setting.',
+                'image': url_for('static', filename='events/mixer.jpg')
+            },
+            {
+                'title': 'Shabbat Dinner for Singles',
+                'date': '2024-04-20',
+                'time': '6:30 PM',
+                'location': 'Community Center, Brooklyn',
+                'description': 'Experience a traditional Shabbat dinner while meeting other Jewish singles.',
+                'image': url_for('static', filename='events/shabbat.jpg')
+            },
+            {
+                'title': 'Speed Dating Event',
+                'date': '2024-04-25',
+                'time': '8:00 PM',
+                'location': 'Modern Cafe, Manhattan',
+                'description': 'Meet multiple potential matches in a fun, structured environment.',
+                'image': url_for('static', filename='events/speed_dating.jpg')
+            }
+        ]
+        return render_template('community_events.html', events=events)
+    finally:
+        conn.close()
+
+@app.route('/faq')
+def faq():
+    faqs = [
+        {
+            'category': 'Account & Profile',
+            'questions': [
+                {
+                    'question': 'How do I create an account?',
+                    'answer': 'Click the "Register" button in the top navigation. You\'ll need to provide a username, password, and some basic information about yourself. After registration, you can complete your profile with more details.'
+                },
+                {
+                    'question': 'Can I change my profile information later?',
+                    'answer': 'Yes! You can edit your profile at any time by clicking on your profile picture in the top navigation and selecting "Edit Profile".'
+                },
+                {
+                    'question': 'How do I upload photos?',
+                    'answer': 'You can upload photos from your profile page. Click "Edit Profile" and use the photo upload section. We accept JPG, PNG, and GIF files up to 16MB.'
+                }
+            ]
+        },
+        {
+            'category': 'Matching & Messaging',
+            'questions': [
+                {
+                    'question': 'How does the matching system work?',
+                    'answer': 'Our matching system considers your preferences, observance level, and interests to suggest compatible matches. You can also browse profiles and use our search filters to find potential matches.'
+                },
+                {
+                    'question': 'When can I message someone?',
+                    'answer': 'You can message any user after you\'ve both liked each other\'s profiles. This mutual match system helps ensure meaningful connections.'
+                },
+                {
+                    'question': 'Is there a limit to how many people I can message?',
+                    'answer': 'Free users can message up to 5 matches per day. Premium members enjoy unlimited messaging.'
+                }
+            ]
+        },
+        {
+            'category': 'Safety & Privacy',
+            'questions': [
+                {
+                    'question': 'How do you protect my privacy?',
+                    'answer': 'We take privacy seriously. Your personal information is never shared with other users. You control what information is visible on your profile, and you can block or report any user who makes you uncomfortable.'
+                },
+                {
+                    'question': 'What should I do if I encounter inappropriate behavior?',
+                    'answer': 'Use the "Report" button on any profile or message to alert our team. We review all reports promptly and take appropriate action to maintain a safe community.'
+                },
+                {
+                    'question': 'Are the profiles verified?',
+                    'answer': 'We encourage users to verify their profiles with a photo ID. Verified profiles are marked with a badge to help you identify authentic users.'
+                }
+            ]
+        },
+        {
+            'category': 'Events & Community',
+            'questions': [
+                {
+                    'question': 'How do I find local events?',
+                    'answer': 'Visit our Community Events page to see upcoming events in your area. You can filter by location, date, and event type.'
+                },
+                {
+                    'question': 'Can I host an event?',
+                    'answer': 'Yes! We welcome community members to host events. Contact us through the Community Events page to learn more about hosting opportunities.'
+                },
+                {
+                    'question': 'Are the events kosher?',
+                    'answer': 'Yes, all our events are either held at kosher venues or provide kosher food options. We clearly indicate the kosher certification level for each event.'
+                }
+            ]
+        },
+        {
+            'category': 'Technical Support',
+            'questions': [
+                {
+                    'question': 'I forgot my password. How do I reset it?',
+                    'answer': 'Click the "Forgot Password" link on the login page. We\'ll send a password reset link to your registered email address.'
+                },
+                {
+                    'question': 'How do I delete my account?',
+                    'answer': 'Go to your profile settings and click "Delete Account". Please note that this action is permanent and cannot be undone.'
+                },
+                {
+                    'question': 'What if I encounter technical issues?',
+                    'answer': 'Contact our support team through the Contact page. We typically respond within 24 hours to help resolve any technical problems.'
+                }
+            ]
+        }
+    ]
+    return render_template('faq.html', faqs=faqs)
+
+@app.route('/blog')
+def blog():
+    # For now, we'll use placeholder blog posts
+    # Later we can create a blog_posts table in the database
+    posts = [
+        {
+            'title': 'Finding Love in the Digital Age: A Jewish Perspective',
+            'date': '2024-03-15',
+            'author': 'Rabbi Sarah Cohen',
+            'excerpt': 'How technology is changing the way Jewish singles connect while maintaining traditional values...',
+            'image': url_for('static', filename='blog/digital_love.jpg'),
+            'category': 'Dating Tips'
+        },
+        {
+            'title': 'The Importance of Shared Values in Jewish Dating',
+            'date': '2024-03-10',
+            'author': 'Dr. David Levy',
+            'excerpt': 'Why aligning on core Jewish values is crucial for building lasting relationships...',
+            'image': url_for('static', filename='blog/shared_values.jpg'),
+            'category': 'Relationships'
+        },
+        {
+            'title': 'Navigating Modern Dating as an Observant Jew',
+            'date': '2024-03-05',
+            'author': 'Miriam Goldstein',
+            'excerpt': 'Practical advice for maintaining religious observance while dating in today\'s world...',
+            'image': url_for('static', filename='blog/modern_dating.jpg'),
+            'category': 'Lifestyle'
+        }
+    ]
+    return render_template('blog.html', posts=posts)
+
+@app.route('/terms')
+def terms():
+    return render_template('terms.html')
+
+@app.route('/privacy')
+def privacy():
+    return render_template('privacy.html')
+
+@app.route('/cookies')
+def cookies():
+    return render_template('cookies.html')
+
+@app.route('/accessibility')
+def accessibility():
+    return render_template('accessibility.html')
+
+# Error handlers
+@app.errorhandler(404)
+def not_found_error(error):
+    return render_template('404.html'), 404
+
+@app.errorhandler(403)
+def forbidden_error(error):
+    return render_template('403.html'), 403
+
+@app.errorhandler(500)
+def internal_error(error):
+    return render_template('500.html'), 500
 
 if __name__ == '__main__':
     app.run(debug=True)

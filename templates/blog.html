@@ -1,0 +1,135 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h1 class="text-center mb-4">Jewish Dating Blog</h1>
+            <p class="text-center lead mb-5">
+                Insights, advice, and stories about Jewish dating and relationships.
+                Stay updated with our latest articles and dating tips.
+            </p>
+
+            <!-- Featured Post -->
+            <div class="card mb-5 featured-post">
+                <img src="{{ posts[0].image }}" class="card-img-top" alt="{{ posts[0].title }}">
+                <div class="card-body">
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="badge bg-primary">{{ posts[0].category }}</span>
+                        <small class="text-muted">{{ posts[0].date }}</small>
+                    </div>
+                    <h2 class="card-title h3">{{ posts[0].title }}</h2>
+                    <p class="card-text">{{ posts[0].excerpt }}</p>
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">By {{ posts[0].author }}</small>
+                        <a href="#" class="btn btn-primary">Read More</a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Blog Posts Grid -->
+            <div class="row">
+                {% for post in posts[1:] %}
+                <div class="col-md-6 mb-4">
+                    <div class="card h-100">
+                        <img src="{{ post.image }}" class="card-img-top" alt="{{ post.title }}">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="badge bg-primary">{{ post.category }}</span>
+                                <small class="text-muted">{{ post.date }}</small>
+                            </div>
+                            <h3 class="card-title h5">{{ post.title }}</h3>
+                            <p class="card-text">{{ post.excerpt }}</p>
+                            <div class="d-flex justify-content-between align-items-center mt-3">
+                                <small class="text-muted">By {{ post.author }}</small>
+                                <a href="#" class="btn btn-outline-primary btn-sm">Read More</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <!-- Newsletter Signup -->
+            <div class="card mt-5">
+                <div class="card-body text-center">
+                    <h2 class="h4 mb-4">Subscribe to Our Blog</h2>
+                    <p class="mb-4">
+                        Get the latest dating advice and Jewish relationship insights delivered to your inbox.
+                    </p>
+                    <form action="{{ url_for('subscribe_newsletter') }}" method="post" class="d-inline-block">
+                        <div class="input-group">
+                            <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                            <button type="submit" class="btn btn-primary">Subscribe</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.featured-post {
+    border: none;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.featured-post .card-img-top {
+    height: 300px;
+    object-fit: cover;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.card-img-top {
+    height: 200px;
+    object-fit: cover;
+}
+
+.badge {
+    font-weight: 500;
+    padding: 0.5em 1em;
+}
+
+.btn-primary {
+    padding: 0.5rem 1.5rem;
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    font-weight: 500;
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.text-muted {
+    color: #888 !important;
+}
+
+.input-group {
+    max-width: 400px;
+}
+
+@media (max-width: 768px) {
+    .featured-post .card-img-top {
+        height: 200px;
+    }
+    
+    .card-img-top {
+        height: 180px;
+    }
+}
+</style>
+{% endblock %} 

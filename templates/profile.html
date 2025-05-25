@@ -3,97 +3,111 @@
 {% block title %}My Profile - Jewish Dating App{% endblock %}
 
 {% block content %}
-<div class="profile-container">
-    <div class="profile-header">
-        <div class="profile-picture-container">
-            {% if profile and profile.profile_picture %}
-                <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="Profile Picture" class="profile-picture">
-            {% else %}
-                <div class="profile-picture-placeholder">
-                    <i class="fas fa-user"></i>
+<div class="container py-5">
+    <div class="profile-edit-container">
+        <div class="row justify-content-center">
+            <div class="col-md-8">
+                <h1 class="text-center mb-4">Edit Your Profile</h1>
+
+                <div class="profile-header-edit text-center mb-4">
+                    <div class="profile-picture-upload-container mb-3">
+                        {% if profile and profile.profile_picture %}
+                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="Profile Picture" class="profile-picture-lg rounded-circle">
+                        {% else %}
+                            <div class="profile-picture-placeholder-lg rounded-circle d-flex align-items-center justify-content-center mx-auto">
+                                <i class="fas fa-user fa-3x text-muted"></i>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <h2 class="h4">{{ g.user['first_name'] }} {{ g.user['last_name'] }}</h2>
                 </div>
-            {% endif %}
-        </div>
-        <h2>{{ g.user['first_name'] }} {{ g.user['last_name'] }}</h2>
-    </div>
 
-    <form method="post" enctype="multipart/form-data" class="profile-form">
-        <div class="form-group">
-            <label for="profile_picture">Profile Picture</label>
-            <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="form-control">
-            <small class="form-text text-muted">Upload a profile picture (max 16MB, allowed formats: PNG, JPG, JPEG, GIF)</small>
-        </div>
+                <form method="post" enctype="multipart/form-data" class="profile-form card p-4 shadow-sm">
+                    <div class="form-group mb-3">
+                        <label for="profile_picture" class="form-label">Profile Picture</label>
+                        <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="form-control">
+                        <small class="form-text text-muted">Upload a profile picture (max 16MB, allowed formats: PNG, JPG, JPEG, GIF)</small>
+                    </div>
 
-        <div class="form-group">
-            <label for="age">Age</label>
-            <input type="number" name="age" id="age" value="{{ profile['age'] if profile else '' }}" required min="18" max="120" class="form-control">
-        </div>
+                    <div class="form-group mb-3">
+                        <label for="age" class="form-label">Age</label>
+                        <input type="number" name="age" id="age" value="{{ profile['age'] if profile else '' }}" required min="18" max="120" class="form-control">
+                    </div>
 
-        <div class="form-group">
-            <label for="bio">About Me</label>
-            <textarea name="bio" id="bio" required class="form-control">{{ profile['bio'] if profile else '' }}</textarea>
-        </div>
+                    <div class="form-group mb-3">
+                        <label for="bio" class="form-label">About Me</label>
+                        <textarea name="bio" id="bio" required class="form-control" rows="4">{{ profile['bio'] if profile else '' }}</textarea>
+                    </div>
 
-        <div class="form-group">
-            <label for="observance_level">Level of Religious Observance</label>
-            <select name="observance_level" id="observance_level" class="form-control">
-                <option value="">Select...</option>
-                <option value="Orthodox" {% if profile and profile['observance_level'] == 'Orthodox' %}selected{% endif %}>Orthodox</option>
-                <option value="Modern Orthodox" {% if profile and profile['observance_level'] == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
-                <option value="Conservative" {% if profile and profile['observance_level'] == 'Conservative' %}selected{% endif %}>Conservative</option>
-                <option value="Reform" {% if profile and profile['observance_level'] == 'Reform' %}selected{% endif %}>Reform</option>
-                <option value="Reconstructionist" {% if profile and profile['observance_level'] == 'Reconstructionist' %}selected{% endif %}>Reconstructionist</option>
-                <option value="Just Jewish" {% if profile and profile['observance_level'] == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
-            </select>
-        </div>
+                    <div class="form-group mb-3">
+                        <label for="observance_level" class="form-label">Level of Religious Observance</label>
+                        <select name="observance_level" id="observance_level" class="form-select">
+                            <option value="">Select...</option>
+                            <option value="Orthodox" {% if profile and profile['observance_level'] == 'Orthodox' %}selected{% endif %}>Orthodox</option>
+                            <option value="Modern Orthodox" {% if profile and profile['observance_level'] == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
+                            <option value="Conservative" {% if profile and profile['observance_level'] == 'Conservative' %}selected{% endif %}>Conservative</option>
+                            <option value="Reform" {% if profile and profile['observance_level'] == 'Reform' %}selected{% endif %}>Reform</option>
+                            <option value="Reconstructionist" {% if profile and profile['observance_level'] == 'Reconstructionist' %}selected{% endif %}>Reconstructionist</option>
+                            <option value="Just Jewish" {% if profile and profile['observance_level'] == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
+                        </select>
+                    </div>
 
-        <div class="form-group">
-            <label for="kosher_level">Kosher Observance</label>
-            <select name="kosher_level" id="kosher_level" class="form-control">
-                <option value="">Select...</option>
-                <option value="Strictly Kosher" {% if profile and profile['kosher_level'] == 'Strictly Kosher' %}selected{% endif %}>Strictly Kosher</option>
-                <option value="Mostly Kosher" {% if profile and profile['kosher_level'] == 'Mostly Kosher' %}selected{% endif %}>Mostly Kosher</option>
-                <option value="Kosher Style" {% if profile and profile['kosher_level'] == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
-                <option value="Not Kosher" {% if profile and profile['kosher_level'] == 'Not Kosher' %}selected{% endif %}>Not Kosher</option>
-            </select>
-        </div>
+                    <div class="form-group mb-3">
+                        <label for="kosher_level" class="form-label">Kosher Observance</label>
+                        <select name="kosher_level" id="kosher_level" class="form-select">
+                            <option value="">Select...</option>
+                            <option value="Strictly Kosher" {% if profile and profile['kosher_level'] == 'Strictly Kosher' %}selected{% endif %}>Strictly Kosher</option>
+                            <option value="Mostly Kosher" {% if profile and profile['kosher_level'] == 'Mostly Kosher' %}selected{% endif %}>Mostly Kosher</option>
+                            <option value="Kosher Style" {% if profile and profile['kosher_level'] == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
+                            <option value="Not Kosher" {% if profile and profile['kosher_level'] == 'Not Kosher' %}selected{% endif %}>Not Kosher</option>
+                        </select>
+                    </div>
 
-        <div class="form-group">
-            <label for="shabbat_observance">Shabbat Observance</label>
-            <select name="shabbat_observance" id="shabbat_observance" class="form-control">
-                <option value="">Select...</option>
-                <option value="Fully Observant" {% if profile and profile['shabbat_observance'] == 'Fully Observant' %}selected{% endif %}>Fully Observant</option>
-                <option value="Partially Observant" {% if profile and profile['shabbat_observance'] == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
-                <option value="Not Observant" {% if profile and profile['shabbat_observance'] == 'Not Observant' %}selected{% endif %}>Not Observant</option>
-            </select>
-        </div>
+                    <div class="form-group mb-4">
+                        <label for="shabbat_observance" class="form-label">Shabbat Observance</label>
+                        <select name="shabbat_observance" id="shabbat_observance" class="form-select">
+                            <option value="">Select...</option>
+                            <option value="Fully Observant" {% if profile and profile['shabbat_observance'] == 'Fully Observant' %}selected{% endif %}>Fully Observant</option>
+                            <option value="Partially Observant" {% if profile and profile['shabbat_observance'] == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
+                            <option value="Not Observant" {% if profile and profile['shabbat_observance'] == 'Not Observant' %}selected{% endif %}>Not Observant</option>
+                        </select>
+                    </div>
 
-        <div class="form-group">
-            <label for="synagogue_affiliation">Synagogue Affiliation</label>
-            <input type="text" name="synagogue_affiliation" id="synagogue_affiliation" value="{{ profile['synagogue_affiliation'] if profile else '' }}" class="form-control">
-        </div>
+                    <div class="form-group mb-4">
+                        <label for="synagogue_affiliation" class="form-label">Synagogue Affiliation</label>
+                        <input type="text" name="synagogue_affiliation" id="synagogue_affiliation" value="{{ profile['synagogue_affiliation'] if profile else '' }}" class="form-control">
+                    </div>
 
-        <button type="submit" class="btn btn-primary">Save Profile</button>
-    </form>
-
-    <!-- Gallery Section -->
-    <div class="gallery-section">
-        <h3>My Photo Gallery</h3>
-        <form action="{{ url_for('upload_photo') }}" method="post" enctype="multipart/form-data" class="gallery-upload-form">
-            <input type="file" name="photo" accept="image/*" class="form-control" required>
-            <button type="submit" class="btn btn-primary" style="margin-top: 0.5rem;">Add Photo</button>
-        </form>
-        <div class="gallery-grid">
-            {% for photo in gallery_photos %}
-            <div class="gallery-photo-card">
-                <img src="{{ url_for('static', filename='uploads/' + photo['filename']) }}" alt="Gallery Photo">
-                <form action="{{ url_for('delete_photo', photo_id=photo['id']) }}" method="post" style="margin-top:0.5rem;">
-                    <button type="submit" class="btn btn-danger btn-sm">Delete</button>
+                    <button type="submit" class="btn btn-primary w-100">Save Profile</button>
                 </form>
+
+                <!-- Gallery Section -->
+                <div class="gallery-section mt-5 card p-4 shadow-sm">
+                    <h3 class="text-center mb-4">My Photo Gallery</h3>
+                    <form action="{{ url_for('upload_photo') }}" method="post" enctype="multipart/form-data" class="gallery-upload-form d-flex gap-3 mb-4">
+                        <input type="file" name="photo" accept="image/*" class="form-control" required>
+                        <button type="submit" class="btn btn-secondary flex-shrink-0">Add Photo</button>
+                    </form>
+                    <div class="gallery-grid row row-cols-2 row-cols-md-3 g-4 justify-content-center">
+                        {% for photo in gallery_photos %}
+                        <div class="col">
+                            <div class="gallery-photo-card card h-100">
+                                <img src="{{ url_for('static', filename='uploads/' + photo['filename']) }}" alt="Gallery Photo" class="card-img-top">
+                                <div class="card-body text-center p-2">
+                                    <form action="{{ url_for('delete_photo', photo_id=photo['id']) }}" method="post">
+                                        <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                        {% else %}
+                        <div class="col-12 text-center text-muted">
+                            <p>No gallery photos yet. Add some beautiful moments!</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
             </div>
-            {% else %}
-            <p style="color:#888;">No gallery photos yet. Add some beautiful moments!</p>
-            {% endfor %}
         </div>
     </div>
 </div>
@@ -101,51 +115,72 @@
 
 {% block extra_css %}
 <style>
-.gallery-section {
-    margin-top: 2.5rem;
-    background: #f8f9fa;
-    border-radius: 1rem;
-    padding: 1.5rem 1rem;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
+/* Add styles for the profile edit page */
+.profile-edit-container {
+    max-width: 900px;
+    margin: auto;
 }
-.gallery-section h3 {
-    color: #2c3e50;
-    font-size: 1.3rem;
+
+.profile-header-edit .profile-picture-upload-container {
+    width: 150px;
+    height: 150px;
+    position: relative;
     margin-bottom: 1rem;
-    font-weight: 700;
-    text-align: center;
 }
-.gallery-upload-form {
-    display: flex;
-    gap: 1rem;
-    justify-content: center;
-    margin-bottom: 1.5rem;
-}
-.gallery-grid {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1.5rem;
-    justify-content: center;
-}
-.gallery-photo-card {
-    background: #fff;
-    border-radius: 0.7rem;
-    box-shadow: 0 1px 6px rgba(0,0,0,0.07);
-    padding: 0.5rem;
-    text-align: center;
-    max-width: 180px;
-}
-.gallery-photo-card img {
-    width: 160px;
-    height: 160px;
+
+.profile-picture-lg {
+    width: 100%;
+    height: 100%;
     object-fit: cover;
-    border-radius: 0.5rem;
-    box-shadow: 0 1px 4px rgba(0,0,0,0.08);
+    border: 3px solid var(--primary-color);
 }
-.btn-sm {
-    font-size: 0.95rem;
-    padding: 0.3rem 0.8rem;
-    border-radius: 0.5rem;
+
+.profile-picture-placeholder-lg {
+    width: 150px;
+    height: 150px;
+    background-color: #e9ecef;
+    color: #6c757d;
+    font-size: 3rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 3px solid var(--primary-color);
+}
+
+.profile-form .form-label {
+    font-weight: 600;
+    color: var(--dark-gray);
+}
+
+.gallery-section h3 {
+    color: var(--dark-gray);
+    font-weight: 700;
+}
+
+.gallery-upload-form .form-control {
+    flex-grow: 1;
+}
+
+.gallery-photo-card img {
+    width: 100%; /* Make image responsive within its column */
+    height: 150px; /* Fixed height for gallery images */
+    object-fit: cover;
+    border-bottom: 1px solid #eee;
+}
+
+.gallery-grid .col {
+    flex-basis: 180px; /* Suggest a preferred width for grid items */
+    flex-grow: 1;
+    max-width: 200px; /* Max width to prevent stretching on larger screens */
+}
+
+@media (max-width: 576px) {
+    .gallery-upload-form {
+        flex-direction: column;
+    }
 }
 </style>
+{% endblock %}
+
+{% block extra_js %}
 {% endblock %}

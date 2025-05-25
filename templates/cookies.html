@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h1 class="text-center mb-4">Cookie Policy</h1>
+            <p class="text-center lead mb-5">
+                Last updated: {{ now().strftime('%B %d, %Y') }}
+            </p>
+
+            <div class="card">
+                <div class="card-body">
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">What Are Cookies</h2>
+                        <p>Cookies are small text files that are placed on your computer or mobile device when you visit our website. They help us make your experience better by:</p>
+                        <ul>
+                            <li>Remembering your preferences</li>
+                            <li>Understanding how you use our site</li>
+                            <li>Making our services more efficient</li>
+                            <li>Providing personalized content</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Types of Cookies We Use</h2>
+                        
+                        <h3 class="h5 mb-3">Essential Cookies</h3>
+                        <p>These cookies are necessary for the website to function properly. They enable basic functions like:</p>
+                        <ul>
+                            <li>User authentication</li>
+                            <li>Security features</li>
+                            <li>Basic site functionality</li>
+                        </ul>
+                        <p class="text-muted">These cookies cannot be disabled.</p>
+
+                        <h3 class="h5 mb-3 mt-4">Functional Cookies</h3>
+                        <p>These cookies remember your preferences and settings:</p>
+                        <ul>
+                            <li>Language preferences</li>
+                            <li>Theme settings</li>
+                            <li>Notification preferences</li>
+                        </ul>
+
+                        <h3 class="h5 mb-3 mt-4">Analytics Cookies</h3>
+                        <p>These cookies help us understand how visitors interact with our website:</p>
+                        <ul>
+                            <li>Page visit statistics</li>
+                            <li>User behavior patterns</li>
+                            <li>Site performance metrics</li>
+                        </ul>
+
+                        <h3 class="h5 mb-3 mt-4">Marketing Cookies</h3>
+                        <p>These cookies are used to deliver relevant advertisements:</p>
+                        <ul>
+                            <li>Personalized ad content</li>
+                            <li>Ad performance tracking</li>
+                            <li>Social media integration</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">How to Control Cookies</h2>
+                        <p>You can control and/or delete cookies as you wish. You can:</p>
+                        <ul>
+                            <li>Delete all cookies from your browser</li>
+                            <li>Set your browser to prevent cookies being placed</li>
+                            <li>Use our cookie consent tool to manage preferences</li>
+                        </ul>
+                        <p>To learn more about cookies and how to manage them, visit <a href="https://www.aboutcookies.org" target="_blank">www.aboutcookies.org</a>.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Browser Settings</h2>
+                        <p>Most web browsers allow you to control cookies through their settings. Here's how to access cookie settings in popular browsers:</p>
+                        <ul>
+                            <li><strong>Chrome:</strong> Settings → Privacy and security → Cookies and other site data</li>
+                            <li><strong>Firefox:</strong> Options → Privacy & Security → Cookies and Site Data</li>
+                            <li><strong>Safari:</strong> Preferences → Privacy → Cookies and website data</li>
+                            <li><strong>Edge:</strong> Settings → Cookies and site permissions → Cookies</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Third-Party Cookies</h2>
+                        <p>Some cookies are placed by third-party services that appear on our pages. These include:</p>
+                        <ul>
+                            <li>Analytics providers (Google Analytics)</li>
+                            <li>Social media platforms (Facebook, Twitter)</li>
+                            <li>Advertising networks</li>
+                            <li>Payment processors</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Updates to This Policy</h2>
+                        <p>We may update this cookie policy from time to time. Any changes will be posted on this page with an updated revision date.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Contact Us</h2>
+                        <p>If you have questions about our use of cookies, please contact us at:</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-envelope me-2"></i>privacy@jewishdating.com</li>
+                            <li><i class="fas fa-phone me-2"></i>(555) 123-4567</li>
+                        </ul>
+                    </section>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        By continuing to use our website, you consent to our use of cookies as described in this policy.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
+}
+
+section:last-child {
+    border-bottom: none;
+}
+
+h2 {
+    color: #333;
+    font-weight: 600;
+}
+
+h3 {
+    color: #444;
+    font-weight: 500;
+}
+
+ul {
+    padding-left: 1.2rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+    color: #444;
+}
+
+.text-muted {
+    font-size: 0.9rem;
+}
+
+.alert {
+    border: none;
+    background-color: #f8f9fa;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+    
+    h3 {
+        font-size: 1.1rem;
+    }
+}
+</style>
+{% endblock %} 

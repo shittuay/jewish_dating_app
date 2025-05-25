@@ -1,0 +1,179 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h1 class="text-center mb-4">Accessibility Statement</h1>
+            <p class="text-center lead mb-5">
+                Last updated: {{ now().strftime('%B %d, %Y') }}
+            </p>
+
+            <div class="card">
+                <div class="card-body">
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Our Commitment to Accessibility</h2>
+                        <p>Jewish Dating App is committed to ensuring digital accessibility for people of all abilities. We strive to continually improve the user experience for everyone and apply relevant accessibility standards.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Conformance Status</h2>
+                        <p>We aim to conform to the Web Content Accessibility Guidelines (WCAG) 2.1 Level AA standards. These guidelines explain how to make web content more accessible for people with disabilities.</p>
+                        <div class="alert alert-info">
+                            <i class="fas fa-info-circle me-2"></i>
+                            Our website is partially conformant with WCAG 2.1 Level AA. Partially conformant means that some parts of the content do not fully conform to the accessibility standard.
+                        </div>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Accessibility Features</h2>
+                        <p>We have implemented the following accessibility features:</p>
+                        <ul>
+                            <li>Keyboard navigation support</li>
+                            <li>Screen reader compatibility</li>
+                            <li>Alternative text for images</li>
+                            <li>Clear and consistent navigation</li>
+                            <li>Resizable text</li>
+                            <li>High contrast mode</li>
+                            <li>Focus indicators</li>
+                            <li>ARIA labels where appropriate</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Known Limitations</h2>
+                        <p>While we strive to ensure that our website is accessible, some areas may still present challenges:</p>
+                        <ul>
+                            <li>Some older PDF documents may not be fully accessible</li>
+                            <li>Some third-party content may not be fully accessible</li>
+                            <li>Some complex interactive features may require additional accessibility improvements</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Compatible Technologies</h2>
+                        <p>Our website is designed to be compatible with:</p>
+                        <ul>
+                            <li>Recent versions of major browsers (Chrome, Firefox, Safari, Edge)</li>
+                            <li>Screen readers (JAWS, NVDA, VoiceOver)</li>
+                            <li>Operating system accessibility features</li>
+                            <li>Mobile devices and their accessibility features</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Accessibility Tools</h2>
+                        <p>We provide the following tools to enhance accessibility:</p>
+                        <ul>
+                            <li>Text size adjustment controls</li>
+                            <li>High contrast mode toggle</li>
+                            <li>Keyboard shortcuts for common actions</li>
+                            <li>Skip navigation links</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Feedback and Contact</h2>
+                        <p>We welcome your feedback on the accessibility of our website. If you encounter any accessibility barriers or have suggestions for improvement, please contact us:</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-envelope me-2"></i>accessibility@jewishdating.com</li>
+                            <li><i class="fas fa-phone me-2"></i>(555) 123-4567</li>
+                            <li><i class="fas fa-tty me-2"></i>TTY: (555) 123-4568</li>
+                        </ul>
+                        <p class="mt-3">We aim to respond to accessibility feedback within 2 business days.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Assessment Methods</h2>
+                        <p>We assess our website's accessibility through:</p>
+                        <ul>
+                            <li>Automated testing tools</li>
+                            <li>Manual testing by our development team</li>
+                            <li>User testing with people who have disabilities</li>
+                            <li>Regular accessibility audits</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Ongoing Improvements</h2>
+                        <p>We are committed to ongoing improvements to our website's accessibility. This includes:</p>
+                        <ul>
+                            <li>Regular accessibility training for our team</li>
+                            <li>Periodic accessibility reviews</li>
+                            <li>Implementation of new accessibility features</li>
+                            <li>Updates based on user feedback</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">Alternative Access</h2>
+                        <p>If you encounter any accessibility issues, we offer alternative ways to access our services:</p>
+                        <ul>
+                            <li>Phone support for account management</li>
+                            <li>Email support for all services</li>
+                            <li>In-person assistance at our office</li>
+                            <li>Alternative format documents upon request</li>
+                        </ul>
+                    </section>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        This accessibility statement was last updated on {{ now().strftime('%B %d, %Y') }}. We regularly review and update our accessibility features and this statement.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
+}
+
+section:last-child {
+    border-bottom: none;
+}
+
+h2 {
+    color: #333;
+    font-weight: 600;
+}
+
+ul {
+    padding-left: 1.2rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+    color: #444;
+}
+
+.alert {
+    border: none;
+    background-color: #f8f9fa;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+{% endblock %} 

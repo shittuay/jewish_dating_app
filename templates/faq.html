@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="text-center mb-4">Frequently Asked Questions</h1>
+            <p class="text-center lead mb-5">
+                Find answers to common questions about our Jewish dating platform.
+                Can't find what you're looking for? <a href="{{ url_for('contact') }}">Contact us</a>.
+            </p>
+
+            <div class="accordion" id="faqAccordion">
+                {% for category in faqs %}
+                <div class="card mb-3">
+                    <div class="card-header bg-primary text-white" id="heading{{ loop.index }}">
+                        <h2 class="mb-0">
+                            <button class="btn btn-link text-white text-decoration-none w-100 text-start" 
+                                    type="button" 
+                                    data-bs-toggle="collapse" 
+                                    data-bs-target="#collapse{{ loop.index }}" 
+                                    aria-expanded="{% if loop.first %}true{% else %}false{% endif %}" 
+                                    aria-controls="collapse{{ loop.index }}">
+                                <i class="fas fa-chevron-{% if loop.first %}down{% else %}right{% endif %} me-2"></i>
+                                {{ category.category }}
+                            </button>
+                        </h2>
+                    </div>
+
+                    <div id="collapse{{ loop.index }}" 
+                         class="collapse {% if loop.first %}show{% endif %}" 
+                         aria-labelledby="heading{{ loop.index }}" 
+                         data-bs-parent="#faqAccordion">
+                        <div class="card-body">
+                            {% for qa in category.questions %}
+                            <div class="faq-item mb-4">
+                                <h3 class="h5 mb-3">
+                                    <i class="fas fa-question-circle text-primary me-2"></i>
+                                    {{ qa.question }}
+                                </h3>
+                                <p class="ms-4 ps-2">{{ qa.answer }}</p>
+                            </div>
+                            {% if not loop.last %}
+                            <hr class="my-3">
+                            {% endif %}
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+
+            <div class="card mt-5">
+                <div class="card-body text-center">
+                    <h2 class="h4 mb-4">Still Have Questions?</h2>
+                    <p class="mb-4">
+                        Our support team is here to help you with any questions or concerns.
+                        We typically respond within 24 hours.
+                    </p>
+                    <a href="{{ url_for('contact') }}" class="btn btn-primary btn-lg">
+                        Contact Support
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.accordion .card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.accordion .card-header {
+    border: none;
+    padding: 0;
+}
+
+.accordion .btn-link {
+    padding: 1rem;
+    font-weight: 600;
+    font-size: 1.1rem;
+}
+
+.accordion .btn-link:hover,
+.accordion .btn-link:focus {
+    text-decoration: none;
+    background-color: rgba(255,255,255,0.1);
+}
+
+.accordion .card-body {
+    padding: 1.5rem;
+}
+
+.faq-item {
+    color: #444;
+}
+
+.faq-item h3 {
+    color: #333;
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.btn-primary {
+    padding: 12px 30px;
+    font-weight: 600;
+}
+
+@media (max-width: 768px) {
+    .accordion .btn-link {
+        font-size: 1rem;
+        padding: 0.75rem;
+    }
+    
+    .accordion .card-body {
+        padding: 1rem;
+    }
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Add click handlers for accordion items
+    const accordionButtons = document.querySelectorAll('.accordion .btn-link');
+    accordionButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const icon = this.querySelector('i');
+            if (icon.classList.contains('fa-chevron-right')) {
+                icon.classList.remove('fa-chevron-right');
+                icon.classList.add('fa-chevron-down');
+            } else {
+                icon.classList.remove('fa-chevron-down');
+                icon.classList.add('fa-chevron-right');
+            }
+        });
+    });
+});
+</script>
+{% endblock %} 

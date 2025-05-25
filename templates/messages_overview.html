@@ -14,25 +14,23 @@
             {% if conversations %}
                 <div class="conversations-list">
                     {% for convo in conversations %}
-                        <div class="conversation-card">
-                            <a href="{{ url_for('conversation', user_id=convo.other_user_id) }}" class="conversation-link">
-                                <div class="conversation-content">
-                                    <div class="conversation-avatar">
-                                        <i class="fas fa-user-circle"></i>
-                                    </div>
-                                    <div class="conversation-info">
-                                        <h3 class="conversation-name">{{ convo.other_username }}</h3>
-                                        <p class="conversation-time">
-                                            <i class="far fa-clock"></i>
-                                            {{ convo.last_message_timestamp }}
-                                        </p>
-                                    </div>
-                                    <div class="conversation-arrow">
-                                        <i class="fas fa-chevron-right"></i>
-                                    </div>
+                        <a href="{{ url_for('conversation', user_id=convo.other_user_id) }}" class="conversation-card list-group-item list-group-item-action d-flex align-items-center">
+                            <div class="conversation-avatar me-3">
+                                <img src="{{ url_for('static', filename='uploads/' + (convo.other_user_profile_picture if convo.other_user_profile_picture else 'default_avatar.png')) }}" alt="{{ convo.other_username }}" class="rounded-circle" width="50" height="50">
+                            </div>
+                            <div class="conversation-info flex-grow-1">
+                                <div class="d-flex w-100 justify-content-between">
+                                    <h5 class="mb-1 conversation-name">{{ convo.other_username }}</h5>
+                                    <small class="conversation-time text-muted"><i class="far fa-clock"></i> {{ convo.last_message_timestamp }}</small>
                                 </div>
-                            </a>
-                        </div>
+                                {% if convo.last_message_content %}
+                                    <p class="mb-1 text-muted">{{ convo.last_message_content[:100] }}{% if convo.last_message_content|length > 100 %}...{% endif %}</p>
+                                {% else %}
+                                     <p class="mb-1 text-muted font-italic">No messages yet.</p>
+                                {% endif %}
+                            </div>
+                            <i class="fas fa-chevron-right ms-3 conversation-arrow"></i>
+                        </a>
                     {% endfor %}
                 </div>
             {% else %}
@@ -51,6 +49,9 @@
     </div>
 </div>
 
+{% endblock %}
+
+{% block extra_css %}
 <style>
 .messages-header {
     margin-bottom: 3rem;
@@ -67,45 +68,18 @@
     border-radius: 15px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
     transition: transform 0.2s ease, box-shadow 0.2s ease;
+    padding: 1.25rem;
+    border: none; /* Remove default list-group-item border */
 }
 
 .conversation-card:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    background-color: #f8f9fa; /* Subtle hover effect */
 }
 
-.conversation-link {
-    display: block;
-    padding: 1.25rem;
-    color: inherit;
-    text-decoration: none;
-}
-
-.conversation-link:hover {
-    color: inherit;
-}
-
-.conversation-content {
-    display: flex;
-    align-items: center;
-    gap: 1.25rem;
-}
-
-.conversation-avatar {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    background: #f8f9fa;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    color: #6c757d;
-    font-size: 1.75rem;
-    flex-shrink: 0;
-}
-
-.conversation-info {
-    flex-grow: 1;
+.conversation-avatar img {
+    border: 2px solid #eee;
 }
 
 .conversation-name {
@@ -119,10 +93,11 @@
     font-size: 0.9rem;
     color: #6c757d;
     margin: 0.25rem 0 0;
+    flex-shrink: 0; /* Prevent timestamp from shrinking */
 }
 
 .conversation-time i {
-    margin-right: 0.5rem;
+    margin-right: 0.25rem; /* Adjusted spacing */
 }
 
 .conversation-arrow {
@@ -164,6 +139,19 @@
 .btn-primary:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+}
+
+/* Responsive adjustments */
+@media (max-width: 576px) {
+    .conversation-content {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.75rem;
+    }
+    
+    .conversation-arrow {
+        align-self: flex-end;
+    }
 }
 </style>
 {% endblock %}

@@ -1,0 +1,168 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h1 class="text-center mb-4">Terms of Service</h1>
+            <p class="text-center lead mb-5">
+                Last updated: {{ now().strftime('%B %d, %Y') }}
+            </p>
+
+            <div class="card">
+                <div class="card-body">
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">1. Acceptance of Terms</h2>
+                        <p>By accessing and using the Jewish Dating App ("the Service"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing the Service.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">2. User Accounts</h2>
+                        <p>To use our Service, you must:</p>
+                        <ul>
+                            <li>Be at least 18 years old</li>
+                            <li>Provide accurate and complete information</li>
+                            <li>Maintain the security of your account</li>
+                            <li>Notify us immediately of any unauthorized use</li>
+                            <li>Not share your account credentials</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">3. User Conduct</h2>
+                        <p>You agree to:</p>
+                        <ul>
+                            <li>Use the Service only for lawful purposes</li>
+                            <li>Respect other users' privacy and dignity</li>
+                            <li>Not engage in harassment or abusive behavior</li>
+                            <li>Not post false or misleading information</li>
+                            <li>Not use the Service for commercial purposes without permission</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">4. Privacy and Data Protection</h2>
+                        <p>We are committed to protecting your privacy. Our Privacy Policy explains how we collect, use, and protect your personal information. By using our Service, you consent to our data practices as described in our Privacy Policy.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">5. Content Guidelines</h2>
+                        <p>You are responsible for all content you post on the Service. Content must:</p>
+                        <ul>
+                            <li>Be accurate and truthful</li>
+                            <li>Respect Jewish values and traditions</li>
+                            <li>Not contain explicit or inappropriate material</li>
+                            <li>Not infringe on others' rights</li>
+                            <li>Not promote hate speech or discrimination</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">6. Premium Features</h2>
+                        <p>Some features of our Service require a premium subscription. By subscribing, you agree to:</p>
+                        <ul>
+                            <li>Pay all fees associated with your subscription</li>
+                            <li>Provide accurate payment information</li>
+                            <li>Understand that subscriptions auto-renew unless cancelled</li>
+                            <li>Accept our refund policy as stated in our FAQ</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">7. Termination</h2>
+                        <p>We reserve the right to:</p>
+                        <ul>
+                            <li>Suspend or terminate accounts that violate these terms</li>
+                            <li>Remove content that violates our guidelines</li>
+                            <li>Modify or discontinue the Service at any time</li>
+                            <li>Refuse service to anyone for any reason</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">8. Limitation of Liability</h2>
+                        <p>The Service is provided "as is" without warranties of any kind. We are not liable for:</p>
+                        <ul>
+                            <li>Any damages arising from use of the Service</li>
+                            <li>Loss of data or content</li>
+                            <li>Interruptions in service</li>
+                            <li>Actions of other users</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">9. Changes to Terms</h2>
+                        <p>We may modify these terms at any time. We will notify users of significant changes via email or through the Service. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">10. Contact Information</h2>
+                        <p>For questions about these Terms of Service, please contact us at:</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-envelope me-2"></i>legal@jewishdating.com</li>
+                            <li><i class="fas fa-phone me-2"></i>(555) 123-4567</li>
+                            <li><i class="fas fa-map-marker-alt me-2"></i>123 Jewish Street, New York, NY 10001</li>
+                        </ul>
+                    </section>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        By using our Service, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
+}
+
+section:last-child {
+    border-bottom: none;
+}
+
+h2 {
+    color: #333;
+    font-weight: 600;
+}
+
+ul {
+    padding-left: 1.2rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+    color: #444;
+}
+
+.alert {
+    border: none;
+    background-color: #f8f9fa;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+{% endblock %} 

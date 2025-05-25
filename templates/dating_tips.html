@@ -1,0 +1,182 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="text-center mb-4">Jewish Dating Tips</h1>
+            <p class="text-center lead mb-5">
+                Navigating the world of Jewish dating can be both exciting and challenging. 
+                Here are some tips to help you make meaningful connections.
+            </p>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Creating an Authentic Profile</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-user-edit text-primary me-2"></i>Be Genuine</h5>
+                            <p>Share your true self, including your level of observance, values, and what makes you unique. Authenticity attracts meaningful connections.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-camera text-primary me-2"></i>Choose Photos Wisely</h5>
+                            <p>Select clear, recent photos that show your personality. Include a mix of solo shots and activities you enjoy.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-star text-primary me-2"></i>Highlight Your Values</h5>
+                            <p>Be clear about your religious observance, family values, and what you're looking for in a partner.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Making the First Move</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-comment text-primary me-2"></i>Start Meaningful Conversations</h5>
+                            <p>Reference something from their profile to show you've read it. Ask thoughtful questions about their interests and values.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-clock text-primary me-2"></i>Timing Matters</h5>
+                            <p>Respond to messages in a timely manner, but don't feel pressured to reply instantly. Quality conversations take time.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-heart text-primary me-2"></i>Show Interest</h5>
+                            <p>Express genuine interest in getting to know them better. Share your thoughts and experiences openly.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Planning the First Date</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-coffee text-primary me-2"></i>Choose the Right Setting</h5>
+                            <p>Select a comfortable, public place where you can talk easily. Consider kosher restaurants or coffee shops.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-calendar text-primary me-2"></i>Be Mindful of Timing</h5>
+                            <p>Consider Jewish holidays and Shabbat when planning dates. Respect each other's observance levels.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-utensils text-primary me-2"></i>Food Considerations</h5>
+                            <p>Be aware of dietary restrictions and preferences. Choose venues that accommodate kosher requirements.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Building a Connection</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-handshake text-primary me-2"></i>Respect Boundaries</h5>
+                            <p>Understand and respect each other's comfort levels with physical contact and religious practices.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-users text-primary me-2"></i>Family Involvement</h5>
+                            <p>Discuss expectations about family involvement in your dating process. Be clear about your preferences.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-balance-scale text-primary me-2"></i>Shared Values</h5>
+                            <p>Focus on finding common ground in religious observance, family values, and life goals.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Red Flags to Watch For</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-exclamation-triangle text-primary me-2"></i>Inconsistent Behavior</h5>
+                            <p>Be cautious of profiles that seem too good to be true or show inconsistent information.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-ban text-primary me-2"></i>Pressure Tactics</h5>
+                            <p>Watch out for anyone who pressures you to move too quickly or share personal information.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-shield-alt text-primary me-2"></i>Trust Your Instincts</h5>
+                            <p>If something feels off, trust your gut. Report any suspicious behavior to our support team.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title h4">Success Stories</h2>
+                    <p class="card-text">
+                        Many couples have found meaningful relationships through our platform. 
+                        Read their stories for inspiration and practical advice.
+                    </p>
+                    <div class="text-center">
+                        <a href="{{ url_for('success_stories') }}" class="btn btn-primary">
+                            Read Success Stories
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="mb-4">
+                    Remember: Dating is a journey. Stay true to yourself and your values, 
+                    and trust that the right connection will come at the right time.
+                </p>
+                <a href="{{ url_for('index') }}" class="btn btn-outline-primary">
+                    Return to Home
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.btn-primary {
+    padding: 12px 30px;
+    font-weight: 600;
+}
+
+.h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.list-unstyled li {
+    padding: 1rem;
+    border-radius: 0.5rem;
+    background-color: #f8f9fa;
+    margin-bottom: 1rem;
+}
+
+.list-unstyled li:last-child {
+    margin-bottom: 0;
+}
+</style>
+{% endblock %} 

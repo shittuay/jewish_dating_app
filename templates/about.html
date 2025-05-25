@@ -1,0 +1,86 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="text-center mb-4">About Jewish Dating App</h1>
+            
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Our Mission</h2>
+                    <p class="card-text">
+                        At Jewish Dating App, we're dedicated to helping Jewish singles find meaningful connections within their community. 
+                        We understand the importance of shared values, traditions, and cultural background in building lasting relationships.
+                    </p>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">What Makes Us Different</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6">Jewish-Focused Matching</h5>
+                            <p>Our platform is specifically designed for Jewish singles, taking into account important factors like observance level, kosher preferences, and Shabbat observance.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6">Community-Driven</h5>
+                            <p>We foster a supportive community where members can connect, share experiences, and participate in Jewish cultural events.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6">Privacy & Security</h5>
+                            <p>Your privacy is our priority. We implement strict security measures to ensure your personal information remains protected.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6">Success Stories</h5>
+                            <p>We take pride in the many successful matches and relationships that have formed through our platform.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Our Values</h2>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="h6">Tradition</h5>
+                            <p>We honor and respect Jewish traditions while embracing modern dating practices.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="h6">Inclusivity</h5>
+                            <p>We welcome Jews of all backgrounds and observance levels.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="h6">Authenticity</h5>
+                            <p>We encourage genuine connections and honest representation.</p>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="h6">Community</h5>
+                            <p>We foster a supportive environment for Jewish singles to connect.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Contact Us</h2>
+                    <p class="card-text">
+                        Have questions or need assistance? Our support team is here to help!
+                        <br>
+                        Email: support@jewishdating.com
+                        <br>
+                        We typically respond within 24 hours.
+                    </p>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Join Our Community</a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

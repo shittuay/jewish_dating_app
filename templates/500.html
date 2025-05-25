@@ -1,0 +1,126 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2 text-center">
+            <div class="error-page">
+                <h1 class="display-1 text-muted">500</h1>
+                <h2 class="mb-4">Internal Server Error</h2>
+                <p class="lead mb-5">
+                    Oops! Something went wrong on our end. We're working to fix it.
+                </p>
+                <div class="error-actions">
+                    <a href="{{ url_for('index') }}" class="btn btn-primary btn-lg me-3">
+                        <i class="fas fa-home me-2"></i>Go Home
+                    </a>
+                    <a href="{{ url_for('contact') }}" class="btn btn-outline-primary btn-lg">
+                        <i class="fas fa-envelope me-2"></i>Contact Support
+                    </a>
+                </div>
+                <div class="mt-5">
+                    <div class="alert alert-info" role="alert">
+                        <h4 class="alert-heading h5 mb-3">What happened?</h4>
+                        <p class="mb-0">
+                            We encountered an unexpected error while processing your request. 
+                            Our team has been notified and is working to resolve the issue.
+                        </p>
+                    </div>
+                    <div class="mt-4">
+                        <h3 class="h5 mb-3">In the meantime, you can:</h3>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <a href="{{ url_for('index') }}" class="text-decoration-none">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <i class="fas fa-home fa-2x text-primary mb-3"></i>
+                                            <h4 class="h6">Return Home</h4>
+                                            <p class="small text-muted">Go back to the homepage</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ url_for('faq') }}" class="text-decoration-none">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <i class="fas fa-question-circle fa-2x text-primary mb-3"></i>
+                                            <h4 class="h6">Check FAQ</h4>
+                                            <p class="small text-muted">Find answers to common questions</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                            <div class="col-md-4">
+                                <a href="{{ url_for('contact') }}" class="text-decoration-none">
+                                    <div class="card h-100">
+                                        <div class="card-body">
+                                            <i class="fas fa-headset fa-2x text-primary mb-3"></i>
+                                            <h4 class="h6">Get Support</h4>
+                                            <p class="small text-muted">Contact our support team</p>
+                                        </div>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.error-page {
+    padding: 3rem 0;
+}
+
+.display-1 {
+    font-size: 8rem;
+    font-weight: 700;
+    color: #e9ecef;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
+}
+
+.card {
+    transition: transform 0.2s;
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.btn {
+    padding: 0.8rem 2rem;
+    font-weight: 500;
+}
+
+.btn-outline-primary {
+    border-width: 2px;
+}
+
+.alert {
+    border: none;
+    background-color: #f8f9fa;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+}
+
+@media (max-width: 768px) {
+    .display-1 {
+        font-size: 6rem;
+    }
+    
+    .error-actions {
+        display: flex;
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .error-actions .btn {
+        width: 100%;
+    }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,164 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 offset-lg-2">
+            <h1 class="text-center mb-4">Privacy Policy</h1>
+            <p class="text-center lead mb-5">
+                Last updated: {{ now().strftime('%B %d, %Y') }}
+            </p>
+
+            <div class="card">
+                <div class="card-body">
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">1. Information We Collect</h2>
+                        <p>We collect information to provide better services to our users. The types of information we collect include:</p>
+                        <ul>
+                            <li>Account information (username, email, password)</li>
+                            <li>Profile information (age, bio, observance level, photos)</li>
+                            <li>Usage data (matches, messages, likes)</li>
+                            <li>Device information (IP address, browser type)</li>
+                            <li>Location data (if you choose to share it)</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">2. How We Use Your Information</h2>
+                        <p>We use the collected information to:</p>
+                        <ul>
+                            <li>Provide and maintain our dating service</li>
+                            <li>Match you with compatible profiles</li>
+                            <li>Send you notifications and updates</li>
+                            <li>Improve our services and user experience</li>
+                            <li>Ensure platform safety and security</li>
+                            <li>Comply with legal obligations</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">3. Information Sharing</h2>
+                        <p>We do not sell your personal information. We may share your information with:</p>
+                        <ul>
+                            <li>Other users (as part of your public profile)</li>
+                            <li>Service providers (hosting, analytics, etc.)</li>
+                            <li>Law enforcement (when required by law)</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">4. Data Security</h2>
+                        <p>We implement appropriate security measures to protect your information, including:</p>
+                        <ul>
+                            <li>Encryption of sensitive data</li>
+                            <li>Regular security assessments</li>
+                            <li>Access controls and authentication</li>
+                            <li>Secure data storage and transmission</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">5. Your Rights</h2>
+                        <p>You have the right to:</p>
+                        <ul>
+                            <li>Access your personal information</li>
+                            <li>Correct inaccurate data</li>
+                            <li>Request deletion of your data</li>
+                            <li>Opt-out of marketing communications</li>
+                            <li>Export your data</li>
+                        </ul>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">6. Cookies and Tracking</h2>
+                        <p>We use cookies and similar technologies to:</p>
+                        <ul>
+                            <li>Remember your preferences</li>
+                            <li>Analyze site usage</li>
+                            <li>Improve our services</li>
+                            <li>Provide personalized content</li>
+                        </ul>
+                        <p>You can control cookie settings through your browser preferences.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">7. Children's Privacy</h2>
+                        <p>Our service is not intended for users under 18 years of age. We do not knowingly collect information from children.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">8. Changes to This Policy</h2>
+                        <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date.</p>
+                    </section>
+
+                    <section class="mb-5">
+                        <h2 class="h4 mb-3">9. Contact Us</h2>
+                        <p>If you have questions about this privacy policy, please contact us at:</p>
+                        <ul class="list-unstyled">
+                            <li><i class="fas fa-envelope me-2"></i>privacy@jewishdating.com</li>
+                            <li><i class="fas fa-phone me-2"></i>(555) 123-4567</li>
+                            <li><i class="fas fa-map-marker-alt me-2"></i>123 Jewish Street, New York, NY 10001</li>
+                        </ul>
+                    </section>
+
+                    <div class="alert alert-info mt-4">
+                        <i class="fas fa-info-circle me-2"></i>
+                        By using our Service, you acknowledge that you have read and understood this Privacy Policy.
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
+}
+
+section:last-child {
+    border-bottom: none;
+}
+
+h2 {
+    color: #333;
+    font-weight: 600;
+}
+
+ul {
+    padding-left: 1.2rem;
+}
+
+ul li {
+    margin-bottom: 0.5rem;
+    color: #444;
+}
+
+.alert {
+    border: none;
+    background-color: #f8f9fa;
+    color: #666;
+}
+
+@media (max-width: 768px) {
+    .card-body {
+        padding: 1.5rem;
+    }
+    
+    h2 {
+        font-size: 1.3rem;
+    }
+}
+</style>
+{% endblock %} 

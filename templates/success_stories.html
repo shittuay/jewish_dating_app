@@ -1,0 +1,100 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="text-center mb-4">Success Stories</h1>
+            <p class="text-center lead mb-5">
+                Real stories from real couples who found love on Jewish Dating App.
+                Your success story could be next!
+            </p>
+
+            {% if stories %}
+                {% for story in stories %}
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <div class="row">
+                                {% if story.photo %}
+                                    <div class="col-md-4 mb-3 mb-md-0">
+                                        <img src="{{ url_for('static', filename='uploads/' + story.photo) }}" 
+                                             alt="Success Story Photo" 
+                                             class="img-fluid rounded">
+                                    </div>
+                                {% endif %}
+                                <div class="col">
+                                    <h3 class="card-title h5">{{ story.name }}</h3>
+                                    {% if story.location %}
+                                        <p class="text-muted mb-3">
+                                            <i class="fas fa-map-marker-alt"></i> {{ story.location }}
+                                        </p>
+                                    {% endif %}
+                                    <p class="card-text">{{ story.review_text }}</p>
+                                    <small class="text-muted">
+                                        Posted on {{ story.created_at.strftime('%B %d, %Y') }}
+                                    </small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            {% else %}
+                <div class="text-center">
+                    <div class="alert alert-info">
+                        <h4 class="alert-heading">Be the First!</h4>
+                        <p>No success stories yet. Join our community and be the first to share your story!</p>
+                    </div>
+                </div>
+            {% endif %}
+
+            <div class="text-center mt-5">
+                <h2 class="h4 mb-4">Share Your Story</h2>
+                <p class="mb-4">
+                    Found love on Jewish Dating App? We'd love to hear your story!
+                    Share your experience and inspire others in their journey to find meaningful connections.
+                </p>
+                <a href="{{ url_for('index') }}#review-form" class="btn btn-primary btn-lg">
+                    Submit Your Story
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+.card img {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.text-muted {
+    color: #888 !important;
+}
+
+.alert {
+    border: none;
+    background-color: #f8f9fa;
+}
+
+.btn-primary {
+    padding: 12px 30px;
+    font-weight: 600;
+}
+</style>
+{% endblock %} 

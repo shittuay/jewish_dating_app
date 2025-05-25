@@ -15,21 +15,26 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+            font-family: 'Inter', sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background-color: #f8fafd;
+            padding-top: 80px;
         }
         .main-content {
             flex: 1 0 auto;
         }
         :root {
-            --primary-color: #4a90e2;
-            --secondary-color: #2c3e50;
+            --primary-color: #2B4C7E;
+            --secondary-color: #D4AF37;
             --success-color: #2ecc71;
             --danger-color: #e74c3c;
             --warning-color: #f1c40f;
-            --light-gray: #f5f6fa;
+            --light-gray: #f8fafd;
             --dark-gray: #2c3e50;
             --text-color: #333;
             --border-radius: 8px;
-            --box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            --box-shadow: 0 4px 10px rgba(0,0,0,0.05);
         }
 
         * {
@@ -38,58 +43,241 @@
             box-sizing: border-box;
         }
 
-        body {
-            font-family: 'Roboto', sans-serif;
-            line-height: 1.6;
-            color: var(--text-color);
-            background-color: var(--light-gray);
-        }
-
         .navbar {
-            background: #2B4C7E;
-            color: #fff;
-            box-shadow: 0 2px 8px rgba(44,76,126,0.08);
-            padding: 1.2rem 0;
+            background: #fff;
+            box-shadow: var(--box-shadow);
+            padding: 0.75rem 0;
             position: fixed;
-            top: 0; left: 0; right: 0;
+            top: 0;
+            left: 0;
+            right: 0;
             width: 100%;
             z-index: 1000;
+            transition: all 0.3s ease;
         }
 
         .navbar-content {
             max-width: 1200px;
             margin: 0 auto;
+            padding: 0 1.5rem;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            padding: 0 2rem;
+            justify-content: space-between;
         }
 
         .navbar-brand {
-            font-size: 2rem;
-            font-weight: 800;
-            color: #D4AF37;
-            letter-spacing: 1px;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: var(--primary-color);
             text-decoration: none;
+            transition: color 0.2s ease;
             font-family: 'Playfair Display', serif;
         }
 
-        .navbar-nav {
+        .navbar-brand:hover {
+            color: var(--secondary-color);
+        }
+
+        .navbar-toggle {
+            display: none;
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            font-size: 1.5rem;
+            color: var(--primary-color);
+        }
+
+        .navbar-menu {
             display: flex;
-            gap: 2rem;
-            list-style: none;
+            align-items: center;
+            gap: 1.5rem;
+        }
+
+        .navbar-start {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .navbar-end {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
         }
 
         .nav-link {
-            color: #fff;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #555;
             text-decoration: none;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: color 0.2s;
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            font-weight: 500;
         }
 
         .nav-link:hover {
-            color: #D4AF37;
+            color: var(--primary-color);
+            background: #f0f0f0;
+        }
+
+        .nav-link.active {
+            color: var(--primary-color);
+            background: #e9ecef;
+        }
+
+        .nav-link i {
+            font-size: 1.1rem;
+        }
+
+        .nav-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid #eee;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-toggle {
+            background: none;
+            border: none;
+            padding: 0.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            color: #555;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+
+        .dropdown-toggle:hover {
+            color: var(--primary-color);
+        }
+
+        .dropdown-toggle::after {
+            display: none;
+        }
+
+        .dropdown-menu {
+            min-width: 200px;
+            padding: 0.5rem;
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .dropdown-item {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            padding: 0.75rem 1rem;
+            color: #495057;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+            text-decoration: none;
+        }
+
+        .dropdown-item:hover {
+            background: #f8f9fa;
+            color: var(--primary-color);
+        }
+
+        .dropdown-item i {
+            width: 20px;
+            text-align: center;
+            font-size: 1.1rem;
+        }
+
+        .dropdown-item .badge {
+            margin-left: auto;
+            background: var(--danger-color);
+            color: white;
+            padding: 0.25rem 0.5rem;
+            border-radius: 20px;
+            font-size: 0.75rem;
+        }
+
+        .dropdown-divider {
+            margin: 0.5rem 0;
+            border-color: #f0f0f0;
+        }
+
+        .btn-primary {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.6rem 1.25rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .btn-primary:hover {
+            background: #1d3357;
+            transform: translateY(-1px);
+        }
+
+        @media (max-width: 992px) {
+            .navbar-toggle {
+                display: block;
+            }
+            
+            .navbar-menu {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: #fff;
+                padding: 1rem;
+                flex-direction: column;
+                gap: 0.75rem;
+                box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+                transform: translateY(0%);
+                opacity: 1;
+                visibility: visible;
+                transition: all 0.3s ease;
+                display: none;
+                border-top: 1px solid #eee;
+            }
+            
+            .navbar-menu.active {
+                display: flex;
+            }
+            
+            .navbar-start,
+            .navbar-end {
+                flex-direction: column;
+                width: 100%;
+                gap: 0.5rem;
+            }
+            
+            .nav-link {
+                width: 100%;
+                justify-content: flex-start;
+                padding: 0.75rem 1rem;
+            }
+            
+            .dropdown-menu {
+                position: static !important;
+                transform: none !important;
+                box-shadow: none;
+                border: 1px solid #f0f0f0;
+                margin-top: 0.5rem;
+            }
+
+            .hero-section {
+                padding-top: 10rem;
+            }
         }
 
         .main-content {
@@ -115,11 +303,6 @@
             text-decoration: none;
             cursor: pointer;
             transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
         }
 
         .btn-primary:hover {
@@ -201,23 +384,6 @@
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 1.5rem;
-        }
-
-        @media (max-width: 768px) {
-            .navbar-content {
-                flex-direction: column;
-                gap: 1rem;
-            }
-
-            .navbar-nav {
-                flex-direction: column;
-                align-items: center;
-                gap: 0.5rem;
-            }
-
-            .main-content {
-                margin-top: 120px;
-            }
         }
 
         .site-footer {
@@ -448,24 +614,72 @@
 <body>
     <nav class="navbar">
         <div class="navbar-content">
-            <a href="{{ url_for('index') }}" class="navbar-brand">Jewish Dating App</a>
-            {% if g.user %}
-            <ul class="navbar-nav">
-                <li><a href="{{ url_for('profile') }}" class="nav-link">My Profile</a></li>
-                <li><a href="{{ url_for('browse_profiles') }}" class="nav-link">Browse</a></li>
-                <li><a href="{{ url_for('search_profiles') }}" class="nav-link">Search</a></li>
-                <li><a href="{{ url_for('my_likes') }}" class="nav-link">My Likes</a></li>
-                <li><a href="{{ url_for('messages') }}" class="nav-link">Messages</a></li>
-                <li><a href="{{ url_for('my_adverts') }}" class="nav-link">My Adverts</a></li>
-                <li><a href="{{ url_for('adverts') }}" class="nav-link">Adverts</a></li>
-                <li><a href="{{ url_for('logout') }}" class="nav-link">Logout</a></li>
-            </ul>
-            {% else %}
-            <ul class="navbar-nav">
-                <li><a href="{{ url_for('login') }}" class="nav-link">Login</a></li>
-                <li><a href="{{ url_for('register') }}" class="nav-link">Register</a></li>
-            </ul>
-            {% endif %}
+            <a href="{{ url_for('index') }}" class="navbar-brand">
+                Jewish Dating App
+            </a>
+            <button class="navbar-toggle" id="navbarToggle" aria-label="Toggle navigation menu">
+                <i class="fas fa-bars"></i>
+            </button>
+            <div class="navbar-menu" id="navbarMenu">
+                {% if g.user %}
+                <div class="navbar-start">
+                    <a href="{{ url_for('profile') }}" class="nav-link {% if request.endpoint == 'profile' %}active{% endif %}">
+                        <i class="fas fa-user-circle"></i>
+                        <span>My Profile</span>
+                    </a>
+                    <a href="{{ url_for('browse_profiles') }}" class="nav-link {% if request.endpoint == 'browse_profiles' %}active{% endif %}">
+                        <i class="fas fa-search"></i>
+                        <span>Browse Profiles</span>
+                    </a>
+                    <a href="{{ url_for('search_profiles') }}" class="nav-link {% if request.endpoint == 'search_profiles' %}active{% endif %}">
+                        <i class="fas fa-search-plus"></i>
+                        <span>Search</span>
+                    </a>
+                </div>
+                <div class="navbar-end">
+                    <a href="{{ url_for('my_likes') }}" class="nav-link {% if request.endpoint == 'my_likes' %}active{% endif %}">
+                        <i class="fas fa-heart"></i>
+                        <span>Likes</span>
+                        {% if profile and profile.new_likes_count %}
+                        <span class="badge">{{ profile.new_likes_count }}</span>
+                        {% endif %}
+                    </a>
+                    <a href="{{ url_for('messages') }}" class="nav-link {% if request.endpoint == 'messages' %}active{% endif %}">
+                        <i class="fas fa-comments"></i>
+                        <span>Messages</span>
+                        {% if profile and profile.unread_messages_count %}
+                        <span class="badge">{{ profile.unread_messages_count }}</span>
+                        {% endif %}
+                    </a>
+                    {% if profile %}
+                    <div class="dropdown">
+                        <button class="dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+                             <img src="{{ url_for('static', filename='uploads/' + (profile.profile_picture if profile.profile_picture else 'default_avatar.png')) }}" 
+                                 class="nav-avatar" alt="Profile Picture">
+                             <span>{{ g.user['username']|capitalize }}</span>
+                        </button>
+                        <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                            <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i> My Profile</a></li>
+                            {# <li><a class="dropdown-item" href="{{ url_for('settings') }}"><i class="fas fa-cog"></i> Settings</a></li> #} {# Temporarily removed as settings route is not defined #}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item" href="{{ url_for('logout') }}"><i class="fas fa-sign-out-alt"></i> Logout</a></li>
+                        </ul>
+                    </div>
+                    {% endif %}
+                </div>
+                {% else %}
+                <div class="navbar-end">
+                    <a href="{{ url_for('login') }}" class="nav-link {% if request.endpoint == 'login' %}active{% endif %}">
+                        <i class="fas fa-sign-in-alt"></i>
+                        <span>Login</span>
+                    </a>
+                    <a href="{{ url_for('register') }}" class="btn btn-primary {% if request.endpoint == 'register' %}active{% endif %}">
+                        <i class="fas fa-user-plus"></i>
+                        <span>Join Now</span>
+                    </a>
+                </div>
+                {% endif %}
+            </div>
         </div>
     </nav>
 
@@ -493,8 +707,8 @@
                 <a href="#">Our Proven Process</a>
                 <a href="#">Client Stories</a>
                 <a href="#">FAQ</a>
-                <a href="/privacy">Privacy Policy</a>
-                <a href="/terms">Terms of Use</a>
+                <a href="#">Privacy Policy</a>
+                <a href="#">Terms of Use</a>
             </div>
             <div class="footer-links-group">
                 <a href="#">Christian Singles</a>
@@ -508,7 +722,11 @@
             </div>
         </div>
         <div class="footer-bottom">
-            &copy; 2025 Jewish Dating App. All rights reserved.
+            <div class="footer-info">
+                <p>&copy; 2024 Jewish Dating App. All rights reserved.</p>
+                <p class="footer-tagline">Building meaningful Jewish connections, one match at a time.</p>
+            </div>
+            <!-- Temporarily removing trust badges until images are available -->
         </div>
     </footer>
 
@@ -583,6 +801,24 @@
                 messages.scrollTop = messages.scrollHeight;
             });
         });
+
+        const navbarToggle = document.querySelector('.navbar-toggle');
+        const navbarMenu = document.querySelector('.navbar-menu');
+        
+        if (navbarToggle && navbarMenu) {
+            navbarToggle.addEventListener('click', function() {
+                navbarMenu.classList.toggle('active');
+                this.classList.toggle('active');
+            });
+            
+            // Close menu when clicking outside
+            document.addEventListener('click', function(event) {
+                if (!navbarToggle.contains(event.target) && !navbarMenu.contains(event.target)) {
+                    navbarMenu.classList.remove('active');
+                    navbarToggle.classList.remove('active');
+                }
+            });
+        }
     });
     </script>
 </body>

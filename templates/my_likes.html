@@ -1,109 +1,265 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>My Likes - Jewish Dating App</title>
-    <style>
-        /* ... (Existing styles, copy .profile-card-image from browse_profiles.html styles) ... */
-        .profile-card {
-            /* ... (Existing styles) ... */
-            align-items: flex-start; /* Align items to top to prevent image from pushing content down */
-        }
-        .profile-card-image { /* New style for image container */
-            flex-shrink: 0;
-            margin-right: 20px;
-            width: 100px;
-            height: 100px;
-            overflow: hidden;
-            border-radius: 50%;
-            border: 1px solid #ddd;
-            background-color: #f0f0f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .profile-card-image img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Your Connections</h1>
-        {% with messages = get_flashed_messages(with_categories=true) %}
-            {% if messages %}<ul class="flash-messages">{% for category, message in messages %}<li class="flash-message {{ category }}">{{ message }}</li>{% endfor %}</ul>{% endif %}
-        {% endwith %}
+{% extends "base.html" %}
 
-        <h2>Matches (Mutual Likes!)</h2>
-        {% if mutual_likes %}
-            {% for profile in mutual_likes %}
-                <div class="profile-card">
-                    <div class="profile-card-image">
-                        {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="{{ profile.username }}">
-                        {% else %}
-                            <div class="profile-picture-placeholder">No profile picture</div>
-                        {% endif %}
-                    </div>
-                    <div class="profile-info">
-                        <h3>{{ profile.username }}</h3>
-                        </div>
-                    <div class="profile-actions">
-                        </div>
-                </div>
-            {% endfor %}
-        {% else %}
-            <div class="no-profiles"><p>No mutual likes yet. Keep Browse and liking!</p></div>
+{% block title %}My Likes - Jewish Dating App{% endblock %}
+
+{% block content %}
+<div class="container my-likes-page">
+    <h1>Your Connections</h1>
+
+    {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+            <ul class="flash-messages">
+                {% for category, message in messages %}
+                    <li class="flash-message {{ category }}">{{ message }}</li>
+                {% endfor %}
+            </ul>
         {% endif %}
+    {% endwith %}
 
+    <section class="mutual-likes-section">
+        <h2>Matches <small>(Mutual Likes!)</small></h2>
+        {% if mutual_likes %}
+            <div class="profiles-grid">
+                {% for profile in mutual_likes %}
+                    {# Include or adapt profile card structure from browse_profiles.html #}
+                    <div class="profile-card">
+                        <div class="profile-image-container">
+                            <img src="{{ url_for('static', filename='uploads/' + (profile.profile_picture if profile.profile_picture else 'default_avatar.png')) }}" 
+                                 alt="{{ profile.username }}" 
+                                 class="profile-image">
+                        </div>
+                        <div class="profile-info">
+                            <h3>{{ profile.username }}</h3>
+                             <div class="profile-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    <span>{{ profile.age }} years old</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-star-of-david"></i>
+                                    <span>{{ profile.observance_level }}</span>
+                                </div>
+                            </div>
+                             <p class="profile-bio">{{ profile.bio[:100] }}{% if profile.bio|length > 100 %}...{% endif %}</p>
+                        </div>
+                        <div class="profile-actions">
+                            <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" class="btn btn-primary btn-sm">View Profile</a>
+                             {# Add message button if needed #}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="no-profiles">No mutual likes yet. Keep browsing and liking!</p>
+        {% endif %}
+    </section>
+
+    <section class="liked-by-me-section">
         <h2>Profiles You've Liked</h2>
         {% if liked_by_me %}
-            {% for profile in liked_by_me %}
-                <div class="profile-card">
-                    <div class="profile-card-image">
-                        {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="{{ profile.username }}">
-                        {% else %}
-                            <div class="profile-picture-placeholder">No profile picture</div>
-                        {% endif %}
+            <div class="profiles-grid">
+                {% for profile in liked_by_me %}
+                    {# Include or adapt profile card structure #}
+                     <div class="profile-card">
+                        <div class="profile-image-container">
+                            <img src="{{ url_for('static', filename='uploads/' + (profile.profile_picture if profile.profile_picture else 'default_avatar.png')) }}" 
+                                 alt="{{ profile.username }}" 
+                                 class="profile-image">
+                        </div>
+                        <div class="profile-info">
+                            <h3>{{ profile.username }}</h3>
+                             <div class="profile-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    <span>{{ profile.age }} years old</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-star-of-david"></i>
+                                    <span>{{ profile.observance_level }}</span>
+                                </div>
+                            </div>
+                             <p class="profile-bio">{{ profile.bio[:100] }}{% if profile.bio|length > 100 %}...{% endif %}</p>
+                        </div>
+                        <div class="profile-actions">
+                            <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" class="btn btn-primary btn-sm">View Profile</a>
+                            {# Add unlike button if needed #}
+                        </div>
                     </div>
-                    <div class="profile-info">
-                        <h3>{{ profile.username }}</h3>
-                        </div>
-                    <div class="profile-actions">
-                        </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         {% else %}
-            <div class="no-profiles"><p>You haven't liked any profiles yet. Start Browse!</p></div>
+            <p class="no-profiles">You haven't liked any profiles yet. Start browsing!</p>
         {% endif %}
+    </section>
 
+    <section class="liked-me-section">
         <h2>Profiles That Liked You</h2>
         {% if liked_me %}
-            {% for profile in liked_me %}
-                <div class="profile-card">
-                    <div class="profile-card-image">
-                        {% if profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="{{ profile.username }}">
-                        {% else %}
-                            <div class="profile-picture-placeholder">No profile picture</div>
-                        {% endif %}
+            <div class="profiles-grid">
+                {% for profile in liked_me %}
+                    {# Include or adapt profile card structure #}
+                    <div class="profile-card">
+                        <div class="profile-image-container">
+                            <img src="{{ url_for('static', filename='uploads/' + (profile.profile_picture if profile.profile_picture else 'default_avatar.png')) }}" 
+                                 alt="{{ profile.username }}" 
+                                 class="profile-image">
+                        </div>
+                        <div class="profile-info">
+                            <h3>{{ profile.username }}</h3>
+                             <div class="profile-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-birthday-cake"></i>
+                                    <span>{{ profile.age }} years old</span>
+                                </div>
+                                <div class="detail-item">
+                                    <i class="fas fa-star-of-david"></i>
+                                    <span>{{ profile.observance_level }}</span>
+                                </div>
+                            </div>
+                             <p class="profile-bio">{{ profile.bio[:100] }}{% if profile.bio|length > 100 %}...{% endif %}</p>
+                        </div>
+                         <div class="profile-actions">
+                            <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" class="btn btn-primary btn-sm">View Profile</a>
+                             {# Add like/message button if needed #}
+                        </div>
                     </div>
-                    <div class="profile-info">
-                        <h3>{{ profile.username }}</h3>
-                        </div>
-                    <div class="profile-actions">
-                        </div>
-                </div>
-            {% endfor %}
+                {% endfor %}
+            </div>
         {% else %}
-            <div class="no-profiles"><p>No one has liked your profile yet. Keep your profile updated!</p></div>
+            <p class="no-profiles">No one has liked your profile yet. Keep your profile updated!</p>
         {% endif %}
+    </section>
 
-        <div class="back-link"><a href="{{ url_for('index') }}">Back to Home</a></div>
-    </div>
-</body>
-</html>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .my-likes-page h1 {
+        text-align: center;
+        color: #2B4C7E;
+        margin-bottom: 2rem;
+        font-size: 2.5rem;
+    }
+
+    .my-likes-page section {
+        background-color: #fff;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        border-radius: 15px;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+
+    .my-likes-page h2 {
+        color: #2B4C7E;
+        margin-top: 0;
+        margin-bottom: 1.5rem;
+        font-size: 1.8rem;
+        border-bottom: 2px solid #D4AF37;
+        padding-bottom: 0.5rem;
+    }
+    
+    .my-likes-page h2 small {
+        font-size: 1rem;
+        color: #555;
+        font-weight: normal;
+    }
+
+    .profiles-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+        gap: 1.5rem;
+    }
+
+    .profile-card {
+        background: #f8fafd;
+        border-radius: 10px;
+        overflow: hidden;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .profile-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 15px rgba(0,0,0,0.1);
+    }
+
+    .profile-image-container {
+        width: 100%;
+        padding-top: 100%; /* 1:1 Aspect Ratio */
+        position: relative;
+        overflow: hidden;
+    }
+
+    .profile-image {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+     .profile-info {
+        padding: 1rem;
+    }
+
+    .profile-info h3 {
+        margin: 0 0 0.5rem 0;
+        color: #2c3e50;
+        font-size: 1.1rem;
+    }
+
+    .profile-details {
+        display: flex;
+        flex-direction: column;
+        gap: 0.3rem;
+        margin-bottom: 0.8rem;
+    }
+
+    .detail-item {
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        color: #495057;
+        font-size: 0.85rem;
+    }
+
+    .detail-item i {
+        color: #007bff;
+        width: 14px;
+    }
+
+     .profile-bio {
+        color: #6c757d;
+        font-size: 0.85rem;
+        line-height: 1.4;
+        margin-bottom: 1rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .profile-actions {
+        padding: 0 1rem 1rem;
+        text-align: right;
+    }
+
+    .profile-actions .btn {
+         font-size: 0.85rem;
+         padding: 0.5rem 1rem;
+    }
+
+    .no-profiles {
+        text-align: center;
+        color: #6c757d;
+        padding: 2rem;
+        background: #f8fafd;
+        border-radius: 10px;
+    }
+
+</style>
+{% endblock %}

@@ -1,0 +1,744 @@
+{% extends "base.html" %}
+
+{% block title %}Newsletter Management - Admin{% endblock %}
+
+{% block content %}
+<div class="newsletter-container">
+    <!-- Header Section -->
+    <div class="newsletter-header">
+        <h1>Newsletter Management</h1>
+        <div class="header-actions">
+            <a href="{{ url_for('newsletter_templates') }}" class="btn btn-secondary">
+                <i class="fas fa-file-alt"></i> Manage Templates
+            </a>
+            <a href="{{ url_for('recurring_newsletters') }}" class="btn btn-secondary">
+                <i class="fas fa-sync"></i> Recurring Newsletters
+            </a>
+            <button onclick="openSendModal()" class="btn btn-primary">
+                <i class="fas fa-paper-plane"></i> Send Newsletter
+            </button>
+            <button onclick="exportSubscribers()" class="btn btn-secondary">
+                <i class="fas fa-download"></i> Export CSV
+            </button>
+        </div>
+    </div>
+
+    <!-- Statistics Cards -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-users"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Total Subscribers</h3>
+                <p class="stat-number">{{ stats.total }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-check"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Active Subscribers</h3>
+                <p class="stat-number">{{ stats.active }}</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-user-times"></i>
+            </div>
+            <div class="stat-content">
+                <h3>Unsubscribed</h3>
+                <p class="stat-number">{{ stats.unsubscribed }}</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <form method="get" class="filters-form">
+            <div class="filter-group">
+                <label for="status">Status:</label>
+                <select name="status" id="status" onchange="this.form.submit()">
+                    <option value="all" {% if status == 'all' %}selected{% endif %}>All</option>
+                    <option value="active" {% if status == 'active' %}selected{% endif %}>Active</option>
+                    <option value="unsubscribed" {% if status == 'unsubscribed' %}selected{% endif %}>Unsubscribed</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="search">Search:</label>
+                <input type="text" name="search" id="search" value="{{ search }}" placeholder="Search by email...">
+            </div>
+            <div class="filter-group">
+                <label for="sort">Sort by:</label>
+                <select name="sort" id="sort" onchange="this.form.submit()">
+                    <option value="subscribed_at" {% if sort == 'subscribed_at' %}selected{% endif %}>Subscribed Date</option>
+                    <option value="email" {% if sort == 'email' %}selected{% endif %}>Email</option>
+                    <option value="status" {% if sort == 'status' %}selected{% endif %}>Status</option>
+                    <option value="last_email_sent" {% if sort == 'last_email_sent' %}selected{% endif %}>Last Email Sent</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label for="order">Order:</label>
+                <select name="order" id="order" onchange="this.form.submit()">
+                    <option value="desc" {% if order == 'desc' %}selected{% endif %}>Descending</option>
+                    <option value="asc" {% if order == 'asc' %}selected{% endif %}>Ascending</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary">Apply Filters</button>
+        </form>
+    </div>
+
+    <!-- Bulk Actions -->
+    <div class="bulk-actions" id="bulk-actions" style="display: none;">
+        <form action="{{ url_for('bulk_action') }}" method="post" id="bulk-action-form">
+            <div class="bulk-actions-content">
+                <span id="selected-count">0 subscribers selected</span>
+                <div class="bulk-actions-buttons">
+                    <select name="action" id="bulk-action" required>
+                        <option value="">Select Action</option>
+                        <option value="delete">Delete Selected</option>
+                        <option value="unsubscribe">Unsubscribe Selected</option>
+                        <option value="resubscribe">Reactivate Selected</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary" onclick="return confirm('Are you sure you want to perform this action?');">
+                        Apply Action
+                    </button>
+                </div>
+            </div>
+        </form>
+    </div>
+
+    <!-- Subscribers Table -->
+    <div class="table-responsive">
+        <table class="subscribers-table">
+            <thead>
+                <tr>
+                    <th>
+                        <input type="checkbox" id="select-all" onchange="toggleAllSubscribers(this)">
+                    </th>
+                    <th>Email</th>
+                    <th>Status</th>
+                    <th>Subscribed</th>
+                    <th>Last Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for subscriber in subscribers %}
+                <tr>
+                    <td>
+                        <input type="checkbox" name="subscriber_ids[]" value="{{ subscriber.id }}" 
+                               class="subscriber-checkbox" onchange="updateBulkActions()">
+                    </td>
+                    <td>{{ subscriber.email }}</td>
+                    <td>
+                        <span class="status-badge status-{{ subscriber.status }}">
+                            {{ subscriber.status }}
+                        </span>
+                    </td>
+                    <td>{{ subscriber.subscribed_at }}</td>
+                    <td>{{ subscriber.last_email_sent or 'Never' }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            <form action="{{ url_for('delete_subscriber', subscriber_id=subscriber.id) }}" 
+                                  method="post" 
+                                  class="delete-form"
+                                  onsubmit="return confirm('Are you sure you want to delete this subscriber?');">
+                                <button type="submit" class="btn btn-sm btn-danger">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="6" class="no-subscribers">
+                        No subscribers found matching your criteria.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Import Subscribers Section -->
+    <div class="import-section">
+        <h2>Import Subscribers</h2>
+        <form action="{{ url_for('import_subscribers') }}" method="post" enctype="multipart/form-data" class="import-form">
+            <div class="form-group">
+                <label for="csv_file">CSV File:</label>
+                <input type="file" id="csv_file" name="csv_file" accept=".csv" required>
+                <small class="form-text">File should contain a column named 'email'. Optional columns: 'name', 'status'</small>
+            </div>
+            <button type="submit" class="btn btn-primary">Import Subscribers</button>
+        </form>
+    </div>
+</div>
+
+<!-- Send Newsletter Modal -->
+<div id="sendNewsletterModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Send Newsletter</h2>
+            <button onclick="closeSendModal()" class="close-btn">&times;</button>
+        </div>
+        <form id="sendNewsletterForm" action="{{ url_for('schedule_newsletter') }}" method="post">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="template">Template:</label>
+                    <select id="template" name="template_id" onchange="loadTemplate()">
+                        <option value="">Custom Message</option>
+                        {% for template in templates %}
+                        <option value="{{ template.id }}">{{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">Content:</label>
+                    <textarea id="content" name="content" rows="10" required></textarea>
+                    <div class="template-variables">
+                        Available variables: {name}, {unsubscribe_url}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="scheduled_for">Schedule For:</label>
+                    <div class="schedule-options">
+                        <select id="schedule_type" name="schedule_type" onchange="toggleScheduleOptions()">
+                            <option value="now">Send Now</option>
+                            <option value="scheduled">Schedule for Later</option>
+                        </select>
+                        <div id="schedule_datetime" style="display: none;">
+                            <input type="datetime-local" 
+                                   id="scheduled_for" 
+                                   name="scheduled_for" 
+                                   min="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Preview:</label>
+                    <div class="preview-options">
+                        <input type="email" 
+                               id="preview_email" 
+                               placeholder="Enter email for preview"
+                               class="preview-email-input">
+                        <button type="button" 
+                                onclick="previewNewsletter()" 
+                                class="btn btn-secondary">
+                            Send Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeSendModal()" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">
+                    <span id="submitButtonText">Send Newsletter</span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.newsletter-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.newsletter-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.newsletter-header h1 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    margin-bottom: 2rem;
+}
+
+.stat-card {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    text-align: center;
+}
+
+.stat-icon {
+    font-size: 2rem;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.stat-content {
+    text-align: center;
+}
+
+.stat-number {
+    font-size: 2rem;
+    font-weight: bold;
+    color: var(--primary-color);
+    margin-bottom: 0.5rem;
+}
+
+.filters-section {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    margin-bottom: 2rem;
+}
+
+.filters-form {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1rem;
+    align-items: end;
+}
+
+.filter-group {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.filter-group label {
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.filter-group select,
+.filter-group input {
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.subscribers-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.subscribers-table th,
+.subscribers-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.subscribers-table th {
+    background: var(--background-secondary);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #e3fcef;
+    color: #00a854;
+}
+
+.status-unsubscribed {
+    background: #fff1f0;
+    color: #f5222d;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.no-subscribers {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+.import-section {
+    margin-top: 2rem;
+    padding: 1.5rem;
+    background: white;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.import-section h2 {
+    margin: 0 0 1rem 0;
+    color: var(--primary-color);
+}
+
+.import-form {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-end;
+}
+
+.import-form .form-group {
+    flex-grow: 1;
+    margin: 0;
+}
+
+.form-text {
+    display: block;
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+#template-select {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.template-help {
+    margin-top: 0.5rem;
+    padding: 0.5rem;
+    background: var(--background-secondary);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.template-help p {
+    margin: 0 0 0.5rem 0;
+    font-weight: 500;
+}
+
+.template-help ul {
+    margin: 0;
+    padding-left: 1.5rem;
+}
+
+.template-help code {
+    background: rgba(0,0,0,0.05);
+    padding: 0.1rem 0.3rem;
+    border-radius: 3px;
+    font-family: monospace;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    margin: 5% auto;
+    padding: 0;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.close {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    cursor: pointer;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 200px;
+}
+
+.form-actions {
+    margin-top: 1.5rem;
+    text-align: right;
+}
+
+#test-email {
+    width: calc(100% - 120px);
+    margin-right: 0.5rem;
+}
+
+.schedule-options {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.schedule-options select {
+    flex: 1;
+}
+
+#schedule_datetime {
+    flex: 2;
+}
+
+#schedule_datetime input {
+    width: 100%;
+}
+
+.preview-options {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.preview-email-input {
+    flex: 1;
+}
+
+@media (max-width: 768px) {
+    .newsletter-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .filters-form {
+        grid-template-columns: 1fr;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .subscribers-table th,
+    .subscribers-table td {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .import-form {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .import-form .form-group {
+        margin-bottom: 1rem;
+    }
+    
+    .schedule-options,
+    .preview-options {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .schedule-options select,
+    .preview-email-input {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+function toggleAllSubscribers(checkbox) {
+    const checkboxes = document.getElementsByClassName('subscriber-checkbox');
+    for (let cb of checkboxes) {
+        cb.checked = checkbox.checked;
+    }
+    updateSelectedCount();
+}
+
+function updateSelectedCount() {
+    const checkboxes = document.getElementsByClassName('subscriber-checkbox');
+    const selectedCount = document.getElementById('selected-count');
+    const applyButton = document.getElementById('apply-bulk-action');
+    let count = 0;
+    
+    for (let cb of checkboxes) {
+        if (cb.checked) count++;
+    }
+    
+    selectedCount.textContent = count;
+    applyButton.disabled = count === 0;
+}
+
+function openSendModal() {
+    const selectedCount = document.querySelectorAll('.subscriber-checkbox:checked').length;
+    if (selectedCount === 0) {
+        alert('Please select at least one subscriber to send the newsletter to.');
+        return;
+    }
+    document.getElementById('sendNewsletterModal').style.display = 'block';
+}
+
+function closeSendModal() {
+    document.getElementById('sendNewsletterModal').style.display = 'none';
+}
+
+function loadTemplate() {
+    const templateId = document.getElementById('template').value;
+    if (!templateId) return;
+    
+    fetch(`{{ url_for('get_template', template_id=0) }}`.replace('0', templateId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('subject').value = data.template.subject;
+                document.getElementById('content').value = data.template.content;
+            } else {
+                alert('Error loading template: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error loading template: ' + error);
+        });
+}
+
+function previewNewsletter() {
+    const subject = document.getElementById('subject').value;
+    const content = document.getElementById('content').value;
+    const testEmail = document.getElementById('preview_email').value;
+    
+    if (!subject || !content) {
+        alert('Please fill in both subject and content fields.');
+        return;
+    }
+    
+    if (!testEmail) {
+        alert('Please provide a test email address.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('subject', subject);
+    formData.append('content', content);
+    formData.append('test_email', testEmail);
+    
+    fetch('{{ url_for("preview_newsletter") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Preview email sent to ' + testEmail);
+        } else {
+            alert('Error sending preview: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error sending preview: ' + error);
+    });
+}
+
+function toggleScheduleOptions() {
+    const scheduleType = document.getElementById('schedule_type').value;
+    const scheduleDatetime = document.getElementById('schedule_datetime');
+    const submitButtonText = document.getElementById('submitButtonText');
+    
+    if (scheduleType === 'scheduled') {
+        scheduleDatetime.style.display = 'block';
+        submitButtonText.textContent = 'Schedule Newsletter';
+    } else {
+        scheduleDatetime.style.display = 'none';
+        submitButtonText.textContent = 'Send Newsletter';
+    }
+}
+
+// Update the form submission to handle scheduling
+document.getElementById('sendNewsletterForm').onsubmit = function(e) {
+    e.preventDefault();
+    
+    const scheduleType = document.getElementById('schedule_type').value;
+    const scheduledFor = document.getElementById('scheduled_for').value;
+    
+    if (scheduleType === 'scheduled' && !scheduledFor) {
+        alert('Please select a date and time for scheduling the newsletter.');
+        return;
+    }
+    
+    // Submit the form
+    this.submit();
+};
+
+// Check for selected template in sessionStorage
+window.addEventListener('load', function() {
+    const selectedTemplate = sessionStorage.getItem('selectedTemplate');
+    if (selectedTemplate) {
+        const template = JSON.parse(selectedTemplate);
+        document.getElementById('template').value = template.id;
+        document.getElementById('subject').value = template.subject;
+        document.getElementById('content').value = template.content;
+        sessionStorage.removeItem('selectedTemplate');
+    }
+});
+</script>
+{% endblock %} 

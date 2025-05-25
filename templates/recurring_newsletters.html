@@ -1,0 +1,557 @@
+{% extends "base.html" %}
+
+{% block title %}Recurring Newsletters - Admin{% endblock %}
+
+{% block content %}
+<div class="recurring-container">
+    <!-- Header Section -->
+    <div class="recurring-header">
+        <h1>Recurring Newsletters</h1>
+        <div class="header-actions">
+            <a href="{{ url_for('admin_newsletter') }}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left"></i> Back to Newsletter Management
+            </a>
+            <button onclick="openRecurringModal()" class="btn btn-primary">
+                <i class="fas fa-plus"></i> Create Recurring Newsletter
+            </button>
+        </div>
+    </div>
+
+    <!-- Recurring Newsletters Table -->
+    <div class="table-responsive">
+        <table class="recurring-table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Frequency</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Recipients</th>
+                    <th>Last Sent</th>
+                    <th>Created By</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for newsletter in recurring %}
+                <tr>
+                    <td>{{ newsletter.name }}</td>
+                    <td>
+                        <span class="frequency-badge frequency-{{ newsletter.frequency }}">
+                            {{ newsletter.frequency }}
+                        </span>
+                    </td>
+                    <td>{{ newsletter.start_date }}</td>
+                    <td>{{ newsletter.end_date or 'No end date' }}</td>
+                    <td>
+                        <span class="status-badge status-{{ newsletter.status }}">
+                            {{ newsletter.status }}
+                        </span>
+                    </td>
+                    <td>
+                        <div class="recipient-stats">
+                            <span class="total">{{ newsletter.total_recipients }} total</span>
+                            <span class="active">{{ newsletter.active_recipients }} active</span>
+                        </div>
+                    </td>
+                    <td>{{ newsletter.last_sent or 'Not sent yet' }}</td>
+                    <td>{{ newsletter.creator }}</td>
+                    <td>
+                        <div class="action-buttons">
+                            {% if newsletter.status == 'active' %}
+                            <form action="{{ url_for('pause_recurring_newsletter', recurring_id=newsletter.id) }}" 
+                                  method="post" 
+                                  class="action-form"
+                                  onsubmit="return confirm('Are you sure you want to pause this newsletter?');">
+                                <button type="submit" class="btn btn-sm btn-warning" title="Pause">
+                                    <i class="fas fa-pause"></i>
+                                </button>
+                            </form>
+                            {% elif newsletter.status == 'paused' %}
+                            <form action="{{ url_for('resume_recurring_newsletter', recurring_id=newsletter.id) }}" 
+                                  method="post" 
+                                  class="action-form">
+                                <button type="submit" class="btn btn-sm btn-success" title="Resume">
+                                    <i class="fas fa-play"></i>
+                                </button>
+                            </form>
+                            {% endif %}
+                            <form action="{{ url_for('delete_recurring_newsletter', recurring_id=newsletter.id) }}" 
+                                  method="post" 
+                                  class="action-form"
+                                  onsubmit="return confirm('Are you sure you want to delete this newsletter? This will also cancel any pending scheduled sends.');">
+                                <button type="submit" class="btn btn-sm btn-danger" title="Delete">
+                                    <i class="fas fa-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% else %}
+                <tr>
+                    <td colspan="9" class="no-newsletters">
+                        No recurring newsletters found.
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Create Recurring Newsletter Modal -->
+<div id="recurringModal" class="modal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2>Create Recurring Newsletter</h2>
+            <button onclick="closeRecurringModal()" class="close-btn">&times;</button>
+        </div>
+        <form id="recurringForm" action="{{ url_for('add_recurring_newsletter') }}" method="post">
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="name">Newsletter Name:</label>
+                    <input type="text" id="name" name="name" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="template">Template:</label>
+                    <select id="template" name="template_id" onchange="loadTemplate()">
+                        <option value="">Custom Message</option>
+                        {% for template in templates %}
+                        <option value="{{ template.id }}">{{ template.name }}</option>
+                        {% endfor %}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="subject">Subject:</label>
+                    <input type="text" id="subject" name="subject" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="content">Content:</label>
+                    <textarea id="content" name="content" rows="10" required></textarea>
+                    <div class="template-variables">
+                        Available variables: {name}, {unsubscribe_url}
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="frequency">Frequency:</label>
+                    <select id="frequency" name="frequency" required>
+                        <option value="daily">Daily</option>
+                        <option value="weekly">Weekly</option>
+                        <option value="monthly">Monthly</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="start_date">Start Date:</label>
+                    <input type="datetime-local" 
+                           id="start_date" 
+                           name="start_date" 
+                           min="{{ now.strftime('%Y-%m-%dT%H:%M') }}"
+                           required>
+                </div>
+
+                <div class="form-group">
+                    <label for="end_date">End Date (Optional):</label>
+                    <input type="datetime-local" 
+                           id="end_date" 
+                           name="end_date" 
+                           min="{{ now.strftime('%Y-%m-%dT%H:%M') }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Preview:</label>
+                    <div class="preview-options">
+                        <input type="email" 
+                               id="preview_email" 
+                               placeholder="Enter email for preview"
+                               class="preview-email-input">
+                        <button type="button" 
+                                onclick="previewNewsletter()" 
+                                class="btn btn-secondary">
+                            Send Preview
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" onclick="closeRecurringModal()" class="btn btn-secondary">Cancel</button>
+                <button type="submit" class="btn btn-primary">Create Recurring Newsletter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<style>
+.recurring-container {
+    max-width: 1200px;
+    margin: 2rem auto;
+    padding: 0 1rem;
+}
+
+.recurring-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+}
+
+.recurring-header h1 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.header-actions {
+    display: flex;
+    gap: 1rem;
+}
+
+.recurring-table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.recurring-table th,
+.recurring-table td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.recurring-table th {
+    background: var(--background-secondary);
+    font-weight: 600;
+    color: var(--text-secondary);
+}
+
+.frequency-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+    text-transform: capitalize;
+}
+
+.frequency-daily {
+    background: #e6f7ff;
+    color: #1890ff;
+}
+
+.frequency-weekly {
+    background: #f6ffed;
+    color: #52c41a;
+}
+
+.frequency-monthly {
+    background: #fff7e6;
+    color: #fa8c16;
+}
+
+.status-badge {
+    padding: 0.25rem 0.75rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.status-active {
+    background: #e3fcef;
+    color: #00a854;
+}
+
+.status-paused {
+    background: #fff1f0;
+    color: #f5222d;
+}
+
+.status-completed {
+    background: #f5f5f5;
+    color: #8c8c8c;
+}
+
+.recipient-stats {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.9rem;
+}
+
+.recipient-stats span {
+    padding: 0.1rem 0.5rem;
+    border-radius: 12px;
+    font-size: 0.8rem;
+}
+
+.recipient-stats .total {
+    background: #f5f5f5;
+    color: #595959;
+}
+
+.recipient-stats .active {
+    background: #e3fcef;
+    color: #00a854;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.action-form {
+    margin: 0;
+}
+
+.btn-sm {
+    padding: 0.25rem 0.5rem;
+    font-size: 0.875rem;
+}
+
+.no-newsletters {
+    text-align: center;
+    color: var(--text-secondary);
+    padding: 2rem;
+}
+
+/* Modal styles (reuse from admin_newsletter.html) */
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content {
+    position: relative;
+    background: white;
+    margin: 5% auto;
+    padding: 0;
+    width: 90%;
+    max-width: 800px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+.modal-header {
+    padding: 1rem;
+    border-bottom: 1px solid var(--border-color);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-header h2 {
+    margin: 0;
+    color: var(--primary-color);
+}
+
+.close-btn {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: var(--text-secondary);
+    cursor: pointer;
+    background: none;
+    border: none;
+    padding: 0;
+}
+
+.modal-body {
+    padding: 1.5rem;
+}
+
+.form-group {
+    margin-bottom: 1rem;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.form-group input,
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5rem;
+    border: 1px solid var(--border-color);
+    border-radius: 4px;
+    font-size: 0.9rem;
+}
+
+.form-group textarea {
+    resize: vertical;
+    min-height: 200px;
+}
+
+.template-variables {
+    margin-top: 0.5rem;
+    font-size: 0.875rem;
+    color: var(--text-secondary);
+}
+
+.preview-options {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+.preview-email-input {
+    flex: 1;
+}
+
+.modal-footer {
+    padding: 1rem;
+    border-top: 1px solid var(--border-color);
+    text-align: right;
+}
+
+@media (max-width: 768px) {
+    .recurring-header {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .header-actions {
+        flex-direction: column;
+        width: 100%;
+    }
+    
+    .header-actions .btn {
+        width: 100%;
+    }
+    
+    .table-responsive {
+        overflow-x: auto;
+    }
+    
+    .recurring-table th,
+    .recurring-table td {
+        padding: 0.75rem;
+        font-size: 0.9rem;
+    }
+    
+    .recipient-stats {
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+    
+    .preview-options {
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .preview-email-input {
+        width: 100%;
+    }
+}
+</style>
+
+<script>
+function openRecurringModal() {
+    const selectedCount = document.querySelectorAll('.subscriber-checkbox:checked').length;
+    if (selectedCount === 0) {
+        alert('Please select at least one subscriber for the recurring newsletter.');
+        return;
+    }
+    document.getElementById('recurringModal').style.display = 'block';
+}
+
+function closeRecurringModal() {
+    document.getElementById('recurringModal').style.display = 'none';
+}
+
+function loadTemplate() {
+    const templateId = document.getElementById('template').value;
+    if (!templateId) return;
+    
+    fetch(`{{ url_for('get_template', template_id=0) }}`.replace('0', templateId))
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                document.getElementById('subject').value = data.template.subject;
+                document.getElementById('content').value = data.template.content;
+            } else {
+                alert('Error loading template: ' + data.error);
+            }
+        })
+        .catch(error => {
+            alert('Error loading template: ' + error);
+        });
+}
+
+function previewNewsletter() {
+    const subject = document.getElementById('subject').value;
+    const content = document.getElementById('content').value;
+    const testEmail = document.getElementById('preview_email').value;
+    
+    if (!subject || !content) {
+        alert('Please fill in both subject and content fields.');
+        return;
+    }
+    
+    if (!testEmail) {
+        alert('Please provide a test email address.');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('subject', subject);
+    formData.append('content', content);
+    formData.append('test_email', testEmail);
+    
+    fetch('{{ url_for("preview_newsletter") }}', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            alert('Preview email sent to ' + testEmail);
+        } else {
+            alert('Error sending preview: ' + data.error);
+        }
+    })
+    .catch(error => {
+        alert('Error sending preview: ' + error);
+    });
+}
+
+// Validate form before submission
+document.getElementById('recurringForm').onsubmit = function(e) {
+    const startDate = new Date(document.getElementById('start_date').value);
+    const endDate = document.getElementById('end_date').value;
+    
+    if (endDate) {
+        const endDateTime = new Date(endDate);
+        if (endDateTime <= startDate) {
+            alert('End date must be after start date.');
+            e.preventDefault();
+            return false;
+        }
+    }
+    
+    return true;
+};
+
+// Close modal when clicking outside
+window.onclick = function(event) {
+    const modal = document.getElementById('recurringModal');
+    if (event.target == modal) {
+        closeRecurringModal();
+    }
+}
+</script>
+{% endblock %} 

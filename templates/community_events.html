@@ -1,0 +1,160 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <h1 class="text-center mb-4">Community Events</h1>
+            <p class="text-center lead mb-5">
+                Join our vibrant community at these upcoming events. 
+                Meet other Jewish singles in a comfortable, meaningful setting.
+            </p>
+
+            {% for event in events %}
+            <div class="card mb-4 event-card">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                        <img src="{{ event.image }}" class="img-fluid rounded-start h-100" alt="{{ event.title }}"
+                             style="object-fit: cover;">
+                    </div>
+                    <div class="col-md-8">
+                        <div class="card-body">
+                            <h2 class="card-title h4">{{ event.title }}</h2>
+                            <div class="event-details mb-3">
+                                <p class="mb-2">
+                                    <i class="fas fa-calendar text-primary me-2"></i>
+                                    {{ event.date }} at {{ event.time }}
+                                </p>
+                                <p class="mb-2">
+                                    <i class="fas fa-map-marker-alt text-primary me-2"></i>
+                                    {{ event.location }}
+                                </p>
+                            </div>
+                            <p class="card-text">{{ event.description }}</p>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <button class="btn btn-primary" onclick="registerForEvent('{{ event.title }}')">
+                                    Register Now
+                                </button>
+                                <button class="btn btn-outline-primary" onclick="shareEvent('{{ event.title }}')">
+                                    <i class="fas fa-share-alt"></i> Share
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+
+            <div class="card mb-4">
+                <div class="card-body">
+                    <h2 class="card-title h4">Host Your Own Event</h2>
+                    <p class="card-text">
+                        Are you interested in hosting a Jewish singles event in your community? 
+                        We can help you organize and promote it!
+                    </p>
+                    <a href="{{ url_for('contact') }}" class="btn btn-primary">
+                        Contact Us to Learn More
+                    </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-body">
+                    <h2 class="card-title h4">Event Guidelines</h2>
+                    <ul class="list-unstyled">
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-check-circle text-primary me-2"></i>Respectful Environment</h5>
+                            <p>All events are designed to create a comfortable, respectful atmosphere for meaningful connections.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-utensils text-primary me-2"></i>Kosher Options</h5>
+                            <p>Food and beverages at our events are kosher-certified or supervised by reliable kashrut authorities.</p>
+                        </li>
+                        <li class="mb-3">
+                            <h5 class="h6"><i class="fas fa-users text-primary me-2"></i>Community Focus</h5>
+                            <p>Events are open to all Jewish singles, regardless of observance level or background.</p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="text-center mt-5">
+                <p class="mb-4">
+                    Can't find an event in your area? Join our mailing list to be notified of new events!
+                </p>
+                <form action="{{ url_for('subscribe_newsletter') }}" method="post" class="d-inline-block">
+                    <div class="input-group">
+                        <input type="email" name="email" class="form-control" placeholder="Enter your email" required>
+                        <button type="submit" class="btn btn-primary">Subscribe</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.event-card {
+    border: none;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    transition: transform 0.2s;
+}
+
+.event-card:hover {
+    transform: translateY(-2px);
+}
+
+.lead {
+    color: #666;
+    font-size: 1.2rem;
+}
+
+.text-primary {
+    color: #007bff !important;
+}
+
+.btn-primary {
+    padding: 8px 20px;
+    font-weight: 600;
+}
+
+.h6 {
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.event-details {
+    color: #666;
+}
+
+.input-group {
+    max-width: 400px;
+}
+
+@media (max-width: 768px) {
+    .event-card .col-md-4 {
+        height: 200px;
+    }
+}
+</style>
+
+<script>
+function registerForEvent(eventTitle) {
+    // TODO: Implement event registration
+    alert(`Registration for ${eventTitle} coming soon!`);
+}
+
+function shareEvent(eventTitle) {
+    // TODO: Implement social sharing
+    if (navigator.share) {
+        navigator.share({
+            title: eventTitle,
+            text: `Join me at ${eventTitle} on Jewish Dating App!`,
+            url: window.location.href
+        }).catch(console.error);
+    } else {
+        alert('Sharing is not supported on this browser.');
+    }
+}
+</script>
+{% endblock %} 
