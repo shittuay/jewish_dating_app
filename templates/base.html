@@ -769,86 +769,166 @@
 
     {% block extra_js %}{% endblock %}
     <script>
-    document.addEventListener('DOMContentLoaded', function() {
-        const toggleBtn = document.getElementById('chatbot-toggle');
-        const chatWindow = document.getElementById('chatbot-window');
-        const closeBtn = document.getElementById('chatbot-close');
-        const form = document.getElementById('chatbot-form');
-        const input = document.getElementById('chatbot-input');
-        const messages = document.getElementById('chatbot-messages');
+        document.addEventListener('DOMContentLoaded', function () {
+            const navbarToggle = document.querySelector('.navbar-toggle');
+            const navbarMenu = document.querySelector('.navbar-menu');
+            const chatbotToggle = document.getElementById('chatbot-toggle');
+            const chatbotWindow = document.getElementById('chatbot-window');
+            const chatbotClose = document.getElementById('chatbot-close');
+            const chatbotForm = document.getElementById('chatbot-form');
+            const chatbotInput = document.getElementById('chatbot-input');
+            const chatbotMessages = document.getElementById('chatbot-messages');
 
-        toggleBtn.addEventListener('click', function() {
-            chatWindow.style.display = chatWindow.style.display === 'none' ? 'flex' : 'none';
+            // Navbar toggle functionality
+            if (navbarToggle && navbarMenu) {
+                navbarToggle.addEventListener('click', function () {
+                    navbarMenu.classList.toggle('active');
+                });
+
+                navbarMenu.querySelectorAll('a.nav-link').forEach(link => {
+                    link.addEventListener('click', () => {
+                        navbarMenu.classList.remove('active');
+                    });
+                });
+            }
+
+            // Chatbot toggle functionality
+            if (chatbotToggle && chatbotWindow && chatbotClose) {
+                chatbotToggle.addEventListener('click', function () {
+                    const isHidden = chatbotWindow.style.display === 'none' || chatbotWindow.style.display === '';
+                    chatbotWindow.style.display = isHidden ? 'flex' : 'none';
+                    if (isHidden) {
+                        chatbotInput.focus();
+                    }
+                });
+
+                chatbotClose.addEventListener('click', function () {
+                    chatbotWindow.style.display = 'none';
+                });
+            }
+
+            // Chat form submission
+            if (chatbotForm && chatbotInput && chatbotMessages) {
+                chatbotForm.addEventListener('submit', async function(e) {
+                    e.preventDefault();
+                    
+                    const message = chatbotInput.value.trim();
+                    if (!message) return;
+
+                    // Add user message to chat
+                    appendMessage(message, 'user');
+                    chatbotInput.value = '';
+
+                    // Show thinking indicator
+                    const thinkingDiv = document.createElement('div');
+                    thinkingDiv.className = 'chatbot-message chatbot-message-bot thinking-indicator';
+                    thinkingDiv.textContent = 'Thinking...';
+                    chatbotMessages.appendChild(thinkingDiv);
+                    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+
+                    try {
+                        const response = await fetch('/chatbot', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ message: message })
+                        });
+
+                        const data = await response.json();
+                        
+                        // Remove thinking indicator
+                        chatbotMessages.removeChild(thinkingDiv);
+                        
+                        // Add bot response to chat
+                        if (data.reply) {
+                            appendMessage(data.reply, 'bot');
+                        } else {
+                            appendMessage('I apologize, but I encountered an error. Please try again.', 'bot');
+                        }
+                    } catch (error) {
+                        console.error('Error:', error);
+                        chatbotMessages.removeChild(thinkingDiv);
+                        appendMessage('I apologize, but I encountered an error. Please try again.', 'bot');
+                    }
+                });
+            }
+
+            function appendMessage(text, sender) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `chatbot-message chatbot-message-${sender}`;
+                messageDiv.textContent = text;
+                chatbotMessages.appendChild(messageDiv);
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+            }
         });
-        closeBtn.addEventListener('click', function() {
-            chatWindow.style.display = 'none';
-        });
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
-            const userMsg = input.value.trim();
-            if (!userMsg) return;
-            // Add user message to chat
-            const userDiv = document.createElement('div');
-            userDiv.className = 'chatbot-message chatbot-message-user';
-            userDiv.textContent = userMsg;
-            messages.appendChild(userDiv);
-            messages.scrollTop = messages.scrollHeight;
-            input.value = '';
+    </script>
 
-            // Create and show thinking indicator dynamically
-            const thinkingIndicator = document.createElement('div');
-            thinkingIndicator.className = 'chatbot-message chatbot-message-bot thinking-indicator';
-            thinkingIndicator.textContent = 'Thinking...';
-            messages.appendChild(thinkingIndicator);
-            messages.scrollTop = messages.scrollHeight; // Scroll to show the indicator
-
-            // Send to backend
-            fetch('/chatbot', {
+    <script>
+        // Get user's location and send it to the backend
+        function sendLocationToBackend(latitude, longitude) {
+            fetch('/update_location', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ message: userMsg })
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ latitude: latitude, longitude: longitude }),
             })
-            .then(res => res.json())
+            .then(response => response.json())
             .then(data => {
-                // Remove thinking indicator
-                messages.removeChild(thinkingIndicator);
-
-                const botDiv = document.createElement('div');
-                botDiv.className = 'chatbot-message chatbot-message-bot';
-                botDiv.textContent = data.reply;
-                messages.appendChild(botDiv);
-                messages.scrollTop = messages.scrollHeight;
+                console.log('Location updated:', data);
             })
-            .catch(() => {
-                // Remove thinking indicator
-                messages.removeChild(thinkingIndicator);
-
-                const botDiv = document.createElement('div');
-                botDiv.className = 'chatbot-message chatbot-message-bot';
-                botDiv.textContent = 'Sorry, there was a problem. Please try again later.';
-                messages.appendChild(botDiv);
-                messages.scrollTop = messages.scrollHeight;
-            });
-        });
-
-        const navbarToggle = document.querySelector('.navbar-toggle');
-        const navbarMenu = document.querySelector('.navbar-menu');
-        
-        if (navbarToggle && navbarMenu) {
-            navbarToggle.addEventListener('click', function() {
-                navbarMenu.classList.toggle('active');
-                this.classList.toggle('active');
-            });
-            
-            // Close menu when clicking outside
-            document.addEventListener('click', function(event) {
-                if (!navbarToggle.contains(event.target) && !navbarMenu.contains(event.target)) {
-                    navbarMenu.classList.remove('active');
-                    navbarToggle.classList.remove('active');
-                }
+            .catch((error) => {
+                console.error('Error updating location:', error);
             });
         }
-    });
+
+        document.addEventListener('DOMContentLoaded', function () {
+            // Request location permission and get location
+            if (navigator.geolocation) {
+                navigator.geolocation.getCurrentPosition(function(position) {
+                    const latitude = position.coords.latitude;
+                    const longitude = position.coords.longitude;
+                    console.log('User location:', latitude, longitude);
+                    sendLocationToBackend(latitude, longitude);
+                }, function(error) {
+                    console.error('Error getting location:', error);
+                    // Handle errors (e.g., user denied permission)
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            console.log("User denied the request for Geolocation.")
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            console.log("Location information is unavailable.")
+                            break;
+                        case error.TIMEOUT:
+                            console.log("The request to get user location timed out.")
+                            break;
+                        case error.UNKNOWN_ERROR:
+                            console.log("An unknown error occurred.")
+                            break;
+                    }
+                });
+            } else {
+                console.log("Geolocation is not supported by this browser.");
+            }
+
+            // Existing navbar toggle script remains here or is merged
+            const navbarToggle = document.querySelector('.navbar-toggle');
+            const navbarMenu = document.querySelector('.navbar-menu');
+
+            if (navbarToggle && navbarMenu) {
+                navbarToggle.addEventListener('click', function () {
+                    navbarMenu.classList.toggle('active');
+                });
+                 // Optional: Close the menu if a menu item is clicked (useful for SPA-like behavior)
+                 navbarMenu.querySelectorAll('a.nav-link').forEach(link => {
+                     link.addEventListener('click', () => {
+                         navbarMenu.classList.remove('active');
+                     });
+                 });
+            }
+        });
     </script>
 </body>
 </html> 

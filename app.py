@@ -17,6 +17,7 @@ from email.utils import formatdate
 import json
 import requests
 from dotenv import load_dotenv
+import math
 
 # Load environment variables from .env file
 load_dotenv()
@@ -83,6 +84,34 @@ def init_db():
             # Update existing rows with current timestamp
             conn.execute("UPDATE users SET last_active = CURRENT_TIMESTAMP WHERE last_active IS NULL;")
             print("'last_active' column added and existing rows updated successfully.")
+
+        # Check and add latitude and longitude columns if they don't exist
+        cursor = conn.execute("PRAGMA table_info(users)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'latitude' not in columns:
+            print("Adding 'latitude' column to users table...")
+            conn.execute("ALTER TABLE users ADD COLUMN latitude REAL;")
+            conn.commit()
+            print("'latitude' column added successfully.")
+        if 'longitude' not in columns:
+            print("Adding 'longitude' column to users table...")
+            conn.execute("ALTER TABLE users ADD COLUMN longitude REAL;")
+            conn.commit()
+            print("'longitude' column added successfully.")
+
+        # Check and add age preference columns if they don't exist
+        cursor = conn.execute("PRAGMA table_info(users)")
+        columns = [col[1] for col in cursor.fetchall()]
+        if 'min_age_preference' not in columns:
+            print("Adding 'min_age_preference' column to users table...")
+            conn.execute("ALTER TABLE users ADD COLUMN min_age_preference INTEGER DEFAULT 18;")
+            conn.commit()
+            print("'min_age_preference' column added successfully.")
+        if 'max_age_preference' not in columns:
+            print("Adding 'max_age_preference' column to users table...")
+            conn.execute("ALTER TABLE users ADD COLUMN max_age_preference INTEGER DEFAULT 120;")
+            conn.commit()
+            print("'max_age_preference' column added successfully.")
 
         conn.execute('''
             CREATE TABLE IF NOT EXISTS profiles (
@@ -552,9 +581,96 @@ def login():
 
 @app.route('/logout')
 def logout():
-    session.pop('user_id', None)
-    flash('You have been logged out.', 'success')
+    session.clear()
     return redirect(url_for('index'))
+
+@app.route('/update_location', methods=['POST'])
+@login_required
+def update_location():
+    if request.is_json:
+        data = request.get_json()
+        latitude = data.get('latitude')
+        longitude = data.get('longitude')
+
+        if latitude is not None and longitude is not None:
+            conn = get_db_connection()
+            try:
+                conn.execute(
+                    "UPDATE users SET latitude = ?, longitude = ? WHERE id = ?",
+                    (latitude, longitude, g.user['id'])
+                )
+                conn.commit()
+                return jsonify({'message': 'Location updated successfully'}), 200
+            except Exception as e:
+                conn.rollback()
+                print(f"Database error updating location: {e}")
+                return jsonify({'error': 'Failed to update location'}), 500
+            finally:
+                conn.close()
+        else:
+            return jsonify({'error': 'Invalid location data'}), 400
+    return jsonify({'error': 'Request must be JSON'}), 415
+
+def haversine_distance(lat1, lon1, lat2, lon2):
+    R = 6371  # Radius of Earth in kilometers
+
+    # Convert degrees to radians
+    lat1_rad = math.radians(lat1)
+    lon1_rad = math.radians(lon1)
+    lat2_rad = math.radians(lat2)
+    lon2_rad = math.radians(lon2)
+
+    dlon = lon2_rad - lon1_rad
+    dlat = lat2_rad - lat1_rad
+
+    a = math.sin(dlat / 2)**2 + math.cos(lat1_rad) * math.cos(lat2_rad) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+
+    distance = R * c
+    return distance
+
+@app.route('/nearby_users', methods=['GET'])
+@login_required
+def nearby_users():
+    current_user_id = g.user['id']
+    radius = request.args.get('radius', 50, type=int) # Default radius 50 km
+
+    conn = get_db_connection()
+    try:
+        # Get current user's location
+        current_user_location = conn.execute(
+            "SELECT latitude, longitude FROM users WHERE id = ?",
+            (current_user_id,)
+        ).fetchone()
+
+        if not current_user_location or current_user_location['latitude'] is None or current_user_location['longitude'] is None:
+            return jsonify({'error': 'Current user location not available'}), 400
+
+        current_lat = current_user_location['latitude']
+        current_lon = current_user_location['longitude']
+
+        # Get all other users with location data
+        other_users = conn.execute(
+            "SELECT u.id, u.username, p.profile_picture, u.latitude, u.longitude FROM users u JOIN profiles p ON u.id = p.user_id WHERE u.id != ? AND u.latitude IS NOT NULL AND u.longitude IS NOT NULL",
+            (current_user_id,)
+        ).fetchall()
+
+        nearby = []
+        for user in other_users:
+            distance = haversine_distance(current_lat, current_lon, user['latitude'], user['longitude'])
+            if distance <= radius:
+                # Add user to nearby list, including distance
+                user_dict = dict(user)
+                user_dict['distance'] = round(distance, 2) # Add rounded distance
+                nearby.append(user_dict)
+
+        return jsonify(nearby), 200
+
+    except Exception as e:
+        print(f"Database error finding nearby users: {e}")
+        return jsonify({'error': 'Failed to find nearby users'}), 500
+    finally:
+        conn.close()
 
 @app.route('/online_users')
 @login_required
@@ -680,13 +796,14 @@ def profile():
 
     return render_template('profile.html', profile=profile_data, gallery_photos=photos)
 
-# --- BROWSE PROFILES ROUTE (MODIFIED for likes) ---
+# --- BROWSE PROFILES ROUTE (MODIFIED for likes and mutual likes) ---
 @app.route('/browse')
 @login_required
 def browse_profiles():
     conn = get_db_connection()
     current_user_id = g.user['id']
 
+    # Fetch all profiles (excluding current user) with like status by current user
     profiles_data = conn.execute(
         '''SELECT p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation,
                   p.profile_picture, u.username, u.id as user_id,
@@ -696,12 +813,26 @@ def browse_profiles():
            ORDER BY u.username ASC''',
         (current_user_id, current_user_id)
     ).fetchall()
+    
+    # Fetch mutual likes for the current user
+    mutual_likes_data = conn.execute(
+        '''SELECT u.id AS user_id, u.username, p.age, p.bio, p.observance_level, p.kosher_level, p.shabbat_observance, p.synagogue_affiliation, p.profile_picture,
+                  1 AS is_liked_by_me -- Since it's a mutual like, current user has liked them
+           FROM likes l1
+           JOIN likes l2 ON l1.liker_id = l2.liked_id AND l1.liked_id = l2.liker_id
+           JOIN users u ON l1.liked_id = u.id
+           JOIN profiles p ON u.id = p.user_id
+           WHERE l1.liker_id = ?
+           ORDER BY u.username ASC''',
+        (current_user_id,)
+    ).fetchall()
+
     conn.close()
 
-    return render_template('browse_profiles.html', profiles=profiles_data)
+    return render_template('browse_profiles.html', profiles=profiles_data, mutual_likes=mutual_likes_data)
 
 # --- VIEW OTHER USER'S PROFILE ROUTE (MODIFIED for likes) ---
-@app.route('/user_profile/<int:user_id>')
+@app.route('/user_profile/<int:user_id>', endpoint='view_user_profile')
 @login_required
 def view_user_profile(user_id):
     conn = get_db_connection()
@@ -715,15 +846,21 @@ def view_user_profile(user_id):
         'SELECT id, username FROM users WHERE id = ?', (user_id,)
     ).fetchone()
 
-    if target_user is None:
+    if not target_user:
         conn.close()
         flash('User not found.', 'error')
         return redirect(url_for('browse_profiles'))
 
     target_profile = conn.execute(
-        '''SELECT age, bio, observance_level, kosher_level, shabbat_observance, synagogue_affiliation
+        '''SELECT age, bio, observance_level, kosher_level, shabbat_observance, synagogue_affiliation, profile_picture
            FROM profiles WHERE user_id = ?''', (user_id,)
     ).fetchone()
+
+    # Check if profile data exists
+    if not target_profile:
+        conn.close()
+        flash(f'Profile data not found for {target_user["username"]}.', 'error')
+        return redirect(url_for('browse_profiles'))
 
     is_liked_by_me = conn.execute(
         'SELECT 1 FROM likes WHERE liker_id = ? AND liked_id = ?',
@@ -1056,12 +1193,15 @@ def delete_photo(photo_id):
 
 def get_love_agent_response(user_message, user_context=None):
     """Get a response from the DeepSeek-powered love agent."""
-    if not app.config['DEEPSEEK_API_KEY']:
+    deepseek_api_key = app.config['DEEPSEEK_API_KEY']
+    app.logger.info(f"DeepSeek API Key loaded: {deepseek_api_key[:4]}...{deepseek_api_key[-4:] if deepseek_api_key else ''}") # Log first/last 4 chars
+
+    if not deepseek_api_key:
         return "I'm currently offline. Please try again later or contact support."
     
     try:
         headers = {
-            'Authorization': f'Bearer {app.config["DEEPSEEK_API_KEY"]}',
+            'Authorization': f'Bearer {deepseek_api_key}',
             'Content-Type': 'application/json'
         }
         

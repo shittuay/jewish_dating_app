@@ -9,91 +9,190 @@
         <p class="lead text-muted">Browse through our community of Jewish singles</p>
     </div>
 
-    <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
-        {% for profile in profiles %}
-        <div class="col">
-            <div class="card h-100 profile-card">
-                <div class="profile-image-container">
-                    {% if profile.profile_picture %}
-                        <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" 
-                             alt="{{ profile.username }}" 
-                             class="profile-image">
-                        <div class="profile-overlay">
-                            <div class="profile-actions-overlay">
-                                <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
-                                   class="btn btn-light btn-sm">
-                                    <i class="fas fa-user-circle"></i> View
-                                </a>
-                                {% if profile.is_liked_by_me %}
-                                    <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-danger btn-sm">
-                                            <i class="fas fa-heart-broken"></i>
-                                        </button>
-                                    </form>
-                                {% else %}
-                                    <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
-                                        <button type="submit" class="btn btn-primary btn-sm">
-                                            <i class="fas fa-heart"></i>
-                                        </button>
-                                    </form>
-                                {% endif %}
+    <!-- Section for Nearby Users -->
+    <div id="nearby-users-section" class="mb-5"> {# Show by default #}
+        <h2>Nearby Users</h2>
+        <p class="text-muted">Users within 50 km radius</p> {# We'll update this dynamically #}
+        <div id="nearby-users-list" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            <!-- Nearby users will be loaded here by JavaScript -->
+            <p id="nearby-placeholder" class="text-muted text-center">Loading nearby users...</p>
+        </div>
+    </div>
+
+    <!-- Section for Suggested Matches (Mutual Likes) -->
+    {% if mutual_likes %}
+    <div id="suggested-matches-section" class="mb-5">
+        <h2>Suggested Matches</h2>
+        <p class="text-muted">Users you have mutually liked</p>
+        <div id="mutual-likes-list" class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% for profile in mutual_likes %}
+            <div class="col">
+                <div class="card h-100 profile-card">
+                    <div class="profile-image-container">
+                        {% if profile.profile_picture %}
+                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" 
+                                 alt="{{ profile.username }}" 
+                                 class="profile-image">
+                            <div class="profile-overlay">
+                                <div class="profile-actions-overlay">
+                                    <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
+                                       class="btn btn-light btn-sm">
+                                        <i class="fas fa-user-circle"></i> View
+                                    </a>
+                                    {# Since these are mutual likes, assume message is available #}
+                                </div>
                             </div>
-                        </div>
-                    {% else %}
-                        <div class="profile-image-placeholder">
-                            <i class="fas fa-user"></i>
-                        </div>
-                    {% endif %}
-                    <div class="profile-badge">
-                        <span class="badge bg-primary">{{ profile.age }}</span>
-                        {% if profile.observance_level %}
-                        <span class="badge bg-info">{{ profile.observance_level }}</span>
+                        {% else %}
+                            <div class="profile-image-placeholder">
+                                <i class="fas fa-user"></i>
+                            </div>
                         {% endif %}
+                        <div class="profile-badge">
+                            <span class="badge bg-primary">{{ profile.age }}</span>
+                            {% if profile.observance_level %}
+                            <span class="badge bg-info">{{ profile.observance_level }}</span>
+                            {% endif %}
+                        </div>
                     </div>
-                </div>
-                
-                <div class="card-body">
-                    <h3 class="card-title h4 mb-2">{{ profile.username }}</h3>
                     
-                    <div class="profile-details">
-                        <div class="detail-item">
-                            <i class="fas fa-utensils"></i>
-                            <span>{{ profile.kosher_level }}</span>
-                        </div>
+                    <div class="card-body">
+                        <h3 class="card-title h4 mb-2">{{ profile.username }}</h3>
                         
-                        <div class="detail-item">
-                            <i class="fas fa-moon"></i>
-                            <span>{{ profile.shabbat_observance }}</span>
+                        <div class="profile-details">
+                            <div class="detail-item">
+                                <i class="fas fa-utensils"></i>
+                                <span>{{ profile.kosher_level }}</span>
+                            </div>
+                            
+                            <div class="detail-item">
+                                <i class="fas fa-moon"></i>
+                                <span>{{ profile.shabbat_observance }}</span>
+                            </div>
+                            
+                            {% if profile.synagogue_affiliation %}
+                            <div class="detail-item">
+                                <i class="fas fa-synagogue"></i>
+                                <span>{{ profile.synagogue_affiliation }}</span>
+                            </div>
+                            {% endif %}
                         </div>
-                        
-                        {% if profile.synagogue_affiliation %}
-                        <div class="detail-item">
-                            <i class="fas fa-synagogue"></i>
-                            <span>{{ profile.synagogue_affiliation }}</span>
+
+                        <div class="bio-section mt-3">
+                            <p class="card-text">{{ profile.bio[:150] }}{% if profile.bio|length > 150 %}...{% endif %}</p>
                         </div>
-                        {% endif %}
                     </div>
 
-                    <div class="bio-section mt-3">
-                        <p class="card-text">{{ profile.bio[:150] }}{% if profile.bio|length > 150 %}...{% endif %}</p>
-                    </div>
-                </div>
-
-                <div class="card-footer bg-transparent border-0">
-                    <div class="d-flex justify-content-between align-items-center">
-                        <a href="{{ url_for('conversation', user_id=profile.user_id) }}" 
-                           class="btn btn-outline-primary btn-sm">
-                            <i class="fas fa-comments"></i> Message
-                        </a>
-                        <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
-                           class="btn btn-outline-secondary btn-sm">
-                            <i class="fas fa-info-circle"></i> Details
-                        </a>
+                    <div class="card-footer bg-transparent border-0">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <a href="{{ url_for('conversation', user_id=profile.user_id) }}" 
+                               class="btn btn-outline-primary btn-sm">
+                                <i class="fas fa-comments"></i> Message
+                            </a>
+                            <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
+                               class="btn btn-outline-secondary btn-sm">
+                                <i class="fas fa-info-circle"></i> Details
+                            </a>
+                        </div>
                     </div>
                 </div>
             </div>
+            {% endfor %}
         </div>
-        {% endfor %}
+    </div>
+    {% endif %}
+
+    <!-- Main Profiles List (Exclude Mutual Likes) -->
+    <div id="all-profiles-section">
+        <h2>All Profiles</h2> {# Rename heading or keep it as is #}
+        <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4">
+            {% set mutual_like_ids = mutual_likes|map(attribute='user_id')|list %}
+            {% for profile in profiles %}
+                {% if profile.user_id not in mutual_like_ids %}
+                <div class="col">
+                    <div class="card h-100 profile-card">
+                        <div class="profile-image-container">
+                            {% if profile.profile_picture %}
+                                <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" 
+                                     alt="{{ profile.username }}" 
+                                     class="profile-image">
+                                <div class="profile-overlay">
+                                    <div class="profile-actions-overlay">
+                                        <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
+                                           class="btn btn-light btn-sm">
+                                            <i class="fas fa-user-circle"></i> View
+                                        </a>
+                                        {% if profile.is_liked_by_me %}
+                                            <form action="{{ url_for('unlike_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-danger btn-sm">
+                                                    <i class="fas fa-heart-broken"></i>
+                                                </button>
+                                            </form>
+                                        {% else %}
+                                            <form action="{{ url_for('like_profile', user_id=profile.user_id) }}" method="post" class="d-inline">
+                                                <button type="submit" class="btn btn-primary btn-sm">
+                                                    <i class="fas fa-heart"></i>
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% else %}
+                                <div class="profile-image-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                            <div class="profile-badge">
+                                <span class="badge bg-primary">{{ profile.age }}</span>
+                                {% if profile.observance_level %}
+                                <span class="badge bg-info">{{ profile.observance_level }}</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <div class="card-body">
+                            <h3 class="card-title h4 mb-2">{{ profile.username }}</h3>
+                            
+                            <div class="profile-details">
+                                <div class="detail-item">
+                                    <i class="fas fa-utensils"></i>
+                                    <span>{{ profile.kosher_level }}</span>
+                                </div>
+                                
+                                <div class="detail-item">
+                                    <i class="fas fa-moon"></i>
+                                    <span>{{ profile.shabbat_observance }}</span>
+                                </div>
+                                
+                                {% if profile.synagogue_affiliation %}
+                                <div class="detail-item">
+                                    <i class="fas fa-synagogue"></i>
+                                    <span>{{ profile.synagogue_affiliation }}</span>
+                                </div>
+                                {% endif %}
+                            </div>
+
+                            <div class="bio-section mt-3">
+                                <p class="card-text">{{ profile.bio[:150] }}{% if profile.bio|length > 150 %}...{% endif %}</p>
+                            </div>
+                        </div>
+
+                        <div class="card-footer bg-transparent border-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a href="{{ url_for('conversation', user_id=profile.user_id) }}" 
+                                   class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-comments"></i> Message
+                                </a>
+                                <a href="{{ url_for('view_user_profile', user_id=profile.user_id) }}" 
+                                   class="btn btn-outline-secondary btn-sm">
+                                    <i class="fas fa-info-circle"></i> Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            {% endfor %}
+        </div>
     </div>
 </div>
 
@@ -104,17 +203,18 @@
 
 .profile-card {
     transition: transform 0.3s ease, box-shadow 0.3s ease;
-    border: none;
-    border-radius: 15px;
+    border: none; /* Remove default border */
+    border-radius: var(--border-radius, 8px); /* Use consistent border radius */
     overflow: hidden;
-    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Use consistent subtle box shadow */
     background: #fff;
     position: relative;
+    border: 1px solid var(--border-color, #e0e0e0); /* Add a subtle border */
 }
 
 .profile-card:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 12px 20px rgba(0, 0, 0, 0.15);
+    transform: translateY(-3px); /* Slightly less dramatic lift on hover */
+    box-shadow: var(--box-shadow-hover, 0 8px 16px rgba(0, 0, 0, 0.1)); /* Use a more prominent shadow on hover */
 }
 
 .profile-image-container {
@@ -186,21 +286,22 @@
 
 .profile-details {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
-    gap: 0.75rem;
-    margin-top: 1rem;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Adjust min width for details */
+    gap: 1rem; /* Increase gap slightly */
+    margin-top: 1.5rem; /* Adjust margin */
 }
 
 .detail-item {
     display: flex;
     align-items: center;
-    gap: 0.5rem;
-    padding: 0.5rem;
-    background: #f8f9fa;
-    border-radius: 8px;
+    gap: 0.6rem; /* Adjust gap */
+    padding: 0.75rem; /* Increase padding */
+    background: var(--light-gray, #f8f9fa); /* Use variable for light gray */
+    border-radius: var(--border-radius-small, 5px); /* Smaller border radius for detail items */
     font-size: 0.9rem;
     color: #495057;
     transition: background-color 0.2s ease;
+    border: 1px solid var(--border-color, #e0e0e0); /* Add subtle border to detail items */
 }
 
 .detail-item:hover {
@@ -208,17 +309,17 @@
 }
 
 .detail-item i {
-    color: #007bff;
+    color: var(--primary-color, #007bff); /* Use variable for primary color */
     font-size: 1rem;
 }
 
 .bio-section {
     color: #6c757d;
     font-size: 0.95rem;
-    line-height: 1.5;
-    margin-top: 1rem;
-    padding-top: 1rem;
-    border-top: 1px solid #f0f0f0;
+    line-height: 1.6; /* Slightly increase line height for readability */
+    margin-top: 1.5rem; /* Adjust margin */
+    padding-top: 1.5rem; /* Adjust padding */
+    border-top: 1px solid var(--border-color, #f0f0f0); /* Use variable for border color */
 }
 
 .card-footer {
@@ -265,5 +366,155 @@
         font-size: 0.8rem;
     }
 }
+
+/* Adding variables for consistency */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --light-gray: #f8f9fa;
+    --border-color: #e0e0e0;
+    --border-radius: 8px;
+    --border-radius-small: 5px;
+    --box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    --box-shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure dashboard sections use the new professional styling */
+/* Targeting specific classes used in base.html for these sections */
+.dashboard-layout .dashboard-sidebar {
+    /* Styles inherited from .dashboard-sidebar rule above */
+}
+
+.dashboard-layout .dashboard-content .quick-actions { /* Assuming a container div with class 'quick-actions' */
+     background-color: #fff; /* Add background */
+    border-radius: var(--border-radius, 8px); /* Consistent border radius */
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Consistent subtle shadow */
+    padding: 1.5rem; /* Consistent padding */
+    margin-bottom: 2rem; /* Space below section */
+    border: 1px solid var(--border-color, #e0e0e0); /* Subtle border */
+}
+
+.dashboard-layout .dashboard-content .suggested-matches { /* Assuming a container div with class 'suggested-matches' */
+     background-color: #fff; /* Add background */
+    border-radius: var(--border-radius, 8px); /* Consistent border radius */
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Consistent subtle shadow */
+    padding: 1.5rem; /* Consistent padding */
+    margin-bottom: 2rem; /* Space below section */
+    border: 1px solid var(--border-color, #e0e0e0); /* Subtle border */
+}
+
+
+/* Refining quick action and suggested match grid items if they exist */
+.quick-action-item, .suggested-match-card { /* Assuming these classes exist based on previous media queries */
+     background-color: #fff; /* Ensure white background */
+     border-radius: var(--border-radius-small, 5px); /* Smaller border radius */
+     box-shadow: var(--box-shadow, 0 1px 3px rgba(0, 0, 0, 0.05)); /* Lighter shadow */
+     padding: 1rem; /* Internal padding */
+     border: 1px solid var(--border-color, #e9ecef); /* Very subtle border */
+     transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-action-item:hover, .suggested-match-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-hover, 0 4px 8px rgba(0, 0, 0, 0.08));
+}
+
+/* Adjusting existing grid styles for better spacing */
+.quick-actions-grid, .suggested-matches-grid {
+    /* Inherits padding, margin-bottom, etc. from the combined rule above */
+    gap: 1rem; /* Adjust gap between grid items */
+}
+
+/* Ensure the nearby users section also gets card styling */
+#nearby-users-section {
+    background-color: #fff; /* Add background */
+    border-radius: var(--border-radius, 8px); /* Consistent border radius */
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Consistent subtle shadow */
+    padding: 1.5rem; /* Consistent padding */
+    margin-bottom: 2rem; /* Space below section */
+    border: 1px solid var(--border-color, #e0e0e0); /* Subtle border */
+}
+
+#nearby-users-list .col .profile-card {
+    /* Styles inherited from .profile-card rule */
+}
+
 </style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const nearbyUsersSection = document.getElementById('nearby-users-section');
+        const nearbyUsersList = document.getElementById('nearby-users-list');
+        const radiusText = nearbyUsersSection.querySelector('p.text-muted');
+        const nearbyPlaceholder = document.getElementById('nearby-placeholder');
+
+        // Fetch nearby users
+        fetch('/nearby_users')
+            .then(response => response.json())
+            .then(data => {
+                // Remove the placeholder message
+                if (nearbyPlaceholder) {
+                    nearbyPlaceholder.remove();
+                }
+
+                if (data && data.length > 0) {
+                    radiusText.textContent = `Users within 50 km radius`; // Update radius text (assuming default 50 km for now)
+
+                    data.forEach(user => {
+                        const userCardHtml = `
+                            <div class="col">
+                                <div class="card h-100 profile-card">
+                                    <div class="profile-image-container">
+                                        <img src="/static/uploads/${user.profile_picture ? user.profile_picture : 'default_avatar.png'}" 
+                                             alt="${user.username}" 
+                                             class="profile-image">
+                                        <div class="profile-overlay">
+                                            <div class="profile-actions-overlay">
+                                                <a href="/user_profile/${user.id}" 
+                                                   class="btn btn-light btn-sm">
+                                                    <i class="fas fa-user-circle"></i> View
+                                                </a>
+                                                {# Add Like/Message buttons if needed, similar to browse_profiles #}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="card-body">
+                                        <h3 class="card-title h4 mb-2">${user.username}</h3>
+                                        <p class="card-text text-muted">${user.distance} km away</p>
+                                        {# Add other profile details if available in the /nearby_users endpoint #}
+                                    </div>
+
+                                    <div class="card-footer bg-transparent border-0">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <a href="/conversation/${user.id}" 
+                                               class="btn btn-outline-primary btn-sm">
+                                                <i class="fas fa-comments"></i> Message
+                                            </a>
+                                            <a href="/user_profile/${user.id}" 
+                                               class="btn btn-outline-secondary btn-sm">
+                                                <i class="fas fa-info-circle"></i> Details
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        nearbyUsersList.insertAdjacentHTML('beforeend', userCardHtml);
+                    });
+                } else {
+                    // Display a message if no nearby users are found
+                    nearbyUsersList.innerHTML = '<p class="text-muted text-center">No nearby users found within 50 km.</p>';
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching nearby users:', error);
+                // Display an error message
+                if (nearbyPlaceholder) {
+                     nearbyPlaceholder.remove(); // Remove placeholder on error too
+                }
+                nearbyUsersList.innerHTML = '<p class="text-danger text-center">Error loading nearby users.</p>';
+            });
+    });
+</script>
 {% endblock %}

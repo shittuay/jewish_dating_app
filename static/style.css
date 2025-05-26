@@ -153,12 +153,16 @@
 
 .home-info-box,
 .reviews-section,
-.review-form-section {
+.review-form-section,
+.dashboard-sidebar, /* Apply similar card styling to sidebars */
+.quick-actions-grid, /* Apply similar card styling to quick actions */
+.suggested-matches-grid { /* Apply similar card styling to suggested matches */
     background-color: #fff; /* Add background to sections for clarity */
-    border-radius: var(--border-radius);
-    box-shadow: var(--box-shadow);
-    padding: 2rem; /* Add internal padding */
+    border-radius: var(--border-radius, 8px); /* Use a CSS variable for consistency, default to 8px */
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Use a subtle box-shadow variable, default provided */
+    padding: 1.5rem; /* Adjust padding for better spacing */
     margin-bottom: 2rem; /* Space between these sections */
+    border: 1px solid var(--border-color, #e0e0e0); /* Add a subtle border */
 }
 
 .home-info-box .home-features {
@@ -206,8 +210,8 @@
 }
 
 .review-card .review-user img {
-    width: 40px;
-    height: 40px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     object-fit: cover;
 }
@@ -221,6 +225,11 @@
 
 .review-form .form-control {
     margin-bottom: 0; /* Remove default form-group margin */
+}
+
+.review-form input,
+.review-form textarea {
+    margin-bottom: 1rem; /* Add some space below form elements */
 }
 
 .dashboard-hero {
@@ -248,7 +257,247 @@
     margin-bottom: 1rem;
 }
 
-.review-form input,
-.review-form textarea {
-    margin-bottom: 1rem;
+/* Dashboard Styles */
+.dashboard-layout {
+    display: grid;
+    grid-template-columns: 280px 1fr 280px; /* Default for larger screens */
+    gap: 2rem;
+    padding: 2rem;
+    min-height: calc(100vh - 60px);
+    background: #f8f9fa;
+}
+
+/* Responsive adjustments for Dashboard */
+@media (max-width: 1024px) {
+    .dashboard-layout {
+        grid-template-columns: 250px 1fr; /* Adjust for medium screens */
+        gap: 1.5rem;
+        padding: 1.5rem;
+    }
+    .dashboard-sidebar.right {
+        display: none; /* Hide the right sidebar on medium screens */
+    }
+}
+
+@media (max-width: 768px) {
+    .dashboard-layout {
+        grid-template-columns: 1fr; /* Stack content vertically on small screens */
+        gap: 1rem;
+        padding: 1rem;
+    }
+    .dashboard-sidebar {
+        display: none; /* Hide sidebars on small screens by default */
+    }
+    .dashboard-sidebar.right {
+        display: none; /* Ensure right sidebar is hidden */
+    }
+
+    /* Adjust dashboard inner grids for small screens */
+    .quick-actions-grid, .suggested-matches-grid {
+        grid-template-columns: 1fr; /* Stack items in a single column */
+        gap: 1rem; /* Adjust gap for stacked items */
+    }
+
+    /* Adjust quick action and suggested match items */
+    .quick-action-item, .suggested-match-card {
+        width: 100%; /* Make items take full width */
+    }
+
+    /* Potentially add a button here to toggle sidebar visibility on mobile */
+}
+
+.dashboard-sidebar {
+    background: white;
+    border-radius: 15px;
+}
+
+.navbar-brand {
+    color: var(--primary-color);
+    transition: color 0.2s ease;
+    font-family: 'Playfair Display', serif;
+}
+
+.navbar-brand:hover {
+    color: var(--secondary-color);
+}
+
+.navbar-toggle {
+    display: none; /* Hide by default on larger screens */
+    background: none;
+    border: none;
+    padding: 0.5rem;
+    cursor: pointer;
+    font-size: 1.5rem;
+    color: var(--primary-color);
+}
+
+.navbar-menu {
+    display: flex; /* Show as flex row by default */
+    align-items: center;
+    gap: 1.5rem;
+}
+
+/* Responsive adjustments for Navbar */
+@media (max-width: 768px) {
+    .navbar-toggle {
+        display: block; /* Show toggle button on small screens */
+    }
+
+    .navbar-menu {
+        display: none; /* Hide menu by default on small screens */
+        flex-direction: column; /* Stack menu items vertically */
+        position: absolute; /* Position below the navbar */
+        top: 60px; /* Adjust based on navbar height */
+        left: 0;
+        right: 0;
+        background: #fff; /* Add background */
+        border-top: 1px solid #eee;
+        padding: 1rem 0;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        z-index: 999;
+    }
+
+    .navbar-menu.active {
+        display: flex; /* Show menu when active */
+    }
+
+    .navbar-content {
+        padding: 0 1rem; /* Adjust padding for smaller screens */
+    }
+
+    .nav-link {
+        padding: 0.75rem 1.5rem; /* Adjust padding for mobile menu items */
+        width: 100%; /* Make links take full width */
+    }
+
+    .navbar-end {
+        align-items: flex-start; /* Align items to the start when stacked */
+        gap: 0.5rem; /* Adjust gap */
+    }
+}
+
+.navbar-start {
+    display: flex;
+}
+
+.profile-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border: none; /* Remove default border */
+    border-radius: var(--border-radius, 8px); /* Use consistent border radius */
+    overflow: hidden;
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Use consistent subtle box shadow */
+    background: #fff;
+    position: relative;
+    border: 1px solid var(--border-color, #e0e0e0); /* Add a subtle border */
+}
+
+.profile-card:hover {
+    transform: translateY(-3px); /* Slightly less dramatic lift on hover */
+    box-shadow: var(--box-shadow-hover, 0 8px 16px rgba(0, 0, 0, 0.1)); /* Use a more prominent shadow on hover */
+}
+
+.profile-details {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); /* Adjust min width for details */
+    gap: 1rem; /* Increase gap slightly */
+    margin-top: 1.5rem; /* Adjust margin */
+}
+
+.detail-item {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem; /* Adjust gap */
+    padding: 0.75rem; /* Increase padding */
+    background: var(--light-gray, #f8f9fa); /* Use variable for light gray */
+    border-radius: var(--border-radius-small, 5px); /* Smaller border radius for detail items */
+    font-size: 0.9rem;
+    color: #495057;
+    transition: background-color 0.2s ease;
+    border: 1px solid var(--border-color, #e0e0e0); /* Add subtle border to detail items */
+}
+
+.detail-item i {
+    color: var(--primary-color, #007bff); /* Use variable for primary color */
+    font-size: 1rem;
+}
+
+.bio-section {
+    color: #6c757d;
+    font-size: 0.95rem;
+    line-height: 1.6; /* Slightly increase line height for readability */
+    margin-top: 1.5rem; /* Adjust margin */
+    padding-top: 1.5rem; /* Adjust padding */
+    border-top: 1px solid var(--border-color, #f0f0f0); /* Use variable for border color */
+}
+
+/* Adding variables for consistency */
+:root {
+    --primary-color: #007bff;
+    --secondary-color: #6c757d;
+    --light-gray: #f8f9fa;
+    --border-color: #e0e0e0;
+    --border-radius: 8px;
+    --border-radius-small: 5px;
+    --box-shadow: 0 1px 6px rgba(0, 0, 0, 0.08);
+    --box-shadow-hover: 0 8px 16px rgba(0, 0, 0, 0.1);
+}
+
+/* Ensure dashboard sections use the new professional styling */
+/* Targeting specific classes used in base.html for these sections */
+.dashboard-layout .dashboard-sidebar {
+    /* Styles inherited from .dashboard-sidebar rule above */
+}
+
+.dashboard-layout .dashboard-content .quick-actions { /* Assuming a container div with class 'quick-actions' */
+     background-color: #fff; /* Add background */
+    border-radius: var(--border-radius, 8px); /* Consistent border radius */
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Consistent subtle shadow */
+    padding: 1.5rem; /* Consistent padding */
+    margin-bottom: 2rem; /* Space below section */
+    border: 1px solid var(--border-color, #e0e0e0); /* Subtle border */
+}
+
+.dashboard-layout .dashboard-content .suggested-matches { /* Assuming a container div with class 'suggested-matches' */
+     background-color: #fff; /* Add background */
+    border-radius: var(--border-radius, 8px); /* Consistent border radius */
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Consistent subtle shadow */
+    padding: 1.5rem; /* Consistent padding */
+    margin-bottom: 2rem; /* Space below section */
+    border: 1px solid var(--border-color, #e0e0e0); /* Subtle border */
+}
+
+
+/* Refining quick action and suggested match grid items if they exist */
+.quick-action-item, .suggested-match-card { /* Assuming these classes exist based on previous media queries */
+     background-color: #fff; /* Ensure white background */
+     border-radius: var(--border-radius-small, 5px); /* Smaller border radius */
+     box-shadow: var(--box-shadow, 0 1px 3px rgba(0, 0, 0, 0.05)); /* Lighter shadow */
+     padding: 1rem; /* Internal padding */
+     border: 1px solid var(--border-color, #e9ecef); /* Very subtle border */
+     transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.quick-action-item:hover, .suggested-match-card:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--box-shadow-hover, 0 4px 8px rgba(0, 0, 0, 0.08));
+}
+
+/* Adjusting existing grid styles for better spacing */
+.quick-actions-grid, .suggested-matches-grid {
+    /* Inherits padding, margin-bottom, etc. from the combined rule above */
+    gap: 1rem; /* Adjust gap between grid items */
+}
+
+/* Ensure the nearby users section also gets card styling */
+#nearby-users-section {
+    background-color: #fff; /* Add background */
+    border-radius: var(--border-radius, 8px); /* Consistent border radius */
+    box-shadow: var(--box-shadow, 0 1px 6px rgba(0, 0, 0, 0.08)); /* Consistent subtle shadow */
+    padding: 1.5rem; /* Consistent padding */
+    margin-bottom: 2rem; /* Space below section */
+    border: 1px solid var(--border-color, #e0e0e0); /* Subtle border */
+}
+
+#nearby-users-list .col .profile-card {
+    /* Styles inherited from .profile-card rule */
 } 
