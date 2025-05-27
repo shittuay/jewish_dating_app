@@ -570,6 +570,20 @@
             font-style: italic;
             color: #999;
         }
+
+        .nav-avatar-placeholder {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background-color: #e9ecef;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #6c757d;
+            font-size: 1.2rem;
+            border: 2px solid #eee;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
     </style>
     {% block extra_css %}
     <style>
@@ -665,9 +679,15 @@
                     {% if profile %}
                     <div class="dropdown">
                         <button class="dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown" aria-expanded="false">
-                             <img src="{{ url_for('static', filename='uploads/' + (profile.profile_picture if profile.profile_picture else 'default_avatar.png')) }}" 
-                                 class="nav-avatar" alt="Profile Picture">
-                             <span>{{ g.user['username']|capitalize }}</span>
+                            {% if profile and profile.profile_picture %}
+                                <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" 
+                                     class="nav-avatar" alt="Profile Picture">
+                            {% else %}
+                                <div class="nav-avatar-placeholder">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            {% endif %}
+                            <span>{{ g.user['username']|capitalize }}</span>
                         </button>
                         <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
                             <li><a class="dropdown-item" href="{{ url_for('profile') }}"><i class="fas fa-user-circle"></i> My Profile</a></li>
