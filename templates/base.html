@@ -584,6 +584,20 @@
             border: 2px solid #eee;
             box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
+
+        .footer-link {
+            color: #b0c4de !important;
+            text-decoration: none !important;
+            transition: color 0.2s !important;
+            font-size: 1rem !important;
+            display: inline-block !important;
+            position: relative !important;
+            z-index: 1 !important;
+        }
+        .footer-link:hover {
+            color: #fff !important;
+            text-decoration: underline !important;
+        }
     </style>
     {% block extra_css %}
     <style>
@@ -738,8 +752,8 @@
                 <a href="#">Our Proven Process</a>
                 <a href="#">Client Stories</a>
                 <a href="#">FAQ</a>
-                <a href="#">Privacy Policy</a>
-                <a href="#">Terms of Use</a>
+                <a href="{{ url_for('privacy') }}" class="footer-link">Privacy Policy</a>
+                <a href="{{ url_for('terms') }}" class="footer-link" style="pointer-events: auto; cursor: pointer;">Terms of Use</a>
             </div>
             <div class="footer-links-group">
                 <a href="#">Christian Singles</a>

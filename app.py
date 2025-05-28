@@ -1,6 +1,6 @@
 import os # Import os module
 from werkzeug.utils import secure_filename # Import secure_filename
-from flask import Flask, render_template, request, redirect, url_for, flash, session, g, abort, jsonify, Response
+from flask import Flask, render_template, request, redirect, url_for, flash, session, g, abort, jsonify, Response, make_response, send_from_directory
 import sqlite3
 import hashlib
 from functools import wraps
@@ -18,6 +18,13 @@ import json
 import requests
 from dotenv import load_dotenv
 import math
+import secrets
+import time
+from flask_mail import Message, Mail
+import magic  # for file type validation
+import os.path
+from pathlib import Path
+import posixpath
 
 # Load environment variables from .env file
 load_dotenv()
@@ -25,12 +32,16 @@ load_dotenv()
 # Create the Flask application
 app = Flask(__name__, instance_relative_config=True)
 
+# Initialize Flask-Mail
+mail = Mail(app)
+
 # Ensure the instance folder exists
 try:
     os.makedirs(app.instance_path)
 except OSError:
     pass
 
+# Set production configuration
 app.config.from_mapping(
     SECRET_KEY=os.getenv('SECRET_KEY', 'dev'),
     DATABASE=os.path.join(app.instance_path, 'jewish_dating.sqlite'),
@@ -39,22 +50,72 @@ app.config.from_mapping(
     MAIL_SERVER='smtp.gmail.com',
     MAIL_PORT=587,
     MAIL_USE_TLS=True,
-    MAIL_USERNAME='your-email@gmail.com',  # Update with your email
-    MAIL_PASSWORD='your-app-password',     # Update with your app password
-    MAIL_DEFAULT_SENDER='Jewish Dating App <your-email@gmail.com>',
-    DEEPSEEK_API_KEY=os.getenv('DEEPSEEK_API_KEY', ''),  # Add DeepSeek API key
-    DEEPSEEK_API_URL='https://api.deepseek.com/v1/chat/completions'  # DeepSeek API endpoint
+    MAIL_USERNAME=os.getenv('MAIL_USERNAME', 'your-email@gmail.com'),
+    MAIL_PASSWORD=os.getenv('MAIL_PASSWORD', 'your-app-password'),
+    MAIL_DEFAULT_SENDER=os.getenv('MAIL_DEFAULT_SENDER', 'Jewish Dating App <your-email@gmail.com>'),
+    DEEPSEEK_API_KEY=os.getenv('DEEPSEEK_API_KEY', ''),
+    DEEPSEEK_API_URL='https://api.deepseek.com/v1/chat/completions',
+    # Security configurations
+    DEBUG=False,  # Disable debug mode in production
+    SESSION_COOKIE_SECURE=True,  # Only send cookies over HTTPS
+    SESSION_COOKIE_HTTPONLY=True,  # Prevent JavaScript access to session cookie
+    SESSION_COOKIE_SAMESITE='Lax',  # Protect against CSRF
+    PERMANENT_SESSION_LIFETIME=datetime.timedelta(days=1),  # Session timeout
 )
+
+# Add security headers middleware
+@app.after_request
+def add_security_headers(response):
+    response.headers['Strict-Transport-Security'] = 'max-age=31536000; includeSubDomains'
+    response.headers['X-Content-Type-Options'] = 'nosniff'
+    response.headers['X-Frame-Options'] = 'SAMEORIGIN'
+    response.headers['X-XSS-Protection'] = '1; mode=block'
+    response.headers['Content-Security-Policy'] = "default-src 'self'; script-src 'self' 'unsafe-inline' cdnjs.cloudflare.com cdn.jsdelivr.net; style-src 'self' 'unsafe-inline' fonts.googleapis.com cdnjs.cloudflare.com cdn.jsdelivr.net; font-src 'self' fonts.gstatic.com cdnjs.cloudflare.com; img-src 'self' data:; connect-src 'self'"
+    return response
+
+# Initialize Flask-Mail with app config
+mail.init_app(app)
 
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 # Allowed file extensions for profile pictures
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
+MAX_FILE_SIZE = 5 * 1024 * 1024  # 5MB
+ALLOWED_MIME_TYPES = {
+    'image/jpeg',
+    'image/png',
+    'image/gif'
+}
 
 def allowed_file(filename):
+    """Check if the file extension is allowed."""
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+def validate_file(file):
+    """Validate file size and type."""
+    if not file:
+        return False, "No file provided"
+    
+    if file.content_length and file.content_length > MAX_FILE_SIZE:
+        return False, f"File too large. Maximum size is {MAX_FILE_SIZE/1024/1024}MB"
+    
+    try:
+        # Read the first 2048 bytes to check the file type
+        header = file.read(2048)
+        file.seek(0)  # Reset file pointer
+        
+        mime = magic.Magic(mime=True)
+        file_type = mime.from_buffer(header)
+        
+        if file_type not in ALLOWED_MIME_TYPES:
+            return False, "Invalid file type. Only images are allowed."
+        
+        return True, None
+    except Exception as e:
+        app.logger.error(f"Error validating file: {str(e)}")
+        return False, "Error validating file. Please try again."
 
 def get_db_connection():
     conn = sqlite3.connect(app.config['DATABASE'])
@@ -274,6 +335,18 @@ def init_db():
                 FOREIGN KEY (subscriber_id) REFERENCES newsletter_subscribers(id),
                 UNIQUE(recurring_newsletter_id, subscriber_id)
             );
+        ''')
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS profile_verification (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                user_id INTEGER NOT NULL,
+                verification_type TEXT NOT NULL,
+                verification_status TEXT NOT NULL,
+                verification_data TEXT,
+                submitted_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+                verified_at TIMESTAMP,
+                FOREIGN KEY (user_id) REFERENCES users (id)
+            )
         ''')
 
         # Insert default templates if they don't exist
@@ -499,6 +572,9 @@ def register():
         username = request.form['username']
         password = request.form['password']
         confirm_password = request.form['confirm_password']
+        email = request.form['email']
+        first_name = request.form['first_name']
+        last_name = request.form['last_name']
         age = request.form['age']
         observance_level = request.form['observance_level']
         kosher_level = request.form['kosher_level']
@@ -513,6 +589,12 @@ def register():
             error = 'Password is required.'
         elif password != confirm_password:
             error = 'Passwords do not match.'
+        elif not email or '@' not in email:
+            error = 'Valid email address is required.'
+        elif not first_name:
+            error = 'First name is required.'
+        elif not last_name:
+            error = 'Last name is required.'
         elif not age or not age.isdigit() or int(age) < 18 or int(age) > 120:
             error = 'Age must be a number between 18 and 120.'
         elif not observance_level:
@@ -523,12 +605,16 @@ def register():
             error = 'Shabbat observance level is required.'
         elif conn.execute('SELECT id FROM users WHERE username = ?', (username,)).fetchone() is not None:
             error = f"User {username} is already registered."
+        elif conn.execute('SELECT id FROM users WHERE email = ?', (email,)).fetchone() is not None:
+            error = f"Email {email} is already registered."
 
         if error is None:
             hashed_password = hashlib.sha256(password.encode('utf-8')).hexdigest()
-            # First create the user
-            cursor = conn.execute('INSERT INTO users (username, password) VALUES (?, ?)',
-                         (username, hashed_password))
+            # Create the user with new fields
+            cursor = conn.execute('''
+                INSERT INTO users (username, password, email, first_name, last_name) 
+                VALUES (?, ?, ?, ?, ?)
+            ''', (username, hashed_password, email, first_name, last_name))
             user_id = cursor.lastrowid
             
             # Then create their profile
@@ -702,99 +788,229 @@ def online_users():
 @login_required
 def profile():
     conn = get_db_connection()
-    user_id = g.user['id']
-
-    if request.method == 'POST':
-        age = request.form['age']
-        bio = request.form['bio']
-        observance_level = request.form.get('observance_level')
-        kosher_level = request.form.get('kosher_level')
-        shabbat_observance = request.form.get('shabbat_observance')
-        synagogue_affiliation = request.form.get('synagogue_affiliation')
-        
-        # Handle profile picture upload
-        profile_picture = None
-        if 'profile_picture' in request.files:
-            file = request.files['profile_picture']
-            if file and file.filename and allowed_file(file.filename):
-                # Generate a unique filename
-                filename = secure_filename(f"{user_id}_{int(datetime.datetime.now().timestamp())}_{file.filename}")
-                file.save(os.path.join(app.config['UPLOAD_FOLDER'], filename))
-                profile_picture = filename
-
-        error = None
-        if not age or not bio:
-            error = 'Age and About Me are required.'
-        elif not age.isdigit() or int(age) < 18 or int(age) > 120:
-            error = 'Age must be a number between 18 and 120.'
-
-        if error is None:
-            existing_profile = conn.execute(
-                'SELECT * FROM profiles WHERE user_id = ?', (user_id,)
-            ).fetchone()
-
-            if existing_profile:
-                # If there's a new profile picture, delete the old one
-                if profile_picture and existing_profile['profile_picture']:
-                    old_file = os.path.join(app.config['UPLOAD_FOLDER'], existing_profile['profile_picture'])
-                    if os.path.exists(old_file):
-                        os.remove(old_file)
-
-                # Update profile with or without new picture
-                if profile_picture:
-                    conn.execute(
-                        '''UPDATE profiles SET
-                            age = ?, bio = ?,
-                            observance_level = ?, kosher_level = ?,
-                            shabbat_observance = ?, synagogue_affiliation = ?,
-                            profile_picture = ?
-                        WHERE user_id = ?''',
-                        (age, bio,
-                         observance_level, kosher_level,
-                         shabbat_observance, synagogue_affiliation,
-                         profile_picture, user_id)
-                    )
-                else:
-                    conn.execute(
-                        '''UPDATE profiles SET
-                            age = ?, bio = ?,
-                            observance_level = ?, kosher_level = ?,
-                            shabbat_observance = ?, synagogue_affiliation = ?
-                        WHERE user_id = ?''',
-                        (age, bio,
-                         observance_level, kosher_level,
-                         shabbat_observance, synagogue_affiliation,
-                         user_id)
-                    )
-                flash('Profile updated successfully!', 'success')
-            else:
-                conn.execute(
-                    '''INSERT INTO profiles
-                        (user_id, age, bio,
-                         observance_level, kosher_level,
-                         shabbat_observance, synagogue_affiliation,
-                         profile_picture)
-                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)''',
-                    (user_id, age, bio,
-                     observance_level, kosher_level,
-                     shabbat_observance, synagogue_affiliation,
-                     profile_picture)
-                )
-                flash('Profile created successfully!', 'success')
-            conn.commit()
-            conn.close()
-            return redirect(url_for('profile'))
-
-        flash(error, 'error')
-        conn.close()
-
-    profile_data = conn.execute(
-        'SELECT age, bio, observance_level, kosher_level, shabbat_observance, synagogue_affiliation, profile_picture FROM profiles WHERE user_id = ?', (user_id,)
-    ).fetchone()
-    photos = conn.execute('SELECT id, filename FROM user_photos WHERE user_id = ? ORDER BY uploaded_at DESC', (user_id,)).fetchall()
+    profile = conn.execute('SELECT * FROM profiles WHERE user_id = ?', (g.user['id'],)).fetchone()
     conn.close()
 
-    return render_template('profile.html', profile=profile_data, gallery_photos=photos)
+    if request.method == 'POST':
+        # Update profile fields
+        conn = get_db_connection()
+        try:
+            for field in ['bio', 'observance_level', 'kosher_level', 'shabbat_observance', 'min_age_preference', 'max_age_preference']:
+                if field in request.form:
+                    value = request.form[field]
+                    if field in ('min_age_preference', 'max_age_preference'):
+                        value = int(value) if value else None
+                    conn.execute(f'''UPDATE profiles SET {field} = ? WHERE user_id = ?''', (value, g.user['id']))
+            conn.commit()
+            flash('Profile updated successfully!', 'success')
+        except sqlite3.Error as e:
+            flash(f'Error updating profile: {e}', 'error')
+        finally:
+            conn.close()
+        return redirect(url_for('profile'))
+
+    # Get all fields for the template
+    fields = {
+        'bio': profile['bio'] if profile else None,
+        'observance_level': profile['observance_level'] if profile else None,
+        'kosher_level': profile['kosher_level'] if profile else None,
+        'shabbat_observance': profile['shabbat_observance'] if profile else None,
+        'min_age_preference': profile['min_age_preference'] if profile else None,
+        'max_age_preference': profile['max_age_preference'] if profile else None,
+    }
+
+    # Calculate profile completion
+    profile_completion = calculate_profile_completion(dict(profile)) if profile else 0
+
+    return render_template('profile.html', fields=fields, profile={'profile_completion': profile_completion})
+
+@app.route('/verify-profile', methods=['POST'])
+@login_required
+def verify_profile():
+    if request.is_json:
+        data = request.get_json()
+        verification_type = data.get('type')
+    else:
+        verification_type = request.form.get('type')
+
+    if not verification_type:
+        return jsonify({'error': 'Verification type is required'}), 400
+    
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        if verification_type == 'email':
+            # Generate verification token
+            token = secrets.token_urlsafe(32)
+            cursor.execute('''
+                INSERT INTO profile_verification (user_id, verification_type, verification_status, verification_data)
+                VALUES (?, ?, ?, ?)
+            ''', (g.user['id'], 'email', 'pending', token))
+            conn.commit()
+            
+            # Send verification email
+            verification_url = url_for('confirm_verification', token=token, _external=True)
+            send_verification_email(g.user['email'], verification_url)
+            
+            return jsonify({'message': 'Verification email sent! Please check your inbox.'})
+            
+        elif verification_type == 'phone':
+            phone_number = data.get('phone_number')
+            if not phone_number:
+                return jsonify({'error': 'Phone number is required'}), 400
+                
+            # Generate verification code
+            code = ''.join(random.choices('0123456789', k=6))
+            cursor.execute('''
+                INSERT INTO profile_verification (user_id, verification_type, verification_status, verification_data)
+                VALUES (?, ?, ?, ?)
+            ''', (g.user['id'], 'phone', 'pending', code))
+            conn.commit()
+            
+            # TODO: Implement SMS sending service
+            # For now, we'll just return the code in development
+            if app.debug:
+                return jsonify({'message': f'Verification code sent! (Development mode: {code})'})
+            else:
+                return jsonify({'message': 'Verification code sent to your phone!'})
+            
+        elif verification_type == 'phone_verify':
+            code = data.get('code')
+            if not code:
+                return jsonify({'error': 'Verification code is required'}), 400
+                
+            # Verify the code
+            verification = cursor.execute('''
+                SELECT * FROM profile_verification
+                WHERE user_id = ? AND verification_type = 'phone' 
+                AND verification_status = 'pending'
+                AND verification_data = ?
+                ORDER BY submitted_at DESC LIMIT 1
+            ''', (g.user['id'], code)).fetchone()
+            
+            if not verification:
+                return jsonify({'error': 'Invalid or expired verification code'}), 400
+            
+            # Update verification status
+            cursor.execute('''
+                UPDATE profile_verification
+                SET verification_status = 'verified', verified_at = CURRENT_TIMESTAMP
+                WHERE id = ?
+            ''', (verification['id'],))
+            
+            # Update profile verification status
+            cursor.execute('''
+                UPDATE profiles
+                SET is_verified = 1, verification_method = ?, verification_date = CURRENT_TIMESTAMP
+                WHERE user_id = ?
+            ''', ('phone', g.user['id']))
+            
+            conn.commit()
+            return jsonify({'message': 'Phone number verified successfully!'})
+            
+        elif verification_type == 'photo':
+            if 'verification_photo' not in request.files:
+                return jsonify({'error': 'No photo uploaded'}), 400
+                
+            file = request.files['verification_photo']
+            if file and file.filename and allowed_file(file.filename):
+                # Create verification photos directory if it doesn't exist
+                verification_dir = os.path.join(app.config['UPLOAD_FOLDER'], 'verification')
+                os.makedirs(verification_dir, exist_ok=True)
+                
+                filename = secure_filename(f"verify_{g.user['id']}_{int(time.time())}_{file.filename}")
+                file_path = os.path.join(verification_dir, filename)
+                file.save(file_path)
+                
+                cursor.execute('''
+                    INSERT INTO profile_verification (user_id, verification_type, verification_status, verification_data)
+                    VALUES (?, ?, ?, ?)
+                ''', (g.user['id'], 'photo', 'pending', filename))
+                conn.commit()
+                
+                return jsonify({'message': 'Verification photo uploaded! Our team will review it shortly.'})
+            else:
+                return jsonify({'error': 'Invalid file type'}), 400
+                
+    except Exception as e:
+        conn.rollback()
+        app.logger.error(f"Verification error: {str(e)}")
+        return jsonify({'error': 'An error occurred during verification'}), 500
+    finally:
+        conn.close()
+
+def send_verification_email(email, verification_url):
+    """Send verification email to user."""
+    try:
+        msg = Message('Verify Your Profile - Jewish Dating App',
+                      sender=app.config['MAIL_DEFAULT_SENDER'],
+                      recipients=[email])
+        
+        msg.body = f'''To verify your profile, please click the following link:
+
+{verification_url}
+
+If you did not request this verification, please ignore this email.
+
+Best regards,
+The Jewish Dating App Team'''
+        
+        msg.html = render_template('email/verification.html', 
+                                 verification_url=verification_url,
+                                 username=g.user['username'])
+        
+        mail.send(msg)
+        return True
+    except Exception as e:
+        app.logger.error(f"Error sending verification email: {str(e)}")
+        return False
+
+@app.route('/confirm-verification/<token>')
+@login_required
+def confirm_verification(token):
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Find verification request
+        verification = cursor.execute('''
+            SELECT * FROM profile_verification
+            WHERE user_id = ? AND verification_data = ? 
+            AND verification_type = 'email'
+            AND verification_status = 'pending'
+            ORDER BY submitted_at DESC LIMIT 1
+        ''', (g.user['id'], token)).fetchone()
+        
+        if not verification:
+            flash('Invalid or expired verification token.', 'error')
+            return redirect(url_for('profile'))
+        
+        # Update verification status
+        cursor.execute('''
+            UPDATE profile_verification
+            SET verification_status = 'verified', verified_at = CURRENT_TIMESTAMP
+            WHERE id = ?
+        ''', (verification['id'],))
+        
+        # Update profile verification status
+        cursor.execute('''
+            UPDATE profiles
+            SET is_verified = 1, verification_method = ?, verification_date = CURRENT_TIMESTAMP
+            WHERE user_id = ?
+        ''', ('email', g.user['id']))
+        
+        conn.commit()
+        flash('Profile verified successfully!', 'success')
+        
+    except Exception as e:
+        conn.rollback()
+        app.logger.error(f"Error confirming verification: {str(e)}")
+        flash('Error verifying profile. Please try again.', 'error')
+    finally:
+        conn.close()
+    
+    return redirect(url_for('profile'))
 
 # --- BROWSE PROFILES ROUTE (MODIFIED for likes and mutual likes) ---
 @app.route('/browse')
@@ -1194,56 +1410,55 @@ def delete_photo(photo_id):
 def get_love_agent_response(user_message, user_context=None):
     """Get a response from the DeepSeek-powered love agent."""
     deepseek_api_key = app.config['DEEPSEEK_API_KEY']
-    app.logger.info(f"DeepSeek API Key loaded: {deepseek_api_key[:4]}...{deepseek_api_key[-4:] if deepseek_api_key else ''}") # Log first/last 4 chars
+    app.logger.info(f"DeepSeek API Key loaded: {deepseek_api_key[:4]}...{deepseek_api_key[-4:] if deepseek_api_key else ''}")
 
     if not deepseek_api_key:
         return "I'm currently offline. Please try again later or contact support."
     
     try:
+        # Create a session with proper SSL verification
+        session = requests.Session()
+        session.verify = True  # Ensure SSL verification is enabled
+        
         headers = {
             'Authorization': f'Bearer {deepseek_api_key}',
             'Content-Type': 'application/json'
         }
         
         # Construct the system message for the love agent persona
-        system_message = """You are a warm, empathetic Jewish dating coach and love agent. Your role is to:
-1. Provide thoughtful dating advice while respecting Jewish values and traditions
-2. Help users navigate the dating process with wisdom and sensitivity
-3. Offer support and encouragement in their journey to find meaningful connections
-4. Share insights about Jewish dating customs and practices when relevant
-5. Maintain a professional yet friendly tone
-6. Never provide medical, legal, or financial advice
-7. Always prioritize user safety and well-being
+        system_message = """You are a warm, empathetic Jewish dating coach and love agent. Your role is to provide guidance, support, and advice to Jewish singles navigating the dating world. You should:
 
-Remember to:
-- Be supportive and non-judgmental
-- Respect different levels of religious observance
-- Encourage healthy dating practices
-- Focus on building meaningful connections
-- Maintain appropriate boundaries
+1. Be supportive and encouraging while maintaining professional boundaries
+2. Provide practical dating advice that respects Jewish values and traditions
+3. Help users understand and articulate their dating preferences and goals
+4. Offer insights about Jewish dating customs and practices
+5. Suggest conversation starters and ways to build meaningful connections
+6. Address common dating challenges in the Jewish community
+7. Be sensitive to different levels of religious observance
+8. Never provide medical, legal, or financial advice
+9. Always maintain appropriate and respectful communication
+10. Encourage users to be authentic and true to their values
 
-Crucially, respond in a natural, conversational tone and **avoid using any markdown formatting** (like bolding with *, italics with _, or code blocks with ```)."""
+Remember to be warm, understanding, and focused on helping users find meaningful connections within the Jewish community."""
         
         # Prepare the conversation history
         messages = [
             {"role": "system", "content": system_message}
         ]
         
-        # Add user context if available
         if user_context:
             messages.append({
                 "role": "system",
                 "content": f"User context: {user_context}"
             })
         
-        # Add the user's message
         messages.append({
             "role": "user",
             "content": user_message
         })
         
-        # Make the API request
-        response = requests.post(
+        # Make the API request with the session
+        response = session.post(
             app.config['DEEPSEEK_API_URL'],
             headers=headers,
             json={
@@ -1251,7 +1466,8 @@ Crucially, respond in a natural, conversational tone and **avoid using any markd
                 "messages": messages,
                 "temperature": 0.7,
                 "max_tokens": 500
-            }
+            },
+            timeout=10  # Add timeout to prevent hanging
         )
         
         if response.status_code == 200:
@@ -1260,12 +1476,24 @@ Crucially, respond in a natural, conversational tone and **avoid using any markd
             app.logger.error(f"DeepSeek API error: {response.status_code} - {response.text}")
             return "I'm having trouble connecting right now. Please try again later."
             
+    except requests.exceptions.SSLError as e:
+        app.logger.error(f"SSL Error in love agent: {str(e)}")
+        return "I encountered a security error. Please try again later."
+    except requests.exceptions.RequestException as e:
+        app.logger.error(f"Request Error in love agent: {str(e)}")
+        return "I'm having trouble connecting right now. Please try again later."
     except Exception as e:
         app.logger.error(f"Error in love agent: {str(e)}")
         return "I encountered an error. Please try again later."
+    finally:
+        if 'session' in locals():
+            session.close()
 
 @app.route('/chatbot', methods=['POST'])
 def chatbot():
+    if not request.is_json:
+        return jsonify({'error': 'Request must be JSON'}), 400
+        
     data = request.get_json()
     user_message = data.get('message', '').strip()
     
@@ -2342,11 +2570,19 @@ def blog():
 
 @app.route('/terms')
 def terms():
-    return render_template('terms.html')
+    response = make_response(render_template('terms.html'))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/privacy')
 def privacy():
-    return render_template('privacy.html')
+    response = make_response(render_template('privacy.html'))
+    response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate'
+    response.headers['Pragma'] = 'no-cache'
+    response.headers['Expires'] = '0'
+    return response
 
 @app.route('/cookies')
 def cookies():
@@ -2368,6 +2604,120 @@ def forbidden_error(error):
 @app.errorhandler(500)
 def internal_error(error):
     return render_template('500.html'), 500
+
+def calculate_profile_completion(profile):
+    """Calculate profile completion percentage based on completion rules."""
+    conn = get_db_connection()
+    cursor = conn.cursor()
+    
+    # Get completion rules
+    cursor.execute('SELECT field_name, weight, is_required FROM profile_completion_rules')
+    rules = cursor.fetchall()
+    
+    total_weight = sum(rule['weight'] for rule in rules)
+    earned_weight = 0
+    
+    for rule in rules:
+        field_name = rule['field_name']
+        weight = rule['weight']
+        is_required = rule['is_required']
+        
+        # Check if field is filled
+        value = profile.get(field_name)
+        if value and str(value).strip():
+            earned_weight += weight
+        elif is_required:
+            # Required fields that are empty reduce the score
+            earned_weight -= weight
+    
+    conn.close()
+    
+    # Calculate percentage, ensuring it's between 0 and 100
+    completion = max(0, min(100, (earned_weight / total_weight) * 100))
+    return round(completion)
+
+def secure_path_join(base_path, *paths):
+    """Securely join paths, ensuring they stay within the base directory."""
+    # Convert base path to absolute path
+    base_path = Path(base_path).resolve()
+    
+    # Join and normalize the target path
+    target_path = Path(base_path).joinpath(*paths).resolve()
+    
+    # Check if the target path is within the base path
+    try:
+        target_path.relative_to(base_path)
+        return str(target_path)
+    except ValueError:
+        raise ValueError("Path traversal attempt detected")
+
+@app.route('/upload-profile-picture', methods=['POST'])
+@login_required
+def upload_profile_picture():
+    if 'profile_picture' not in request.files:
+        flash('No file selected', 'error')
+        return redirect(url_for('profile'))
+    
+    file = request.files['profile_picture']
+    
+    if file.filename == '':
+        flash('No file selected', 'error')
+        return redirect(url_for('profile'))
+    
+    # Validate file
+    is_valid, error_message = validate_file(file)
+    if not is_valid:
+        flash(error_message, 'error')
+        return redirect(url_for('profile'))
+    
+    if file and allowed_file(file.filename):
+        try:
+            # Secure the filename
+            filename = secure_filename(file.filename)
+            # Add user ID to filename to prevent collisions
+            user_id = g.user['id']
+            filename = f"{user_id}_{int(time.time())}_{filename}"
+            
+            # Ensure upload directory exists
+            upload_dir = Path(app.config['UPLOAD_FOLDER'])
+            upload_dir.mkdir(parents=True, exist_ok=True)
+            
+            # Securely join paths
+            try:
+                file_path = secure_path_join(str(upload_dir), filename)
+            except ValueError:
+                flash('Invalid file path', 'error')
+                return redirect(url_for('profile'))
+            
+            # Save file
+            file.save(file_path)
+            
+            # Update user's profile picture in database
+            conn = get_db_connection()
+            conn.execute('UPDATE profiles SET profile_picture = ? WHERE user_id = ?',
+                        (filename, user_id))
+            conn.commit()
+            conn.close()
+            
+            flash('Profile picture updated successfully!', 'success')
+        except Exception as e:
+            app.logger.error(f"Error uploading profile picture: {str(e)}")
+            flash('Error uploading file. Please try again.', 'error')
+    else:
+        flash('Invalid file type. Please upload an image.', 'error')
+    
+    return redirect(url_for('profile'))
+
+@app.route('/static/<path:filename>')
+def serve_static(filename):
+    """Serve static files with secure path handling."""
+    try:
+        return send_from_directory(
+            secure_path_join(app.static_folder, filename),
+            filename
+        )
+    except ValueError:
+        abort(404)
 
 if __name__ == '__main__':
     app.run(debug=True)

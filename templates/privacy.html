@@ -1,164 +1,769 @@
 {% extends "base.html" %}
 
+{% block title %}Privacy Policy - Jewish Dating App{% endblock %}
+
 {% block content %}
-<div class="container mt-5">
-    <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <h1 class="text-center mb-4">Privacy Policy</h1>
-            <p class="text-center lead mb-5">
-                Last updated: {{ now().strftime('%B %d, %Y') }}
-            </p>
-
-            <div class="card">
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10">
+            <div class="card shadow-sm">
                 <div class="card-body">
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">1. Information We Collect</h2>
-                        <p>We collect information to provide better services to our users. The types of information we collect include:</p>
+                    <h1 class="text-center mb-4">Privacy Policy</h1>
+                    
+                    <!-- Last Updated Notice -->
+                    <div class="alert alert-info mb-4">
+                        <p class="mb-0">
+                            Last Updated: {{ now.strftime('%B %d, %Y') }}<br>
+                            <small>This Privacy Policy describes how Jewish Dating App ("we," "us," or "our") collects, uses, 
+                            and shares your personal information when you use our dating platform.</small>
+                        </p>
+                    </div>
+
+                    <!-- Introduction -->
+                    <div class="privacy-section mb-4">
+                        <h2>1. Introduction</h2>
+                        <p>
+                            At Jewish Dating App, we take your privacy seriously. This Privacy Policy explains how we collect, 
+                            use, disclose, and safeguard your information when you use our platform. Please read this privacy 
+                            policy carefully. By using our service, you consent to the practices described in this policy.
+                        </p>
+                        <p>
+                            We comply with applicable data protection laws, including:
+                        </p>
                         <ul>
-                            <li>Account information (username, email, password)</li>
-                            <li>Profile information (age, bio, observance level, photos)</li>
-                            <li>Usage data (matches, messages, likes)</li>
-                            <li>Device information (IP address, browser type)</li>
-                            <li>Location data (if you choose to share it)</li>
+                            <li>New York State Information Security Breach and Notification Act</li>
+                            <li>New York SHIELD Act</li>
+                            <li>New York State Department of Financial Services Cybersecurity Regulation (23 NYCRR 500)</li>
+                            <li>California Consumer Privacy Act (CCPA)</li>
+                            <li>General Data Protection Regulation (GDPR) for European users</li>
                         </ul>
-                    </section>
+                    </div>
 
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">2. How We Use Your Information</h2>
-                        <p>We use the collected information to:</p>
+                    <!-- Information We Collect -->
+                    <div class="privacy-section mb-4">
+                        <h2>2. Information We Collect</h2>
+                        
+                        <h3>2.1 Information You Provide</h3>
                         <ul>
-                            <li>Provide and maintain our dating service</li>
-                            <li>Match you with compatible profiles</li>
-                            <li>Send you notifications and updates</li>
-                            <li>Improve our services and user experience</li>
-                            <li>Ensure platform safety and security</li>
-                            <li>Comply with legal obligations</li>
+                            <li>
+                                <strong>Account Information:</strong>
+                                <ul>
+                                    <li>Name</li>
+                                    <li>Email address</li>
+                                    <li>Phone number</li>
+                                    <li>Date of birth</li>
+                                    <li>Password (encrypted)</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Profile Information:</strong>
+                                <ul>
+                                    <li>Photos</li>
+                                    <li>Religious background and preferences</li>
+                                    <li>Personal interests</li>
+                                    <li>Location information</li>
+                                    <li>Biographical information</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Communication Data:</strong>
+                                <ul>
+                                    <li>Messages with other users</li>
+                                    <li>Chat history</li>
+                                    <li>User preferences and settings</li>
+                                </ul>
+                            </li>
                         </ul>
-                    </section>
 
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">3. Information Sharing</h2>
-                        <p>We do not sell your personal information. We may share your information with:</p>
+                        <h3>2.2 Information Automatically Collected</h3>
                         <ul>
-                            <li>Other users (as part of your public profile)</li>
-                            <li>Service providers (hosting, analytics, etc.)</li>
-                            <li>Law enforcement (when required by law)</li>
+                            <li>
+                                <strong>Device Information:</strong>
+                                <ul>
+                                    <li>IP address</li>
+                                    <li>Browser type</li>
+                                    <li>Operating system</li>
+                                    <li>Device identifiers</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Usage Information:</strong>
+                                <ul>
+                                    <li>Pages visited</li>
+                                    <li>Features used</li>
+                                    <li>Time spent on platform</li>
+                                    <li>Interaction with other users</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Location Data:</strong>
+                                <ul>
+                                    <li>Approximate location (city/region)</li>
+                                    <li>Precise location (with consent)</li>
+                                </ul>
+                            </li>
                         </ul>
-                    </section>
+                    </div>
 
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">4. Data Security</h2>
-                        <p>We implement appropriate security measures to protect your information, including:</p>
+                    <!-- How We Use Your Information -->
+                    <div class="privacy-section mb-4">
+                        <h2>3. How We Use Your Information</h2>
+                        <p>We use your information for the following purposes:</p>
                         <ul>
-                            <li>Encryption of sensitive data</li>
-                            <li>Regular security assessments</li>
-                            <li>Access controls and authentication</li>
-                            <li>Secure data storage and transmission</li>
+                            <li>
+                                <strong>Providing Our Services:</strong>
+                                <ul>
+                                    <li>Creating and managing your account</li>
+                                    <li>Matching you with potential partners</li>
+                                    <li>Facilitating communication between users</li>
+                                    <li>Processing payments and subscriptions</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Improving Our Services:</strong>
+                                <ul>
+                                    <li>Analyzing usage patterns</li>
+                                    <li>Developing new features</li>
+                                    <li>Enhancing user experience</li>
+                                    <li>Conducting research and analysis</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Safety and Security:</strong>
+                                <ul>
+                                    <li>Verifying user identities</li>
+                                    <li>Preventing fraud and abuse</li>
+                                    <li>Enforcing our terms of service</li>
+                                    <li>Protecting user safety</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Communication:</strong>
+                                <ul>
+                                    <li>Sending service notifications</li>
+                                    <li>Responding to user inquiries</li>
+                                    <li>Sending marketing communications (with consent)</li>
+                                    <li>Providing customer support</li>
+                                </ul>
+                            </li>
                         </ul>
-                    </section>
+                    </div>
 
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">5. Your Rights</h2>
-                        <p>You have the right to:</p>
+                    <!-- Information Sharing -->
+                    <div class="privacy-section mb-4">
+                        <h2>4. Information Sharing and Disclosure</h2>
+                        <p>We may share your information in the following circumstances:</p>
                         <ul>
-                            <li>Access your personal information</li>
-                            <li>Correct inaccurate data</li>
-                            <li>Request deletion of your data</li>
-                            <li>Opt-out of marketing communications</li>
-                            <li>Export your data</li>
+                            <li>
+                                <strong>With Other Users:</strong>
+                                <ul>
+                                    <li>Profile information you choose to share</li>
+                                    <li>Messages you send to other users</li>
+                                    <li>Basic location information for matching</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Service Providers:</strong>
+                                <ul>
+                                    <li>Payment processors</li>
+                                    <li>Cloud hosting services</li>
+                                    <li>Analytics providers</li>
+                                    <li>Customer support services</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Legal Requirements:</strong>
+                                <ul>
+                                    <li>To comply with laws and regulations</li>
+                                    <li>To respond to legal requests</li>
+                                    <li>To protect our rights and safety</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Business Transfers:</strong>
+                                <ul>
+                                    <li>In case of merger or acquisition</li>
+                                    <li>During business restructuring</li>
+                                </ul>
+                            </li>
                         </ul>
-                    </section>
+                    </div>
 
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">6. Cookies and Tracking</h2>
-                        <p>We use cookies and similar technologies to:</p>
+                    <!-- Data Security -->
+                    <div class="privacy-section mb-4">
+                        <h2>5. Data Security</h2>
+                        <p>
+                            We implement appropriate technical and organizational measures to protect your information, including:
+                        </p>
                         <ul>
-                            <li>Remember your preferences</li>
-                            <li>Analyze site usage</li>
-                            <li>Improve our services</li>
-                            <li>Provide personalized content</li>
+                            <li>
+                                <strong>Advanced Encryption:</strong>
+                                <ul>
+                                    <li>AES-256 encryption for data at rest</li>
+                                    <li>TLS 1.3 encryption for data in transit</li>
+                                    <li>End-to-end encryption for private messages</li>
+                                    <li>Secure key management and rotation</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Access Control and Authentication:</strong>
+                                <ul>
+                                    <li>Multi-factor authentication (MFA) for all accounts</li>
+                                    <li>Role-based access control (RBAC)</li>
+                                    <li>Regular access reviews and audits</li>
+                                    <li>Session management and timeout controls</li>
+                                    <li>IP-based access restrictions</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Security Monitoring and Testing:</strong>
+                                <ul>
+                                    <li>24/7 security monitoring</li>
+                                    <li>Automated threat detection</li>
+                                    <li>Regular penetration testing</li>
+                                    <li>Vulnerability assessments</li>
+                                    <li>Security incident and event management (SIEM)</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Data Protection Measures:</strong>
+                                <ul>
+                                    <li>Data minimization practices</li>
+                                    <li>Pseudonymization of sensitive data</li>
+                                    <li>Regular data backups with encryption</li>
+                                    <li>Secure data deletion procedures</li>
+                                    <li>Data retention policies and controls</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Physical Security:</strong>
+                                <ul>
+                                    <li>Secure data center facilities</li>
+                                    <li>Biometric access controls</li>
+                                    <li>24/7 surveillance and monitoring</li>
+                                    <li>Environmental controls and redundancy</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Employee Security:</strong>
+                                <ul>
+                                    <li>Background checks for all employees</li>
+                                    <li>Regular security training</li>
+                                    <li>Confidentiality agreements</li>
+                                    <li>Security awareness programs</li>
+                                    <li>Incident response team</li>
+                                </ul>
+                            </li>
                         </ul>
-                        <p>You can control cookie settings through your browser preferences.</p>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">7. Children's Privacy</h2>
-                        <p>Our service is not intended for users under 18 years of age. We do not knowingly collect information from children.</p>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">8. Changes to This Policy</h2>
-                        <p>We may update this privacy policy from time to time. We will notify you of any changes by posting the new policy on this page and updating the "Last updated" date.</p>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">9. Contact Us</h2>
-                        <p>If you have questions about this privacy policy, please contact us at:</p>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-envelope me-2"></i>privacy@jewishdating.com</li>
-                            <li><i class="fas fa-phone me-2"></i>(555) 123-4567</li>
-                            <li><i class="fas fa-map-marker-alt me-2"></i>123 Jewish Street, New York, NY 10001</li>
+                        <p>
+                            In compliance with the New York SHIELD Act, we maintain reasonable safeguards to protect the 
+                            security, confidentiality, and integrity of your personal information. Our security program 
+                            includes:
+                        </p>
+                        <ul>
+                            <li>Risk assessment and management</li>
+                            <li>Regular security updates and patches</li>
+                            <li>Incident response and breach notification procedures</li>
+                            <li>Third-party vendor security assessments</li>
+                            <li>Regular security program reviews and updates</li>
                         </ul>
-                    </section>
+                    </div>
 
-                    <div class="alert alert-info mt-4">
-                        <i class="fas fa-info-circle me-2"></i>
-                        By using our Service, you acknowledge that you have read and understood this Privacy Policy.
+                    <!-- Add new section: Additional Privacy Protections -->
+                    <div class="privacy-section mb-4">
+                        <h2>11. Additional Privacy Protections</h2>
+                        
+                        <h3>11.1 Enhanced User Privacy Controls</h3>
+                        <ul>
+                            <li>
+                                <strong>Profile Privacy:</strong>
+                                <ul>
+                                    <li>Granular control over profile visibility</li>
+                                    <li>Photo privacy settings (public, matches only, private)</li>
+                                    <li>Location privacy controls (exact, approximate, hidden)</li>
+                                    <li>Profile verification badge options</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Communication Privacy:</strong>
+                                <ul>
+                                    <li>Message encryption options</li>
+                                    <li>Read receipts control</li>
+                                    <li>Message retention settings</li>
+                                    <li>Block and report features</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Data Sharing Controls:</strong>
+                                <ul>
+                                    <li>Third-party app integration controls</li>
+                                    <li>Analytics opt-out options</li>
+                                    <li>Marketing preference center</li>
+                                    <li>Cookie and tracking controls</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>11.2 Special Category Data Protection</h3>
+                        <p>
+                            We implement additional safeguards for sensitive information:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Religious Information:</strong>
+                                <ul>
+                                    <li>Optional disclosure of religious background</li>
+                                    <li>Separate storage for religious preferences</li>
+                                    <li>Enhanced access controls for religious data</li>
+                                    <li>Explicit consent requirements for sharing</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Personal Information:</strong>
+                                <ul>
+                                    <li>Strict access controls for personal data</li>
+                                    <li>Additional encryption for sensitive fields</li>
+                                    <li>Regular privacy impact assessments</li>
+                                    <li>Data minimization for sensitive information</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>11.3 Privacy by Design</h3>
+                        <p>
+                            We implement privacy by design principles throughout our platform:
+                        </p>
+                        <ul>
+                            <li>Privacy-first development approach</li>
+                            <li>Default privacy settings</li>
+                            <li>Transparent data practices</li>
+                            <li>User-friendly privacy controls</li>
+                            <li>Regular privacy impact assessments</li>
+                        </ul>
+
+                        <h3>11.4 Data Subject Rights Support</h3>
+                        <p>
+                            We provide dedicated support for exercising your privacy rights:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Request Processing:</strong>
+                                <ul>
+                                    <li>Dedicated privacy request portal</li>
+                                    <li>Automated request tracking</li>
+                                    <li>Response time monitoring</li>
+                                    <li>Appeal process for denied requests</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Data Portability:</strong>
+                                <ul>
+                                    <li>Multiple export formats (JSON, CSV, PDF)</li>
+                                    <li>Comprehensive data export</li>
+                                    <li>Third-party transfer support</li>
+                                    <li>Export history tracking</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Your Rights -->
+                    <div class="privacy-section mb-4">
+                        <h2>6. Your Rights and Choices</h2>
+                        <p>You have the following rights regarding your personal information:</p>
+                        <ul>
+                            <li>
+                                <strong>Access and Update:</strong>
+                                <ul>
+                                    <li>View your personal information</li>
+                                    <li>Update your profile information</li>
+                                    <li>Correct inaccurate data</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Deletion and Export:</strong>
+                                <ul>
+                                    <li>Request deletion of your account</li>
+                                    <li>Export your data</li>
+                                    <li>Withdraw consent</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Communication Preferences:</strong>
+                                <ul>
+                                    <li>Opt-out of marketing emails</li>
+                                    <li>Manage notification settings</li>
+                                    <li>Control location sharing</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Privacy Settings:</strong>
+                                <ul>
+                                    <li>Control profile visibility</li>
+                                    <li>Manage photo privacy</li>
+                                    <li>Adjust matching preferences</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Children's Privacy -->
+                    <div class="privacy-section mb-4">
+                        <h2>7. Children's Privacy</h2>
+                        <p>
+                            Our service is not intended for children under 18 years of age. We do not knowingly collect 
+                            personal information from children under 18. If you believe we have collected information from 
+                            a child under 18, please contact us immediately.
+                        </p>
+                    </div>
+
+                    <!-- International Users -->
+                    <div class="privacy-section mb-4">
+                        <h2>8. International Users</h2>
+                        <p>
+                            If you are using our service from outside the United States, please be aware that your 
+                            information may be transferred to, stored, and processed in the United States. By using our 
+                            service, you consent to such transfer and processing.
+                        </p>
+                        <p>
+                            For users in the European Economic Area (EEA), we comply with GDPR requirements and provide 
+                            additional rights and protections as required by law.
+                        </p>
+                    </div>
+
+                    <!-- Changes to Privacy Policy -->
+                    <div class="privacy-section mb-4">
+                        <h2>9. Changes to This Privacy Policy</h2>
+                        <p>
+                            We may update this privacy policy from time to time. We will notify you of any changes by:
+                        </p>
+                        <ul>
+                            <li>Posting the new policy on this page</li>
+                            <li>Updating the "Last Updated" date</li>
+                            <li>Sending an email notification for significant changes</li>
+                        </ul>
+                    </div>
+
+                    <!-- Contact Information -->
+                    <div class="privacy-section mb-4">
+                        <h2>10. Contact Us</h2>
+                        <p>
+                            If you have questions about this Privacy Policy or our data practices, please contact us at:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Email:</strong> privacy@jewishdatingapp.com
+                            </li>
+                            <li>
+                                <strong>Address:</strong><br>
+                                Jewish Dating App<br>
+                                350 Fifth Avenue, Suite 3300<br>
+                                New York, NY 10118<br>
+                                United States of America
+                            </li>
+                            <li>
+                                <strong>Phone:</strong> (800) 555-0123
+                            </li>
+                        </ul>
+                        <p>
+                            For privacy-related complaints, you may also contact:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>New York State Attorney General's Office:</strong><br>
+                                Consumer Frauds Bureau<br>
+                                28 Liberty Street<br>
+                                New York, NY 10005<br>
+                                Phone: (800) 771-7755<br>
+                                Website: <a href="https://ag.ny.gov/consumer-frauds" target="_blank">https://ag.ny.gov/consumer-frauds</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Add new section: Technical Security Details -->
+                    <div class="privacy-section mb-4">
+                        <h2>12. Technical Security Implementation</h2>
+                        
+                        <h3>12.1 Encryption and Data Protection</h3>
+                        <ul>
+                            <li>
+                                <strong>Data Encryption Standards:</strong>
+                                <ul>
+                                    <li>AES-256-GCM for data at rest with unique keys per user</li>
+                                    <li>TLS 1.3 with perfect forward secrecy for data in transit</li>
+                                    <li>End-to-end encryption using Signal Protocol for messages</li>
+                                    <li>Key rotation every 90 days with secure key management</li>
+                                    <li>Hardware Security Modules (HSMs) for key storage</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Network Security:</strong>
+                                <ul>
+                                    <li>DDoS protection with rate limiting and traffic filtering</li>
+                                    <li>Web Application Firewall (WAF) with OWASP rules</li>
+                                    <li>Network segmentation and micro-segmentation</li>
+                                    <li>Intrusion Detection and Prevention Systems (IDS/IPS)</li>
+                                    <li>Regular network penetration testing</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Application Security:</strong>
+                                <ul>
+                                    <li>OWASP Top 10 vulnerability prevention</li>
+                                    <li>Input validation and sanitization</li>
+                                    <li>Content Security Policy (CSP) implementation</li>
+                                    <li>Cross-Site Scripting (XSS) protection</li>
+                                    <li>SQL injection prevention</li>
+                                    <li>Regular security code reviews</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Infrastructure Security:</strong>
+                                <ul>
+                                    <li>AWS/Azure security best practices</li>
+                                    <li>Container security with runtime protection</li>
+                                    <li>Kubernetes security policies</li>
+                                    <li>Infrastructure as Code (IaC) security scanning</li>
+                                    <li>Regular infrastructure vulnerability scanning</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>12.2 Security Monitoring and Incident Response</h3>
+                        <ul>
+                            <li>
+                                <strong>Security Operations Center (SOC):</strong>
+                                <ul>
+                                    <li>24/7 security monitoring and alerting</li>
+                                    <li>SIEM (Security Information and Event Management)</li>
+                                    <li>Log aggregation and analysis</li>
+                                    <li>Threat intelligence integration</li>
+                                    <li>Automated incident response workflows</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Incident Response Procedures:</strong>
+                                <ul>
+                                    <li>Automated incident detection and classification</li>
+                                    <li>Incident severity levels (P1-P4)</li>
+                                    <li>Response time SLAs (15 minutes for P1 incidents)</li>
+                                    <li>Incident response playbooks</li>
+                                    <li>Post-incident analysis and reporting</li>
+                                </ul>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Add new section: Privacy Request Procedures -->
+                    <div class="privacy-section mb-4">
+                        <h2>13. Privacy Request Procedures</h2>
+
+                        <h3>13.1 How to Submit Privacy Requests</h3>
+                        <p>
+                            You can submit privacy requests through the following channels:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>Privacy Portal:</strong>
+                                <ul>
+                                    <li>Access through your account settings</li>
+                                    <li>Select request type (access, deletion, correction, etc.)</li>
+                                    <li>Upload identity verification documents</li>
+                                    <li>Track request status in real-time</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Email Requests:</strong>
+                                <ul>
+                                    <li>Send to privacy@jewishdatingapp.com</li>
+                                    <li>Include "Privacy Request" in subject line</li>
+                                    <li>Provide your account email and request type</li>
+                                    <li>Attach identity verification documents</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Phone Requests:</strong>
+                                <ul>
+                                    <li>Call (800) 555-0123</li>
+                                    <li>Select "Privacy Request" option</li>
+                                    <li>Follow voice prompts for request type</li>
+                                    <li>Provide identity verification information</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>13.2 Request Processing Timeline</h3>
+                        <ul>
+                            <li>
+                                <strong>Initial Response:</strong>
+                                <ul>
+                                    <li>Confirmation within 24 hours</li>
+                                    <li>Request tracking number provided</li>
+                                    <li>Estimated completion time</li>
+                                    <li>Required additional information (if any)</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Processing Times:</strong>
+                                <ul>
+                                    <li>Access requests: 30 days maximum</li>
+                                    <li>Deletion requests: 45 days maximum</li>
+                                    <li>Correction requests: 30 days maximum</li>
+                                    <li>Data portability: 30 days maximum</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Complex Requests:</strong>
+                                <ul>
+                                    <li>May require up to 90 days</li>
+                                    <li>Regular status updates provided</li>
+                                    <li>Extension notification if needed</li>
+                                    <li>Reason for extension explained</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>13.3 Identity Verification</h3>
+                        <ul>
+                            <li>
+                                <strong>Required Information:</strong>
+                                <ul>
+                                    <li>Account email address</li>
+                                    <li>Recent activity details</li>
+                                    <li>Government-issued ID (for sensitive requests)</li>
+                                    <li>Additional verification if needed</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Verification Methods:</strong>
+                                <ul>
+                                    <li>Email verification link</li>
+                                    <li>Two-factor authentication</li>
+                                    <li>Knowledge-based verification</li>
+                                    <li>Document verification</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>13.4 Request Types and Procedures</h3>
+                        <ul>
+                            <li>
+                                <strong>Data Access Request:</strong>
+                                <ul>
+                                    <li>Complete data export in requested format</li>
+                                    <li>Categories of data collected</li>
+                                    <li>Sources of data collection</li>
+                                    <li>Third-party sharing details</li>
+                                    <li>Data retention periods</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Deletion Request:</strong>
+                                <ul>
+                                    <li>Account deactivation process</li>
+                                    <li>Data deletion from all systems</li>
+                                    <li>Backup data handling</li>
+                                    <li>Deletion confirmation</li>
+                                    <li>30-day recovery period</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Correction Request:</strong>
+                                <ul>
+                                    <li>Data accuracy verification</li>
+                                    <li>Update process</li>
+                                    <li>Third-party notification</li>
+                                    <li>Correction confirmation</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Data Portability:</strong>
+                                <ul>
+                                    <li>Available export formats (JSON, CSV, PDF)</li>
+                                    <li>Data structure documentation</li>
+                                    <li>Third-party transfer support</li>
+                                    <li>Export security measures</li>
+                                </ul>
+                            </li>
+                        </ul>
+
+                        <h3>13.5 Appeals Process</h3>
+                        <ul>
+                            <li>
+                                <strong>Appeal Submission:</strong>
+                                <ul>
+                                    <li>Submit within 30 days of decision</li>
+                                    <li>Include original request number</li>
+                                    <li>Provide reason for appeal</li>
+                                    <li>Additional supporting information</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>Appeal Review:</strong>
+                                <ul>
+                                    <li>Review by privacy team lead</li>
+                                    <li>Legal review if necessary</li>
+                                    <li>Response within 30 days</li>
+                                    <li>Final decision notification</li>
+                                </ul>
+                            </li>
+                        </ul>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+{% endblock %}
 
+{% block extra_css %}
 <style>
-.card {
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+.privacy-section h2 {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f8f9fa;
 }
 
-.lead {
-    color: #666;
+.privacy-section h3 {
+    color: var(--secondary-color);
     font-size: 1.2rem;
+    margin: 1.5rem 0 1rem;
 }
 
-section {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1.5rem;
+.privacy-section ul {
+    padding-left: 1.5rem;
 }
 
-section:last-child {
-    border-bottom: none;
-}
-
-h2 {
-    color: #333;
-    font-weight: 600;
-}
-
-ul {
-    padding-left: 1.2rem;
-}
-
-ul li {
+.privacy-section ul li {
     margin-bottom: 0.5rem;
-    color: #444;
+}
+
+.privacy-section ul ul {
+    margin-top: 0.5rem;
+    margin-bottom: 1rem;
 }
 
 .alert {
-    border: none;
-    background-color: #f8f9fa;
-    color: #666;
+    border-left: 4px solid;
 }
 
-@media (max-width: 768px) {
-    .card-body {
-        padding: 1.5rem;
-    }
-    
-    h2 {
-        font-size: 1.3rem;
-    }
+.alert-info {
+    border-left-color: #17a2b8;
+}
+
+.alert-heading {
+    font-size: 1.2rem;
+    margin-bottom: 0.5rem;
+}
+
+.alert-heading i {
+    margin-right: 0.5rem;
+}
+
+strong {
+    color: var(--primary-color);
 }
 </style>
 {% endblock %} 

@@ -2,85 +2,272 @@
 
 {% block content %}
 <div class="container mt-5">
-    <div class="row">
-        <div class="col-md-8 offset-md-2">
-            <h1 class="text-center mb-4">About Jewish Dating App</h1>
-            
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title h4">Our Mission</h2>
-                    <p class="card-text">
+    <!-- Hero Section -->
+    <div class="row mb-5">
+        <div class="col-lg-10 offset-lg-1 text-center">
+            <h1 class="display-4 mb-4">About Jewish Dating App</h1>
+            <p class="lead text-muted">Building meaningful Jewish connections, one match at a time</p>
+            <div class="mt-4">
+                <img src="{{ url_for('static', filename='images/about-hero.jpg') }}" alt="Jewish Dating App Community" class="img-fluid rounded shadow-lg" style="max-height: 400px; width: auto;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Mission Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Our Mission</h2>
+                    <p class="lead text-center mb-4">
                         At Jewish Dating App, we're dedicated to helping Jewish singles find meaningful connections within their community. 
                         We understand the importance of shared values, traditions, and cultural background in building lasting relationships.
                     </p>
-                </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title h4">What Makes Us Different</h2>
-                    <ul class="list-unstyled">
-                        <li class="mb-3">
-                            <h5 class="h6">Jewish-Focused Matching</h5>
-                            <p>Our platform is specifically designed for Jewish singles, taking into account important factors like observance level, kosher preferences, and Shabbat observance.</p>
-                        </li>
-                        <li class="mb-3">
-                            <h5 class="h6">Community-Driven</h5>
-                            <p>We foster a supportive community where members can connect, share experiences, and participate in Jewish cultural events.</p>
-                        </li>
-                        <li class="mb-3">
-                            <h5 class="h6">Privacy & Security</h5>
-                            <p>Your privacy is our priority. We implement strict security measures to ensure your personal information remains protected.</p>
-                        </li>
-                        <li class="mb-3">
-                            <h5 class="h6">Success Stories</h5>
-                            <p>We take pride in the many successful matches and relationships that have formed through our platform.</p>
-                        </li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title h4">Our Values</h2>
-                    <div class="row">
-                        <div class="col-md-6">
-                            <h5 class="h6">Tradition</h5>
-                            <p>We honor and respect Jewish traditions while embracing modern dating practices.</p>
+                    <div class="row text-center mt-4">
+                        <div class="col-md-4">
+                            <div class="h1 text-primary mb-3"><i class="fas fa-heart"></i></div>
+                            <h5>Meaningful Connections</h5>
+                            <p class="text-muted">Building relationships based on shared values</p>
                         </div>
-                        <div class="col-md-6">
-                            <h5 class="h6">Inclusivity</h5>
-                            <p>We welcome Jews of all backgrounds and observance levels.</p>
+                        <div class="col-md-4">
+                            <div class="h1 text-primary mb-3"><i class="fas fa-star-of-david"></i></div>
+                            <h5>Jewish Heritage</h5>
+                            <p class="text-muted">Celebrating and preserving Jewish traditions</p>
                         </div>
-                        <div class="col-md-6">
-                            <h5 class="h6">Authenticity</h5>
-                            <p>We encourage genuine connections and honest representation.</p>
-                        </div>
-                        <div class="col-md-6">
-                            <h5 class="h6">Community</h5>
-                            <p>We foster a supportive environment for Jewish singles to connect.</p>
+                        <div class="col-md-4">
+                            <div class="h1 text-primary mb-3"><i class="fas fa-users"></i></div>
+                            <h5>Community Focus</h5>
+                            <p class="text-muted">Creating a supportive Jewish dating community</p>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="card mb-4">
-                <div class="card-body">
-                    <h2 class="card-title h4">Contact Us</h2>
-                    <p class="card-text">
-                        Have questions or need assistance? Our support team is here to help!
-                        <br>
-                        Email: support@jewishdating.com
-                        <br>
-                        We typically respond within 24 hours.
-                    </p>
+    <!-- What Makes Us Different -->
+    <div class="row mb-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">What Makes Us Different</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-check-circle text-success fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="h6">Jewish-Focused Matching</h5>
+                                    <p class="text-muted">Our platform is specifically designed for Jewish singles, taking into account important factors like observance level, kosher preferences, and Shabbat observance.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-shield-alt text-primary fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="h6">Privacy & Security</h5>
+                                    <p class="text-muted">Your privacy is our priority. We implement strict security measures and verification processes to ensure a safe dating environment.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-calendar-alt text-info fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="h6">Community Events</h5>
+                                    <p class="text-muted">Regular in-person events and virtual gatherings to help members connect in meaningful ways beyond the digital platform.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="d-flex align-items-start">
+                                <div class="flex-shrink-0">
+                                    <i class="fas fa-chart-line text-warning fa-2x me-3"></i>
+                                </div>
+                                <div>
+                                    <h5 class="h6">Success Rate</h5>
+                                    <p class="text-muted">We take pride in our high success rate, with thousands of meaningful connections and relationships formed through our platform.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
+        </div>
+    </div>
 
-            <div class="text-center mt-4">
-                <a href="{{ url_for('register') }}" class="btn btn-primary btn-lg">Join Our Community</a>
+    <!-- Our Values -->
+    <div class="row mb-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Our Values</h2>
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-torah text-primary fa-3x mb-3"></i>
+                                    <h5>Tradition</h5>
+                                    <p class="text-muted">We honor and respect Jewish traditions while embracing modern dating practices.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-hands-helping text-primary fa-3x mb-3"></i>
+                                    <h5>Inclusivity</h5>
+                                    <p class="text-muted">We welcome Jews of all backgrounds, observance levels, and denominations.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-user-check text-primary fa-3x mb-3"></i>
+                                    <h5>Authenticity</h5>
+                                    <p class="text-muted">We encourage genuine connections and honest representation in our community.</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body text-center">
+                                    <i class="fas fa-synagogue text-primary fa-3x mb-3"></i>
+                                    <h5>Community</h5>
+                                    <p class="text-muted">We foster a supportive environment for Jewish singles to connect and grow together.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Stories Preview -->
+    <div class="row mb-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Success Stories</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body">
+                                    <blockquote class="blockquote mb-0">
+                                        <p class="mb-3"><i class="fas fa-quote-left text-primary me-2"></i>We met on Jewish Dating App and instantly connected over our shared values. Now we're planning our wedding!</p>
+                                        <footer class="blockquote-footer">Sarah & David, New York</footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <div class="card h-100 border-0 bg-light">
+                                <div class="card-body">
+                                    <blockquote class="blockquote mb-0">
+                                        <p class="mb-3"><i class="fas fa-quote-left text-primary me-2"></i>The platform's focus on Jewish values helped us find each other. We're grateful for this amazing community.</p>
+                                        <footer class="blockquote-footer">Rachel & Michael, Los Angeles</footer>
+                                    </blockquote>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('success_stories') }}" class="btn btn-outline-primary">Read More Success Stories</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Team Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Our Team</h2>
+                    <div class="row g-4">
+                        <div class="col-md-4 text-center">
+                            <img src="{{ url_for('static', filename='images/team/ceo.jpg') }}" alt="CEO" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            <h5>Rabbi David Cohen</h5>
+                            <p class="text-muted">Founder & CEO</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <img src="{{ url_for('static', filename='images/team/coo.jpg') }}" alt="COO" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            <h5>Sarah Goldstein</h5>
+                            <p class="text-muted">Chief Operations Officer</p>
+                        </div>
+                        <div class="col-md-4 text-center">
+                            <img src="{{ url_for('static', filename='images/team/cto.jpg') }}" alt="CTO" class="rounded-circle mb-3" style="width: 150px; height: 150px; object-fit: cover;">
+                            <h5>Michael Levy</h5>
+                            <p class="text-muted">Chief Technology Officer</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Contact Section -->
+    <div class="row mb-5">
+        <div class="col-lg-8 offset-lg-2">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="text-center mb-4">Get in Touch</h2>
+                    <div class="row">
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="fas fa-envelope text-primary me-2"></i> Email Us</h5>
+                            <p class="text-muted">support@jewishdating.com</p>
+                            <p class="text-muted">We typically respond within 24 hours.</p>
+                        </div>
+                        <div class="col-md-6 mb-4">
+                            <h5><i class="fas fa-phone text-primary me-2"></i> Call Us</h5>
+                            <p class="text-muted">(800) 555-0123</p>
+                            <p class="text-muted">Monday-Friday, 9am-5pm EST</p>
+                        </div>
+                    </div>
+                    <div class="text-center mt-4">
+                        <a href="{{ url_for('contact') }}" class="btn btn-primary me-2">Contact Form</a>
+                        <a href="{{ url_for('register') }}" class="btn btn-outline-primary">Join Our Community</a>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
+
+<style>
+    .card {
+        transition: transform 0.2s;
+    }
+    .card:hover {
+        transform: translateY(-5px);
+    }
+    .text-primary {
+        color: #2B4C7E !important;
+    }
+    .btn-primary {
+        background-color: #2B4C7E;
+        border-color: #2B4C7E;
+    }
+    .btn-primary:hover {
+        background-color: #1d3357;
+        border-color: #1d3357;
+    }
+    .btn-outline-primary {
+        color: #2B4C7E;
+        border-color: #2B4C7E;
+    }
+    .btn-outline-primary:hover {
+        background-color: #2B4C7E;
+        border-color: #2B4C7E;
+    }
+</style>
 {% endblock %} 

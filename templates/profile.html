@@ -7,14 +7,67 @@
     <div class="profile-edit-container">
         <div class="row justify-content-center">
             <div class="col-md-8">
+                <!-- Profile Completion Progress -->
+                <div class="profile-completion-card card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Profile Completion</h3>
+                        <div class="progress mb-3" style="height: 25px;">
+                            <div class="progress-bar bg-success" role="progressbar" 
+                                 style="width: {{ profile.profile_completion }}%;" 
+                                 aria-valuenow="{{ profile.profile_completion }}" 
+                                 aria-valuemin="0" 
+                                 aria-valuemax="100">
+                                {{ profile.profile_completion }}%
+                            </div>
+                        </div>
+                        <p class="text-muted">Complete your profile to increase your chances of finding a match!</p>
+                        {% if profile.profile_completion < 100 %}
+                            <div class="completion-tips">
+                                <h5>Tips to complete your profile:</h5>
+                                <ul class="list-unstyled">
+                                    {% for rule in completion_rules %}
+                                        {% if not rule.is_completed %}
+                                            <li><i class="fas fa-check-circle text-muted"></i> {{ rule.description }}</li>
+                                        {% endif %}
+                                    {% endfor %}
+                                </ul>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Profile Verification Status -->
+                <div class="verification-status-card card mb-4">
+                    <div class="card-body">
+                        <h3 class="card-title">Profile Verification</h3>
+                        {% if profile.is_verified %}
+                            <div class="alert alert-success">
+                                <i class="fas fa-check-circle"></i> Your profile is verified
+                                <small class="d-block text-muted">Verified on {{ profile.verification_date }}</small>
+                            </div>
+                        {% else %}
+                            <div class="alert alert-warning">
+                                <i class="fas fa-exclamation-circle"></i> Your profile is not verified
+                                <p class="mb-0">Verification helps build trust in the community.</p>
+                                <button class="btn btn-primary mt-2" data-bs-toggle="modal" data-bs-target="#verificationModal">
+                                    Verify Your Profile
+                                </button>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+
                 <h1 class="text-center mb-4">Edit Your Profile</h1>
 
+                <!-- Profile Picture Section -->
                 <div class="profile-header-edit text-center mb-4">
                     <div class="profile-picture-upload-container mb-3">
                         {% if profile and profile.profile_picture %}
-                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" alt="Profile Picture" class="profile-picture-lg rounded-circle">
+                            <img src="{{ url_for('static', filename='uploads/' + profile.profile_picture) }}" 
+                                 alt="Profile Picture" 
+                                 class="profile-picture-lg rounded-circle">
                         {% else %}
-                            <div class="profile-picture-placeholder-lg rounded-circle d-flex align-items-center justify-content-center mx-auto">
+                            <div class="profile-picture-placeholder-lg rounded-circle">
                                 <i class="fas fa-user fa-3x text-muted"></i>
                             </div>
                         {% endif %}
@@ -23,59 +76,217 @@
                 </div>
 
                 <form method="post" enctype="multipart/form-data" class="profile-form card p-4 shadow-sm">
-                    <div class="form-group mb-3">
-                        <label for="profile_picture" class="form-label">Profile Picture</label>
-                        <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="form-control">
-                        <small class="form-text text-muted">Upload a profile picture (max 16MB, allowed formats: PNG, JPG, JPEG, GIF)</small>
+                    <!-- Basic Information Section -->
+                    <div class="form-section mb-4">
+                        <h3 class="section-title">Basic Information</h3>
+                        <div class="form-group mb-3">
+                            <label for="profile_picture" class="form-label">Profile Picture</label>
+                            <input type="file" name="profile_picture" id="profile_picture" accept="image/*" class="form-control">
+                            <small class="form-text text-muted">Upload a clear, recent photo of yourself (max 16MB)</small>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="age" class="form-label">Age</label>
+                            <input type="number" name="age" id="age" value="{{ profile.age if profile else '' }}" 
+                                   required min="18" max="120" class="form-control">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="bio" class="form-label">About Me</label>
+                            <textarea name="bio" id="bio" required class="form-control" rows="4" 
+                                      placeholder="Tell us about yourself, your interests, and what you're looking for...">{{ profile.bio if profile else '' }}</textarea>
+                        </div>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label for="age" class="form-label">Age</label>
-                        <input type="number" name="age" id="age" value="{{ profile['age'] if profile else '' }}" required min="18" max="120" class="form-control">
+                    <!-- Religious Background Section -->
+                    <div class="form-section mb-4">
+                        <h3 class="section-title">Religious Background</h3>
+                        <div class="form-group mb-3">
+                            <label for="observance_level" class="form-label">Level of Religious Observance</label>
+                            <select name="observance_level" id="observance_level" class="form-select" required>
+                                <option value="">Select...</option>
+                                <option value="Orthodox" {% if profile and profile.observance_level == 'Orthodox' %}selected{% endif %}>Orthodox</option>
+                                <option value="Modern Orthodox" {% if profile and profile.observance_level == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
+                                <option value="Conservative" {% if profile and profile.observance_level == 'Conservative' %}selected{% endif %}>Conservative</option>
+                                <option value="Reform" {% if profile and profile.observance_level == 'Reform' %}selected{% endif %}>Reform</option>
+                                <option value="Reconstructionist" {% if profile and profile.observance_level == 'Reconstructionist' %}selected{% endif %}>Reconstructionist</option>
+                                <option value="Just Jewish" {% if profile and profile.observance_level == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="kosher_level" class="form-label">Kosher Observance</label>
+                            <select name="kosher_level" id="kosher_level" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Strictly Kosher" {% if profile and profile.kosher_level == 'Strictly Kosher' %}selected{% endif %}>Strictly Kosher</option>
+                                <option value="Kosher at Home" {% if profile and profile.kosher_level == 'Kosher at Home' %}selected{% endif %}>Kosher at Home</option>
+                                <option value="Kosher Style" {% if profile and profile.kosher_level == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
+                                <option value="Not Observant" {% if profile and profile.kosher_level == 'Not Observant' %}selected{% endif %}>Not Observant</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="shabbat_observance" class="form-label">Shabbat Observance</label>
+                            <select name="shabbat_observance" id="shabbat_observance" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Fully Observant" {% if profile and profile.shabbat_observance == 'Fully Observant' %}selected{% endif %}>Fully Observant</option>
+                                <option value="Partially Observant" {% if profile and profile.shabbat_observance == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
+                                <option value="Not Observant" {% if profile and profile.shabbat_observance == 'Not Observant' %}selected{% endif %}>Not Observant</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="synagogue_affiliation" class="form-label">Synagogue Affiliation</label>
+                            <input type="text" name="synagogue_affiliation" id="synagogue_affiliation" 
+                                   value="{{ profile.synagogue_affiliation if profile else '' }}" 
+                                   class="form-control" placeholder="Enter your synagogue or community">
+                        </div>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label for="bio" class="form-label">About Me</label>
-                        <textarea name="bio" id="bio" required class="form-control" rows="4">{{ profile['bio'] if profile else '' }}</textarea>
+                    <!-- Education and Career Section -->
+                    <div class="form-section mb-4">
+                        <h3 class="section-title">Education and Career</h3>
+                        <div class="form-group mb-3">
+                            <label for="education_level" class="form-label">Education Level</label>
+                            <select name="education_level" id="education_level" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="High School" {% if profile and profile.education_level == 'High School' %}selected{% endif %}>High School</option>
+                                <option value="Some College" {% if profile and profile.education_level == 'Some College' %}selected{% endif %}>Some College</option>
+                                <option value="Bachelor's Degree" {% if profile and profile.education_level == "Bachelor's Degree" %}selected{% endif %}>Bachelor's Degree</option>
+                                <option value="Master's Degree" {% if profile and profile.education_level == "Master's Degree" %}selected{% endif %}>Master's Degree</option>
+                                <option value="Doctorate" {% if profile and profile.education_level == 'Doctorate' %}selected{% endif %}>Doctorate</option>
+                                <option value="Other" {% if profile and profile.education_level == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="occupation" class="form-label">Occupation</label>
+                            <input type="text" name="occupation" id="occupation" 
+                                   value="{{ profile.occupation if profile else '' }}" 
+                                   class="form-control" placeholder="What do you do for a living?">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="employer" class="form-label">Employer</label>
+                            <input type="text" name="employer" id="employer" 
+                                   value="{{ profile.employer if profile else '' }}" 
+                                   class="form-control" placeholder="Where do you work?">
+                        </div>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label for="observance_level" class="form-label">Level of Religious Observance</label>
-                        <select name="observance_level" id="observance_level" class="form-select">
-                            <option value="">Select...</option>
-                            <option value="Orthodox" {% if profile and profile['observance_level'] == 'Orthodox' %}selected{% endif %}>Orthodox</option>
-                            <option value="Modern Orthodox" {% if profile and profile['observance_level'] == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
-                            <option value="Conservative" {% if profile and profile['observance_level'] == 'Conservative' %}selected{% endif %}>Conservative</option>
-                            <option value="Reform" {% if profile and profile['observance_level'] == 'Reform' %}selected{% endif %}>Reform</option>
-                            <option value="Reconstructionist" {% if profile and profile['observance_level'] == 'Reconstructionist' %}selected{% endif %}>Reconstructionist</option>
-                            <option value="Just Jewish" {% if profile and profile['observance_level'] == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
-                        </select>
+                    <!-- Family and Background Section -->
+                    <div class="form-section mb-4">
+                        <h3 class="section-title">Family and Background</h3>
+                        <div class="form-group mb-3">
+                            <label for="family_background" class="form-label">Family Background</label>
+                            <textarea name="family_background" id="family_background" class="form-control" rows="3" 
+                                      placeholder="Tell us about your family background...">{{ profile.family_background if profile else '' }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="parents_observance" class="form-label">Parents' Religious Observance</label>
+                            <select name="parents_observance" id="parents_observance" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Orthodox" {% if profile and profile.parents_observance == 'Orthodox' %}selected{% endif %}>Orthodox</option>
+                                <option value="Modern Orthodox" {% if profile and profile.parents_observance == 'Modern Orthodox' %}selected{% endif %}>Modern Orthodox</option>
+                                <option value="Conservative" {% if profile and profile.parents_observance == 'Conservative' %}selected{% endif %}>Conservative</option>
+                                <option value="Reform" {% if profile and profile.parents_observance == 'Reform' %}selected{% endif %}>Reform</option>
+                                <option value="Just Jewish" {% if profile and profile.parents_observance == 'Just Jewish' %}selected{% endif %}>Just Jewish</option>
+                                <option value="Other" {% if profile and profile.parents_observance == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="siblings" class="form-label">Number of Siblings</label>
+                            <input type="number" name="siblings" id="siblings" 
+                                   value="{{ profile.siblings if profile else '' }}" 
+                                   min="0" class="form-control">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="children" class="form-label">Number of Children</label>
+                            <input type="number" name="children" id="children" 
+                                   value="{{ profile.children if profile else '' }}" 
+                                   min="0" class="form-control">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="want_children" class="form-label">Do you want children?</label>
+                            <select name="want_children" id="want_children" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Yes" {% if profile and profile.want_children == 'Yes' %}selected{% endif %}>Yes</option>
+                                <option value="No" {% if profile and profile.want_children == 'No' %}selected{% endif %}>No</option>
+                                <option value="Maybe" {% if profile and profile.want_children == 'Maybe' %}selected{% endif %}>Maybe</option>
+                                <option value="Already have children" {% if profile and profile.want_children == 'Already have children' %}selected{% endif %}>Already have children</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-group mb-3">
-                        <label for="kosher_level" class="form-label">Kosher Observance</label>
-                        <select name="kosher_level" id="kosher_level" class="form-select">
-                            <option value="">Select...</option>
-                            <option value="Strictly Kosher" {% if profile and profile['kosher_level'] == 'Strictly Kosher' %}selected{% endif %}>Strictly Kosher</option>
-                            <option value="Mostly Kosher" {% if profile and profile['kosher_level'] == 'Mostly Kosher' %}selected{% endif %}>Mostly Kosher</option>
-                            <option value="Kosher Style" {% if profile and profile['kosher_level'] == 'Kosher Style' %}selected{% endif %}>Kosher Style</option>
-                            <option value="Not Kosher" {% if profile and profile['kosher_level'] == 'Not Kosher' %}selected{% endif %}>Not Kosher</option>
-                        </select>
+                    <!-- Jewish Community Section -->
+                    <div class="form-section mb-4">
+                        <h3 class="section-title">Jewish Community</h3>
+                        <div class="form-group mb-3">
+                            <label for="community_involvement" class="form-label">Community Involvement</label>
+                            <textarea name="community_involvement" id="community_involvement" class="form-control" rows="3" 
+                                      placeholder="How are you involved in the Jewish community?">{{ profile.community_involvement if profile else '' }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="jewish_education" class="form-label">Jewish Education</label>
+                            <select name="jewish_education" id="jewish_education" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Day School" {% if profile and profile.jewish_education == 'Day School' %}selected{% endif %}>Day School</option>
+                                <option value="Hebrew School" {% if profile and profile.jewish_education == 'Hebrew School' %}selected{% endif %}>Hebrew School</option>
+                                <option value="Yeshiva" {% if profile and profile.jewish_education == 'Yeshiva' %}selected{% endif %}>Yeshiva</option>
+                                <option value="Self-taught" {% if profile and profile.jewish_education == 'Self-taught' %}selected{% endif %}>Self-taught</option>
+                                <option value="Other" {% if profile and profile.jewish_education == 'Other' %}selected{% endif %}>Other</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="languages" class="form-label">Languages Spoken</label>
+                            <input type="text" name="languages" id="languages" 
+                                   value="{{ profile.languages if profile else '' }}" 
+                                   class="form-control" placeholder="e.g., English, Hebrew, Yiddish">
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="aliyah_interest" class="form-label">Interest in Aliyah</label>
+                            <select name="aliyah_interest" id="aliyah_interest" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Very Interested" {% if profile and profile.aliyah_interest == 'Very Interested' %}selected{% endif %}>Very Interested</option>
+                                <option value="Somewhat Interested" {% if profile and profile.aliyah_interest == 'Somewhat Interested' %}selected{% endif %}>Somewhat Interested</option>
+                                <option value="Not Interested" {% if profile and profile.aliyah_interest == 'Not Interested' %}selected{% endif %}>Not Interested</option>
+                                <option value="Already in Israel" {% if profile and profile.aliyah_interest == 'Already in Israel' %}selected{% endif %}>Already in Israel</option>
+                            </select>
+                        </div>
                     </div>
 
-                    <div class="form-group mb-4">
-                        <label for="shabbat_observance" class="form-label">Shabbat Observance</label>
-                        <select name="shabbat_observance" id="shabbat_observance" class="form-select">
-                            <option value="">Select...</option>
-                            <option value="Fully Observant" {% if profile and profile['shabbat_observance'] == 'Fully Observant' %}selected{% endif %}>Fully Observant</option>
-                            <option value="Partially Observant" {% if profile and profile['shabbat_observance'] == 'Partially Observant' %}selected{% endif %}>Partially Observant</option>
-                            <option value="Not Observant" {% if profile and profile['shabbat_observance'] == 'Not Observant' %}selected{% endif %}>Not Observant</option>
-                        </select>
-                    </div>
+                    <!-- Relationship Preferences Section -->
+                    <div class="form-section mb-4">
+                        <h3 class="section-title">Relationship Preferences</h3>
+                        <div class="form-group mb-3">
+                            <label for="relationship_goals" class="form-label">Relationship Goals</label>
+                            <select name="relationship_goals" id="relationship_goals" class="form-select">
+                                <option value="">Select...</option>
+                                <option value="Marriage" {% if profile and profile.relationship_goals == 'Marriage' %}selected{% endif %}>Marriage</option>
+                                <option value="Serious Relationship" {% if profile and profile.relationship_goals == 'Serious Relationship' %}selected{% endif %}>Serious Relationship</option>
+                                <option value="Casual Dating" {% if profile and profile.relationship_goals == 'Casual Dating' %}selected{% endif %}>Casual Dating</option>
+                                <option value="Friendship" {% if profile and profile.relationship_goals == 'Friendship' %}selected{% endif %}>Friendship</option>
+                            </select>
+                        </div>
 
-                    <div class="form-group mb-4">
-                        <label for="synagogue_affiliation" class="form-label">Synagogue Affiliation</label>
-                        <input type="text" name="synagogue_affiliation" id="synagogue_affiliation" value="{{ profile['synagogue_affiliation'] if profile else '' }}" class="form-control">
+                        <div class="form-group mb-3">
+                            <label for="dating_preferences" class="form-label">Dating Preferences</label>
+                            <textarea name="dating_preferences" id="dating_preferences" class="form-control" rows="3" 
+                                      placeholder="What are you looking for in a partner?">{{ profile.dating_preferences if profile else '' }}</textarea>
+                        </div>
+
+                        <div class="form-group mb-3">
+                            <label for="deal_breakers" class="form-label">Deal Breakers</label>
+                            <textarea name="deal_breakers" id="deal_breakers" class="form-control" rows="3" 
+                                      placeholder="What are your deal breakers?">{{ profile.deal_breakers if profile else '' }}</textarea>
+                        </div>
                     </div>
 
                     <button type="submit" class="btn btn-primary w-100">Save Profile</button>
@@ -92,7 +303,8 @@
                         {% for photo in gallery_photos %}
                         <div class="col">
                             <div class="gallery-photo-card card h-100">
-                                <img src="{{ url_for('static', filename='uploads/' + photo['filename']) }}" alt="Gallery Photo" class="card-img-top">
+                                <img src="{{ url_for('static', filename='uploads/' + photo['filename']) }}" 
+                                     alt="Gallery Photo" class="card-img-top">
                                 <div class="card-body text-center p-2">
                                     <form action="{{ url_for('delete_photo', photo_id=photo['id']) }}" method="post">
                                         <button type="submit" class="btn btn-danger btn-sm w-100">Delete</button>
@@ -111,45 +323,96 @@
         </div>
     </div>
 </div>
+
+<!-- Verification Modal -->
+<div class="modal fade" id="verificationModal" tabindex="-1" aria-labelledby="verificationModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="verificationModalLabel">Verify Your Profile</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Choose a verification method:</p>
+                <div class="verification-options">
+                    <button class="btn btn-outline-primary w-100 mb-2" onclick="startVerification('email')">
+                        <i class="fas fa-envelope"></i> Email Verification
+                    </button>
+                    <button class="btn btn-outline-primary w-100 mb-2" onclick="startVerification('phone')">
+                        <i class="fas fa-phone"></i> Phone Verification
+                    </button>
+                    <button class="btn btn-outline-primary w-100" onclick="startVerification('photo')">
+                        <i class="fas fa-camera"></i> Photo Verification
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_css %}
 <style>
-/* Add styles for the profile edit page */
 .profile-edit-container {
     max-width: 900px;
     margin: auto;
 }
 
-.profile-header-edit .profile-picture-upload-container {
-    width: 150px;
-    height: 150px;
-    position: relative;
-    margin-bottom: 1rem;
+.form-section {
+    border-bottom: 1px solid #eee;
+    padding-bottom: 1.5rem;
 }
 
-.profile-picture-lg {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    border: 3px solid var(--primary-color);
+.form-section:last-child {
+    border-bottom: none;
 }
 
-.profile-picture-placeholder-lg {
-    width: 150px;
-    height: 150px;
+.section-title {
+    color: var(--primary-color);
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 2px solid #f8f9fa;
+}
+
+.profile-completion-card .progress {
     background-color: #e9ecef;
-    color: #6c757d;
-    font-size: 3rem;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    border: 3px solid var(--primary-color);
+    border-radius: 10px;
 }
 
-.profile-form .form-label {
-    font-weight: 600;
-    color: var(--dark-gray);
+.profile-completion-card .progress-bar {
+    background-color: var(--primary-color);
+    border-radius: 10px;
+}
+
+.completion-tips {
+    margin-top: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid #eee;
+}
+
+.completion-tips li {
+    margin-bottom: 0.5rem;
+    color: #6c757d;
+}
+
+.completion-tips li i {
+    margin-right: 0.5rem;
+}
+
+.verification-status-card .alert {
+    margin-bottom: 0;
+}
+
+.verification-options .btn {
+    text-align: left;
+    padding: 1rem;
+}
+
+.verification-options .btn i {
+    margin-right: 0.5rem;
+    width: 20px;
+    text-align: center;
 }
 
 .gallery-section h3 {
@@ -162,16 +425,16 @@
 }
 
 .gallery-photo-card img {
-    width: 100%; /* Make image responsive within its column */
-    height: 150px; /* Fixed height for gallery images */
+    width: 100%;
+    height: 150px;
     object-fit: cover;
     border-bottom: 1px solid #eee;
 }
 
 .gallery-grid .col {
-    flex-basis: 180px; /* Suggest a preferred width for grid items */
+    flex-basis: 180px;
     flex-grow: 1;
-    max-width: 200px; /* Max width to prevent stretching on larger screens */
+    max-width: 200px;
 }
 
 @media (max-width: 576px) {
@@ -183,4 +446,193 @@
 {% endblock %}
 
 {% block extra_js %}
+<script>
+function startVerification(method) {
+    const modal = $('#verificationModal');
+    
+    switch(method) {
+        case 'email':
+            // Show email verification form
+            modal.find('.modal-body').html(`
+                <form id="emailVerificationForm">
+                    <div class="mb-3">
+                        <label class="form-label">Email Verification</label>
+                        <p class="text-muted">We'll send a verification link to your registered email address.</p>
+                        <button type="button" class="btn btn-primary w-100" onclick="sendVerificationEmail()">
+                            Send Verification Email
+                        </button>
+                    </div>
+                </form>
+            `);
+            break;
+            
+        case 'phone':
+            // Show phone verification form
+            modal.find('.modal-body').html(`
+                <form id="phoneVerificationForm">
+                    <div class="mb-3">
+                        <label for="phoneNumber" class="form-label">Phone Number</label>
+                        <input type="tel" class="form-control" id="phoneNumber" 
+                               placeholder="Enter your phone number" required>
+                        <div class="mt-3">
+                            <button type="button" class="btn btn-primary w-100" onclick="sendVerificationCode()">
+                                Send Verification Code
+                            </button>
+                        </div>
+                    </div>
+                    <div id="codeVerificationSection" style="display: none;">
+                        <div class="mb-3">
+                            <label for="verificationCode" class="form-label">Verification Code</label>
+                            <input type="text" class="form-control" id="verificationCode" 
+                                   placeholder="Enter the code sent to your phone" required>
+                            <div class="mt-3">
+                                <button type="button" class="btn btn-primary w-100" onclick="verifyPhoneCode()">
+                                    Verify Code
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </form>
+            `);
+            break;
+            
+        case 'photo':
+            // Show photo verification form
+            modal.find('.modal-body').html(`
+                <form id="photoVerificationForm" enctype="multipart/form-data">
+                    <div class="mb-3">
+                        <label class="form-label">Photo Verification</label>
+                        <p class="text-muted">Upload a photo of yourself holding a sign with today's date and your username.</p>
+                        <input type="file" class="form-control mb-3" id="verificationPhoto" 
+                               accept="image/*" required>
+                        <button type="button" class="btn btn-primary w-100" onclick="uploadVerificationPhoto()">
+                            Upload Verification Photo
+                        </button>
+                    </div>
+                </form>
+            `);
+            break;
+    }
+}
+
+function sendVerificationEmail() {
+    fetch('/verify-profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: 'email'
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+            $('#verificationModal').modal('hide');
+        } else if (data.error) {
+            alert(data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+function sendVerificationCode() {
+    const phoneNumber = document.getElementById('phoneNumber').value;
+    if (!phoneNumber) {
+        alert('Please enter your phone number');
+        return;
+    }
+
+    fetch('/verify-profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: 'phone',
+            phone_number: phoneNumber
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+            document.getElementById('codeVerificationSection').style.display = 'block';
+        } else if (data.error) {
+            alert(data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+function verifyPhoneCode() {
+    const code = document.getElementById('verificationCode').value;
+    if (!code) {
+        alert('Please enter the verification code');
+        return;
+    }
+
+    fetch('/verify-profile', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+            type: 'phone_verify',
+            code: code
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+            $('#verificationModal').modal('hide');
+            location.reload(); // Refresh to show updated verification status
+        } else if (data.error) {
+            alert(data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+
+function uploadVerificationPhoto() {
+    const photoInput = document.getElementById('verificationPhoto');
+    if (!photoInput.files.length) {
+        alert('Please select a photo');
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append('type', 'photo');
+    formData.append('verification_photo', photoInput.files[0]);
+
+    fetch('/verify-profile', {
+        method: 'POST',
+        body: formData
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message) {
+            alert(data.message);
+            $('#verificationModal').modal('hide');
+        } else if (data.error) {
+            alert(data.error);
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        alert('An error occurred. Please try again.');
+    });
+}
+</script>
 {% endblock %}

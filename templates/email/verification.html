@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Verify Your Profile - Jewish Dating App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .content {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .button {
+            display: inline-block;
+            padding: 12px 24px;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
+        .footer {
+            text-align: center;
+            font-size: 12px;
+            color: #666;
+            margin-top: 30px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>Verify Your Profile</h1>
+    </div>
+    
+    <div class="content">
+        <p>Hello {{ username }},</p>
+        
+        <p>Thank you for using the Jewish Dating App! To ensure the safety and authenticity of our community, 
+        we require profile verification.</p>
+        
+        <p>Please click the button below to verify your profile:</p>
+        
+        <div style="text-align: center;">
+            <a href="{{ verification_url }}" class="button">Verify My Profile</a>
+        </div>
+        
+        <p>Or copy and paste this link into your browser:</p>
+        <p style="word-break: break-all;">{{ verification_url }}</p>
+        
+        <p>If you did not request this verification, please ignore this email.</p>
+    </div>
+    
+    <div class="footer">
+        <p>This is an automated message, please do not reply to this email.</p>
+        <p>&copy; 2024 Jewish Dating App. All rights reserved.</p>
+    </div>
+</body>
+</html> 

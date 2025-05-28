@@ -1,168 +1,308 @@
 {% extends "base.html" %}
 
+{% block title %}Terms of Use - Jewish Dating App{% endblock %}
+
 {% block content %}
 <div class="container mt-5">
     <div class="row">
-        <div class="col-lg-8 offset-lg-2">
-            <h1 class="text-center mb-4">Terms of Service</h1>
-            <p class="text-center lead mb-5">
-                Last updated: {{ now().strftime('%B %d, %Y') }}
-            </p>
-
+        <div class="col-lg-10 offset-lg-1">
             <div class="card">
-                <div class="card-body">
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">1. Acceptance of Terms</h2>
-                        <p>By accessing and using the Jewish Dating App ("the Service"), you agree to be bound by these Terms of Service and all applicable laws and regulations. If you do not agree with any of these terms, you are prohibited from using or accessing the Service.</p>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">2. User Accounts</h2>
-                        <p>To use our Service, you must:</p>
-                        <ul>
-                            <li>Be at least 18 years old</li>
-                            <li>Provide accurate and complete information</li>
-                            <li>Maintain the security of your account</li>
-                            <li>Notify us immediately of any unauthorized use</li>
-                            <li>Not share your account credentials</li>
-                        </ul>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">3. User Conduct</h2>
-                        <p>You agree to:</p>
-                        <ul>
-                            <li>Use the Service only for lawful purposes</li>
-                            <li>Respect other users' privacy and dignity</li>
-                            <li>Not engage in harassment or abusive behavior</li>
-                            <li>Not post false or misleading information</li>
-                            <li>Not use the Service for commercial purposes without permission</li>
-                        </ul>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">4. Privacy and Data Protection</h2>
-                        <p>We are committed to protecting your privacy. Our Privacy Policy explains how we collect, use, and protect your personal information. By using our Service, you consent to our data practices as described in our Privacy Policy.</p>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">5. Content Guidelines</h2>
-                        <p>You are responsible for all content you post on the Service. Content must:</p>
-                        <ul>
-                            <li>Be accurate and truthful</li>
-                            <li>Respect Jewish values and traditions</li>
-                            <li>Not contain explicit or inappropriate material</li>
-                            <li>Not infringe on others' rights</li>
-                            <li>Not promote hate speech or discrimination</li>
-                        </ul>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">6. Premium Features</h2>
-                        <p>Some features of our Service require a premium subscription. By subscribing, you agree to:</p>
-                        <ul>
-                            <li>Pay all fees associated with your subscription</li>
-                            <li>Provide accurate payment information</li>
-                            <li>Understand that subscriptions auto-renew unless cancelled</li>
-                            <li>Accept our refund policy as stated in our FAQ</li>
-                        </ul>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">7. Termination</h2>
-                        <p>We reserve the right to:</p>
-                        <ul>
-                            <li>Suspend or terminate accounts that violate these terms</li>
-                            <li>Remove content that violates our guidelines</li>
-                            <li>Modify or discontinue the Service at any time</li>
-                            <li>Refuse service to anyone for any reason</li>
-                        </ul>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">8. Limitation of Liability</h2>
-                        <p>The Service is provided "as is" without warranties of any kind. We are not liable for:</p>
-                        <ul>
-                            <li>Any damages arising from use of the Service</li>
-                            <li>Loss of data or content</li>
-                            <li>Interruptions in service</li>
-                            <li>Actions of other users</li>
-                        </ul>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">9. Changes to Terms</h2>
-                        <p>We may modify these terms at any time. We will notify users of significant changes via email or through the Service. Continued use of the Service after changes constitutes acceptance of the new terms.</p>
-                    </section>
-
-                    <section class="mb-5">
-                        <h2 class="h4 mb-3">10. Contact Information</h2>
-                        <p>For questions about these Terms of Service, please contact us at:</p>
-                        <ul class="list-unstyled">
-                            <li><i class="fas fa-envelope me-2"></i>legal@jewishdating.com</li>
-                            <li><i class="fas fa-phone me-2"></i>(555) 123-4567</li>
-                            <li><i class="fas fa-map-marker-alt me-2"></i>123 Jewish Street, New York, NY 10001</li>
-                        </ul>
-                    </section>
-
-                    <div class="alert alert-info mt-4">
-                        <i class="fas fa-info-circle me-2"></i>
-                        By using our Service, you acknowledge that you have read, understood, and agree to be bound by these Terms of Service.
+                <div class="card-body p-4">
+                    <h1 class="text-center mb-4">Terms of Use</h1>
+                    
+                    <!-- Legal Disclaimer -->
+                    <div class="alert alert-warning mb-4">
+                        <h4 class="alert-heading"><i class="fas fa-exclamation-triangle"></i> Important Legal Notice</h4>
+                        <p class="mb-0">
+                            These Terms of Use are currently under review by our legal team. While we provide this basic framework, 
+                            we strongly recommend that all users consult with their own legal counsel before agreeing to these terms. 
+                            A comprehensive legal review is essential to ensure full compliance with all applicable laws and to protect 
+                            both users and the platform.
+                        </p>
                     </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">1. Introduction</h2>
+                        <p>
+                            Welcome to the Jewish Dating App. These Terms of Use ("Terms") govern your access to and use of our 
+                            platform. By accessing or using our services, you agree to be bound by these Terms. Please read them 
+                            carefully and consult with legal counsel if you have any questions.
+                        </p>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">2. User Eligibility</h2>
+                        <p>
+                            To use our platform, you must:
+                        </p>
+                        <ul>
+                            <li>Be at least 18 years of age</li>
+                            <li>Be legally capable of entering into binding contracts</li>
+                            <li>Not be prohibited from using our services under applicable laws</li>
+                            <li>Provide accurate and complete information during registration</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">3. User Conduct and Responsibilities</h2>
+                        <p>
+                            As a user of our platform, you agree to:
+                        </p>
+                        <ul>
+                            <li>Maintain accurate and up-to-date profile information</li>
+                            <li>Treat other users with respect and dignity</li>
+                            <li>Not engage in any form of harassment or inappropriate behavior</li>
+                            <li>Not use the platform for any illegal purposes</li>
+                            <li>Not share your account credentials with others</li>
+                            <li>Not create multiple accounts</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">4. Privacy and Data Protection</h2>
+                        <p>
+                            We take your privacy seriously. Our data collection and usage practices are governed by our 
+                            <a href="{{ url_for('privacy') }}">Privacy Policy</a>. We comply with applicable data protection 
+                            laws and regulations, including but not limited to:
+                        </p>
+                        <ul>
+                            <li>General Data Protection Regulation (GDPR)</li>
+                            <li>California Consumer Privacy Act (CCPA)</li>
+                            <li>New York State Information Security Breach and Notification Act</li>
+                            <li>New York State Department of Financial Services Cybersecurity Regulation (23 NYCRR 500)</li>
+                            <li>New York SHIELD Act (Stop Hacks and Improve Electronic Data Security)</li>
+                            <li>Other relevant privacy laws and regulations</li>
+                        </ul>
+                    </div>
+
+                    <!-- New Section: New York Consumer Protection -->
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">12. New York Consumer Protection</h2>
+                        <p>
+                            As a New York-based service, we comply with the following New York consumer protection laws:
+                        </p>
+                        <ul>
+                            <li>
+                                <strong>New York General Business Law (GBL) Article 22-A:</strong> 
+                                Prohibits deceptive acts and practices in consumer transactions. We commit to:
+                                <ul>
+                                    <li>Providing clear and accurate information about our services</li>
+                                    <li>Not engaging in any deceptive marketing practices</li>
+                                    <li>Honoring all advertised features and pricing</li>
+                                    <li>Providing clear terms for subscription services</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>New York Automatic Renewal Law (GBL § 527):</strong>
+                                For premium subscriptions, we will:
+                                <ul>
+                                    <li>Clearly disclose automatic renewal terms</li>
+                                    <li>Obtain affirmative consent for automatic renewals</li>
+                                    <li>Provide clear cancellation instructions</li>
+                                    <li>Send renewal reminders before charging</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>New York Consumer Protection from Deceptive Acts and Practices (GBL § 349):</strong>
+                                We commit to:
+                                <ul>
+                                    <li>Not engaging in any false advertising</li>
+                                    <li>Providing accurate pricing information</li>
+                                    <li>Clearly disclosing all material terms</li>
+                                    <li>Honoring all advertised features and benefits</li>
+                                </ul>
+                            </li>
+                            <li>
+                                <strong>New York Right of Publicity Law (Civil Rights Law §§ 50-51):</strong>
+                                Regarding user content and photos:
+                                <ul>
+                                    <li>We will not use your name, image, or likeness for commercial purposes without consent</li>
+                                    <li>You retain rights to your personal content</li>
+                                    <li>You can request removal of your content at any time</li>
+                                </ul>
+                            </li>
+                        </ul>
+                        <p>
+                            <strong>Consumer Rights Under New York Law:</strong>
+                        </p>
+                        <ul>
+                            <li>Right to clear and conspicuous disclosure of all material terms</li>
+                            <li>Right to cancel automatic renewals</li>
+                            <li>Right to receive refunds for unauthorized charges</li>
+                            <li>Right to file complaints with the New York State Attorney General's Office</li>
+                            <li>Right to pursue private legal action for deceptive practices</li>
+                        </ul>
+                        <p>
+                            For consumer complaints or to exercise your rights, you may contact:
+                        </p>
+                        <ul>
+                            <li>Our customer service at support@jewishdatingapp.com</li>
+                            <li>New York State Attorney General's Office:
+                                <br>Consumer Frauds Bureau
+                                <br>28 Liberty Street
+                                <br>New York, NY 10005
+                                <br>Phone: (800) 771-7755
+                                <br>Website: <a href="https://ag.ny.gov/consumer-frauds" target="_blank">https://ag.ny.gov/consumer-frauds</a>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">5. Content and Intellectual Property</h2>
+                        <p>
+                            Users retain ownership of their content but grant us a license to use it for platform operations. 
+                            We respect intellectual property rights and expect users to do the same.
+                        </p>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">6. Safety and Verification</h2>
+                        <p>
+                            We implement various safety measures, including:
+                        </p>
+                        <ul>
+                            <li>Profile verification processes</li>
+                            <li>Content moderation</li>
+                            <li>User reporting systems</li>
+                            <li>Safety guidelines and resources</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">7. Disclaimer of Warranties</h2>
+                        <p>
+                            Our platform is provided "as is" without any warranties. We do not guarantee:
+                        </p>
+                        <ul>
+                            <li>Continuous, uninterrupted access to our services</li>
+                            <li>Accuracy of user-provided information</li>
+                            <li>Compatibility with all devices or browsers</li>
+                            <li>Results from using our platform</li>
+                        </ul>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">8. Limitation of Liability</h2>
+                        <p>
+                            To the extent permitted by New York law, we are not liable for:
+                        </p>
+                        <ul>
+                            <li>Indirect, incidental, or consequential damages</li>
+                            <li>Loss of data or business interruption</li>
+                            <li>Actions or content of other users</li>
+                            <li>Third-party services or websites</li>
+                        </ul>
+                        <p class="mt-3">
+                            <strong>New York State Notice:</strong> Nothing in these Terms shall limit your rights under New York 
+                            consumer protection laws. Some states do not allow the exclusion or limitation of certain damages, 
+                            so the above limitations may not apply to you. If you are a New York resident, you specifically 
+                            acknowledge that nothing in these Terms shall limit your rights under New York General Business 
+                            Law Article 22-A and other applicable consumer protection laws.
+                        </p>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">9. Modifications to Terms</h2>
+                        <p>
+                            We reserve the right to modify these Terms at any time. Users will be notified of significant 
+                            changes. Continued use of the platform after changes constitutes acceptance of the new Terms.
+                        </p>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">10. Governing Law and Jurisdiction</h2>
+                        <p>
+                            These Terms are governed by the laws of the United States of America and the State of New York, 
+                            without regard to its conflict of law principles. Any disputes shall be resolved in the state or 
+                            federal courts located in New York County, New York, and you consent to the personal jurisdiction 
+                            of such courts.
+                        </p>
+                    </div>
+
+                    <div class="terms-section mb-4">
+                        <h2 class="h3 mb-3">11. Contact Information</h2>
+                        <p>
+                            For questions about these Terms, please contact us at:
+                        </p>
+                        <ul>
+                            <li>Email: legal@jewishdatingapp.com</li>
+                            <li>Address: Jewish Dating App<br>
+                                350 Fifth Avenue, Suite 3300<br>
+                                New York, NY 10118<br>
+                                United States of America</li>
+                        </ul>
+                    </div>
+
+                    <!-- Legal Review Notice -->
+                    <div class="alert alert-info mt-4">
+                        <h4 class="alert-heading"><i class="fas fa-info-circle"></i> Legal Review Status</h4>
+                        <p>
+                            These Terms of Use are currently being reviewed by our legal team. We are working with experienced 
+                            attorneys to ensure:
+                        </p>
+                        <ul>
+                            <li>Full compliance with all applicable laws and regulations</li>
+                            <li>Proper protection of user rights and privacy</li>
+                            <li>Clear and enforceable terms and conditions</li>
+                            <li>Appropriate dispute resolution mechanisms</li>
+                            <li>Comprehensive coverage of all legal aspects of the platform</li>
+                        </ul>
+                        <p class="mb-0">
+                            The final version of these Terms will be updated after legal review and will be clearly marked 
+                            with the effective date. Users will be notified of any significant changes.
+                        </p>
+                    </div>
+
+                    <div class="text-center mt-4">
+                        <p class="text-muted">
+                            Last Updated: {{ now.strftime('%B %d, %Y') }}<br>
+                            <small>Note: This is a preliminary version pending legal review.</small>
+                        </p>
+                    </div>
+
+                    <style>
+                        .terms-section {
+                            border-bottom: 1px solid #eee;
+                            padding-bottom: 1.5rem;
+                        }
+                        .terms-section:last-child {
+                            border-bottom: none;
+                        }
+                        .terms-section h2 {
+                            color: #2B4C7E;
+                            font-weight: 600;
+                        }
+                        .terms-section ul {
+                            padding-left: 1.2rem;
+                        }
+                        .terms-section ul li {
+                            margin-bottom: 0.5rem;
+                        }
+                        .alert {
+                            border: none;
+                            border-radius: 8px;
+                        }
+                        .alert-warning {
+                            background-color: #fff3cd;
+                            color: #856404;
+                        }
+                        .alert-info {
+                            background-color: #e8f4f8;
+                            color: #0c5460;
+                        }
+                        .card {
+                            border: none;
+                            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                        }
+                        @media (max-width: 768px) {
+                            .card-body {
+                                padding: 1.5rem;
+                            }
+                        }
+                    </style>
                 </div>
             </div>
         </div>
     </div>
 </div>
-
-<style>
-.card {
-    border: none;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.lead {
-    color: #666;
-    font-size: 1.2rem;
-}
-
-section {
-    border-bottom: 1px solid #eee;
-    padding-bottom: 1.5rem;
-}
-
-section:last-child {
-    border-bottom: none;
-}
-
-h2 {
-    color: #333;
-    font-weight: 600;
-}
-
-ul {
-    padding-left: 1.2rem;
-}
-
-ul li {
-    margin-bottom: 0.5rem;
-    color: #444;
-}
-
-.alert {
-    border: none;
-    background-color: #f8f9fa;
-    color: #666;
-}
-
-@media (max-width: 768px) {
-    .card-body {
-        padding: 1.5rem;
-    }
-    
-    h2 {
-        font-size: 1.3rem;
-    }
-}
-</style>
 {% endblock %} 
